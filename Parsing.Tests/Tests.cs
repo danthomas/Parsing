@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Parsing.Tests
@@ -10,10 +9,9 @@ namespace Parsing.Tests
         [Test]
         public void Text()
         {
-            List<Token> tokens = new List<Token> { new Token(TokenType.Text, "abc") };
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse(tokens));
+            var actual = NodesToString(parser.Parse("abc"));
 
             Assert.That(actual, Is.EqualTo(@"
 Expressions
@@ -24,16 +22,9 @@ Expressions
         [Test]
         public void IdentifierStatement()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "abc"),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse(tokens));
+            var actual = NodesToString(parser.Parse("{abc}"));
 
             Assert.That(actual, Is.EqualTo(@"
 Expressions
@@ -46,18 +37,9 @@ Expressions
         [Test]
         public void IdentifierQuestionTextStatement()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "abc"),
-                new Token(TokenType.Question),
-                new Token(TokenType.Text, "def"),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse(tokens));
+            var actual = NodesToString(parser.Parse("{abc?def}"));
 
             Assert.That(actual, Is.EqualTo(@"
 Expressions
@@ -73,20 +55,9 @@ Expressions
         [Test]
         public void IdentifierQuestionExpressionStatement()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "abc"),
-                new Token(TokenType.Question),
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "def"),
-                new Token(TokenType.RightCurly),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse(tokens));
+            var actual = NodesToString(parser.Parse("{abc?{def}}"));
 
             Assert.That(actual, Is.EqualTo(@"
 Expressions
@@ -104,24 +75,9 @@ Expressions
         [Test]
         public void IdentifierQuestionExpressionColonExpressionStatement()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "abc"),
-                new Token(TokenType.Question),
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "def"),
-                new Token(TokenType.RightCurly),
-                new Token(TokenType.Colon),
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "ghi"),
-                new Token(TokenType.RightCurly),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse(tokens));
+            var actual = NodesToString(parser.Parse("{abc?{def}:{ghi}}"));
 
             Assert.That(actual, Is.EqualTo(@"
 Expressions
@@ -144,17 +100,9 @@ Expressions
         [Test]
         public void TextStatement()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.Text, "abc"),
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "def"),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
-            var node = parser.Parse(tokens);
+            var node = parser.Parse("abc{def}");
             var actual = NodesToString(node);
 
             Assert.That(actual, Is.EqualTo(@"
@@ -170,20 +118,9 @@ Expressions
         [Test]
         public void StatementTextStatement()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "abc"),
-                new Token(TokenType.RightCurly),
-                new Token(TokenType.Text, " "),
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "def"),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
-            var node = parser.Parse(tokens);
+            var node = parser.Parse("{abc} {def}");
             var actual = NodesToString(node);
 
             Assert.That(actual, Is.EqualTo(@"
@@ -203,17 +140,12 @@ Expressions
         [Test]
         public void LeftCurly_ExpectedIdentifier()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly)
-            };
-
             Parser parser = new Parser();
 
             string message = "";
             try
             {
-                parser.Parse(tokens);
+                parser.Parse("{");
             }
             catch (Exception e)
             {
@@ -226,18 +158,12 @@ Expressions
         [Test]
         public void LeftCurlyRightCurly_ExpectedIdentifier()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.RightCurly)
-            };
-
             Parser parser = new Parser();
 
             string message = "";
             try
             {
-                parser.Parse(tokens);
+                parser.Parse("{}");
             }
             catch (Exception e)
             {
@@ -250,18 +176,12 @@ Expressions
         [Test]
         public void LeftCurlyText_ExpectedRightCurly()
         {
-            List<Token> tokens = new List<Token>
-            {
-                new Token(TokenType.LeftCurly),
-                new Token(TokenType.Text, "abc")
-            };
-
             Parser parser = new Parser();
 
             string message = "";
             try
             {
-                parser.Parse(tokens);
+                parser.Parse("{abc");
             }
             catch (Exception e)
             {

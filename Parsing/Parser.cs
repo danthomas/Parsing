@@ -23,13 +23,14 @@ namespace Parsing
          * identifier : [a-zA-Z]+
          */
 
-        private List<Token> _tokens;
         private int _index;
+        private Lexer _lexer;
 
-        public Node Parse(List<Token> tokens)
+        public Node Parse(string text)
         {
+            _lexer = new Lexer(text);
             _index = -1;
-            _tokens = tokens;
+
             NextToken();
 
             return Template();
@@ -105,7 +106,7 @@ namespace Parsing
 
         private bool Identifier(Node node, bool expected = false)
         {
-            return Check(node, TokenType.Text, NodeType.Identifier, expected);
+            return Check(node, TokenType.Identifier, NodeType.Identifier, expected);
         }
 
         private bool RightCurly(Node node, bool expected = false)
@@ -145,8 +146,8 @@ namespace Parsing
         private void NextToken()
         {
             _index++;
-            Current = _index < _tokens.Count
-                ? _tokens[_index]
+            Current = _index < _lexer.Tokens.Count
+                ? _lexer.Tokens[_index]
                 : new Token(TokenType.End);
         }
 

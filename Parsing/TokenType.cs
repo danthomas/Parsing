@@ -8,6 +8,8 @@
         Template,
         End,
         Question,
-        Colon
+        Colon,
+        Identifier,
+        Start
     }
 }
