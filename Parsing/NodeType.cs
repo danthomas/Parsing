@@ -10,6 +10,8 @@
         Identifier,
         RightCurly,
         Question,
-        Colon
+        Colon,
+        EqualTo,
+        NotEqualTo
     }
 }

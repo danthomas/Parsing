@@ -5,12 +5,9 @@ namespace Parsing
 {
     public class Lexer
     {
-        private readonly string _text;
-        private int curlyCount;
-
+        
         public Lexer(string text)
         {
-            _text = text;
             Tokens = new List<Token>();
             TokenType tokenType = TokenType.Text;
             Token token = null;
@@ -18,6 +15,7 @@ namespace Parsing
             for (int i = 0; i < text.Length; ++i)
             {
                 char c = text[i];
+                char n = i + 1 < text.Length ? text[i + 1] : (char) 0;
 
                 switch(c)
                 {
@@ -40,6 +38,24 @@ namespace Parsing
                         Tokens.Add(new Token(TokenType.Colon));
                         tokenType = TokenType.Text;
                         token = null;
+                        break;
+                    case '=':
+                        Tokens.Add(new Token(TokenType.EqualTo));
+                        tokenType = TokenType.Text;
+                        token = null;
+                        break;
+                    case '!':
+                        if (n == '=')
+                        {
+                            i++;
+                            Tokens.Add(new Token(TokenType.NotEqualTo));
+                            tokenType = TokenType.Text;
+                            token = null;
+                        }
+                        else
+                        {
+                            throw new Exception("= Expected");
+                        }
                         break;
                     default:
                         if (token == null)

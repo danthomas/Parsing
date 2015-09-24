@@ -10,6 +10,8 @@
         Question,
         Colon,
         Identifier,
-        Start
+        Start,
+        EqualTo,
+        NotEqualTo
     }
 }

@@ -14,11 +14,14 @@ namespace Parsing
          * expression : text
          *              | statement
          *
-         * statement : openCurly identifier [question expression [colon expression]] closeCurly
+         * statement : openCurly identifier [equalTo|notEqualTo text] [question expression [colon expression]] closeCurly
          *   
          * text : .+
          * openCurly : {
          * closeCurly : }
+         * question : ?
+         * equalTo : =
+         * notEqualTo : !=
          * question : ?
          * identifier : [a-zA-Z]+
          */
@@ -78,6 +81,12 @@ namespace Parsing
             if (LeftCurly(node))
             {
                 Identifier(node, true);
+
+                if (EqualTo(node) || NotEqualTo(node))
+                {
+                    Text(node, true);
+                }
+
                 if (Question(node))
                 {
                     Expression(node, true);
@@ -92,6 +101,16 @@ namespace Parsing
             }
 
             return false;
+        }
+
+        private bool EqualTo(Node node, bool expected = false)
+        {
+            return Check(node, TokenType.EqualTo, NodeType.EqualTo, expected);
+        }
+
+        private bool NotEqualTo(Node node, bool expected = false)
+        {
+            return Check(node, TokenType.NotEqualTo, NodeType.NotEqualTo, expected);
         }
 
         private bool Text(Node node, bool expected = false)

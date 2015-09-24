@@ -35,6 +35,40 @@ Expressions
         }
 
         [Test]
+        public void IdentifierEqualToTextStatement()
+        {
+            Parser parser = new Parser();
+
+            var actual = NodesToString(parser.Parse("{abc=def ghi}"));
+
+            Assert.That(actual, Is.EqualTo(@"
+Expressions
+    Expression
+        LeftCurly
+        Identifier:abc
+        EqualTo
+        Text:def ghi
+        RightCurly"));
+        }
+
+        [Test]
+        public void IdentifierNotEqualToTextStatement()
+        {
+            Parser parser = new Parser();
+
+            var actual = NodesToString(parser.Parse("{abc!=def ghi}"));
+
+            Assert.That(actual, Is.EqualTo(@"
+Expressions
+    Expression
+        LeftCurly
+        Identifier:abc
+        NotEqualTo
+        Text:def ghi
+        RightCurly"));
+        }
+
+        [Test]
         public void IdentifierQuestionTextStatement()
         {
             Parser parser = new Parser();
