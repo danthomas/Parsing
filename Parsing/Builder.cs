@@ -50,7 +50,7 @@ namespace Parsing
 
             public Helper(IDictionary<string, string> values)
             {
-                _values = values;
+                _values = values.ToDictionary(x => x.Key.ToLower(), x => x.Value);
                 _stringBuilder = new StringBuilder();
             }
 
@@ -61,21 +61,21 @@ namespace Parsing
 
             public bool IsNull(string key)
             {
-                return !_values.ContainsKey(key)
-                       || String.IsNullOrWhiteSpace(_values[key]);
+                return !_values.ContainsKey(key.ToLower())
+                       || String.IsNullOrWhiteSpace(_values[key.ToLower()]);
             }
 
             public bool IsEqualTo(string key, string value)
             {
-                return _values.ContainsKey(key)
-                       && _values[key] == value;
+                return _values.ContainsKey(key.ToLower())
+                       && _values[key.ToLower()] == value;
             }
 
             public void AppendValue(string key)
             {
-                if (_values.ContainsKey(key))
+                if (_values.ContainsKey(key.ToLower()))
                 {
-                    _stringBuilder.Append(_values[key]);
+                    _stringBuilder.Append(_values[key.ToLower()]);
                 }
             }
 

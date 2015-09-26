@@ -37,8 +37,72 @@ namespace Parsing.TestClient
             {
                 var xDocument = XDocument.Load(_filePath, LoadOptions.PreserveWhitespace);
 
-                data.Text = xDocument.Root.Element("data").Value.Replace("\n", Environment.NewLine);
+
                 template.Text = xDocument.Root.Element("template").Value;
+                List<Dictionary<string, string>> items = xDocument
+                    .Root
+                    .Element("items")
+                    .Elements("item")
+                    .Select(x => x.Attributes().ToDictionary(k => k.Name.LocalName, v => v.Value))
+                    .ToList();
+
+                var names = items
+                    .SelectMany(x => x.Keys)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var name in names)
+                {
+                    this.items.Columns.Add(name, 75);
+                }
+
+                var totalWidth = this.items.Columns.Cast<ColumnHeader>().Sum(x => x.Width);
+
+                var width = this.items.Width = totalWidth;
+
+                this.items.Columns.Add("Output", width);
+
+                foreach (var item in items)
+                {
+                    ListItem listViewItem = new ListItem(item);
+
+                    bool first = true;
+
+                    foreach (string name in names)
+                    {
+                        string value = "";
+
+                        if (item.ContainsKey(name))
+                        {
+                            value = item[name];
+                        }
+
+                        if (first)
+                        {
+                            listViewItem.Text = value;
+                        }
+                        else
+                        {
+                            listViewItem.SubItems.Add(value);
+                        }
+                        
+                        first = false;
+                    }
+
+                    listViewItem.SubItems.Add("");
+
+                    this.items.Items.Add(listViewItem);
+                }
+            }
+        }
+
+        private class ListItem : ListViewItem
+        {
+            public Dictionary<string, string> Attributes { get; set; }
+
+            public ListItem(Dictionary<string, string> attributes)
+            {
+                Attributes = attributes;
             }
         }
 
@@ -46,29 +110,10 @@ namespace Parsing.TestClient
         {
             XDocument xDocument = new XDocument(
                 new XElement("root",
-                    new XElement("data", data.Text),
+                    //new XElement("data", data.Text),
                     new XElement("template", template.Text)));
 
             xDocument.Save(_filePath, SaveOptions.DisableFormatting);
-        }
-
-        private void data_TextChanged(object sender, EventArgs e)
-        {
-            _values = new Dictionary<string, string>();
-
-            try
-            {
-                foreach (var kvp in data.Text
-                    .Split('\n')
-                    .Select(x => new KeyValuePair<string, string>(x.Split(' ')[0].Trim(), x.Split(' ')[1].Trim())))
-                {
-                    _values.Add(kvp);
-                }
-            }
-            catch (Exception)
-            {
-
-            }
         }
 
         private void template_TextChanged(object sender, EventArgs e)
@@ -79,7 +124,6 @@ namespace Parsing.TestClient
         private void Parse()
         {
             expressionTree.Text = "";
-            output.Text = "";
 
             try
             {
@@ -88,7 +132,15 @@ namespace Parsing.TestClient
                 try
                 {
                     var func = _builder.Build(node);
-                    output.Text = Environment.NewLine + Environment.NewLine + func(_values);
+
+                    foreach (ListItem listItem in items.Items)
+                    {
+                        listItem
+                            .SubItems
+                            .Cast<ListViewItem.ListViewSubItem>()
+                            .Last()
+                            .Text = func(listItem.Attributes);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -96,7 +148,6 @@ namespace Parsing.TestClient
                 }
 
                 WriteNode(node);
-
             }
             catch (Exception e)
             {
