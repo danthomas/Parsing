@@ -31,10 +31,11 @@
             this.data = new System.Windows.Forms.TextBox();
             this.template = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.result = new System.Windows.Forms.TextBox();
+            this.expressionTree = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.output = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -73,24 +74,25 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.output);
             this.splitContainer1.Panel1.Controls.Add(this.template);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.result);
+            this.splitContainer1.Panel2.Controls.Add(this.expressionTree);
             this.splitContainer1.Size = new System.Drawing.Size(874, 509);
             this.splitContainer1.SplitterDistance = 164;
             this.splitContainer1.TabIndex = 2;
             // 
-            // result
+            // expressionTree
             // 
-            this.result.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.result.Font = new System.Drawing.Font("Consolas", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.result.Location = new System.Drawing.Point(0, 0);
-            this.result.Multiline = true;
-            this.result.Name = "result";
-            this.result.Size = new System.Drawing.Size(874, 341);
-            this.result.TabIndex = 2;
+            this.expressionTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.expressionTree.Font = new System.Drawing.Font("Consolas", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.expressionTree.Location = new System.Drawing.Point(0, 0);
+            this.expressionTree.Multiline = true;
+            this.expressionTree.Name = "expressionTree";
+            this.expressionTree.Size = new System.Drawing.Size(874, 341);
+            this.expressionTree.TabIndex = 2;
             // 
             // menuStrip1
             // 
@@ -118,6 +120,15 @@
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.saveToolStripMenuItem.Text = "&SaveSettings";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveSettings);
+            // 
+            // output
+            // 
+            this.output.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.output.Font = new System.Drawing.Font("Consolas", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.output.Location = new System.Drawing.Point(0, 137);
+            this.output.Name = "output";
+            this.output.Size = new System.Drawing.Size(874, 27);
+            this.output.TabIndex = 2;
             // 
             // Form1
             // 
@@ -149,10 +160,11 @@
         private System.Windows.Forms.TextBox data;
         private System.Windows.Forms.TextBox template;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TextBox result;
+        private System.Windows.Forms.TextBox expressionTree;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.TextBox output;
     }
 }
 

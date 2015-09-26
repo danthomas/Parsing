@@ -120,7 +120,7 @@ namespace Parsing
 
         private bool LeftCurly(Node node, bool expected = false)
         {
-            return Check(node, TokenType.LeftCurly, NodeType.LeftCurly, expected);
+            return Check(node, TokenType.LeftCurly, null, expected);
         }
 
         private bool Identifier(Node node, bool expected = false)
@@ -130,7 +130,7 @@ namespace Parsing
 
         private bool RightCurly(Node node, bool expected = false)
         {
-            return Check(node, TokenType.RightCurly, NodeType.RightCurly, expected);
+            return Check(node, TokenType.RightCurly, null, expected);
         }
 
         private bool Question(Node node, bool expected = false)
@@ -144,11 +144,14 @@ namespace Parsing
         }
 
         [DebuggerStepThrough]
-        private bool Check(Node node, TokenType tokenType, NodeType nodeType, bool expected = false)
+        private bool Check(Node node, TokenType tokenType, NodeType? nodeType = null, bool expected = false)
         {
             if (tokenType == Current.TokenType)
             {
-                node.Children.Add(new Node(nodeType, Current.Text));
+                if (nodeType.HasValue)
+                {
+                    node.Children.Add(new Node(nodeType.Value, Current.Text));
+                }
                 NextToken();
                 return true;
             }

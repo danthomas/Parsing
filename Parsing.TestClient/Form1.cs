@@ -56,11 +56,18 @@ namespace Parsing.TestClient
         {
             _values = new Dictionary<string, string>();
 
-            foreach (var kvp in data.Text
-                .Split('\n')
-                .Select(x => new KeyValuePair<string, string>(x.Split(' ')[0], x.Split(' ')[1])))
+            try
             {
-                _values.Add(kvp);
+                foreach (var kvp in data.Text
+                    .Split('\n')
+                    .Select(x => new KeyValuePair<string, string>(x.Split(' ')[0].Trim(), x.Split(' ')[1].Trim())))
+                {
+                    _values.Add(kvp);
+                }
+            }
+            catch (Exception)
+            {
+
             }
         }
 
@@ -71,24 +78,34 @@ namespace Parsing.TestClient
 
         private void Parse()
         {
+            expressionTree.Text = "";
+            output.Text = "";
+
             try
             {
                 var node = _parser.Parse(template.Text);
-                var func = _builder.Build(node);
+
+                try
+                {
+                    var func = _builder.Build(node);
+                    output.Text = Environment.NewLine + Environment.NewLine + func(_values);
+                }
+                catch (Exception e)
+                {
+                    expressionTree.Text += Environment.NewLine + e.Message;
+                }
 
                 WriteNode(node);
-                
-                result.Text += Environment.NewLine + Environment.NewLine + func(_values);
+
             }
             catch (Exception e)
             {
-                result.Text = e.Message;
+                expressionTree.Text = e.Message;
             }
         }
 
         private void WriteNode(Node node)
         {
-            result.Text = "";
             WriteNode(node, 0);
         }
 
@@ -96,7 +113,7 @@ namespace Parsing.TestClient
         {
             foreach (Node child in node.Children)
             {
-                result.Text += Environment.NewLine +
+                expressionTree.Text += Environment.NewLine +
                     new string(' ', indent * 4) +
                     child.NodeType +
                     (child.Text == "" ? "" : ":" + child.Text);

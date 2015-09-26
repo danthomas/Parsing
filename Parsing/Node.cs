@@ -9,11 +9,11 @@ namespace Parsing
         public string Text { get; set; }
 
         [DebuggerStepThrough]
-        public Node(NodeType nodeType, string text = "")
+        public Node(NodeType nodeType, string text = "", params Node[] children)
         {
             NodeType = nodeType;
             Text = text;
-            Children = new List<Node>();
+            Children = new List<Node>(children);
         }
 
         public List<Node> Children { get; set; }

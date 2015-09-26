@@ -6,12 +6,13 @@
         Expressions,
         Expression,
         Text,
-        LeftCurly,
+        //LeftCurly,
         Identifier,
-        RightCurly,
+        //RightCurly,
         Question,
         Colon,
         EqualTo,
-        NotEqualTo
+        NotEqualTo,
+        Null
     }
 }
