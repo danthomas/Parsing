@@ -6,6 +6,17 @@ namespace Parsing.Tests
     [TestFixture]
     class Tests
     {
+
+        [Test]
+        public void xxxxx()
+        {
+            Parser parser = new Parser();
+
+            var actual = NodesToString(parser.Parse("{def?xxx{abc}yyy}"));
+
+            Assert.That(actual, Is.EqualTo(@""));
+        }
+
         [Test]
         public void Text()
         {

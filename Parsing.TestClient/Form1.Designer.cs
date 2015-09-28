@@ -30,12 +30,12 @@
         {
             this.template = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.items = new System.Windows.Forms.ListView();
             this.expressionTree = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.items = new System.Windows.Forms.ListView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -54,7 +54,7 @@
             this.template.Location = new System.Drawing.Point(0, 0);
             this.template.Multiline = true;
             this.template.Name = "template";
-            this.template.Size = new System.Drawing.Size(965, 283);
+            this.template.Size = new System.Drawing.Size(826, 283);
             this.template.TabIndex = 1;
             this.template.TextChanged += new System.EventHandler(this.template_TextChanged);
             // 
@@ -72,9 +72,19 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.items);
-            this.splitContainer1.Size = new System.Drawing.Size(965, 509);
+            this.splitContainer1.Size = new System.Drawing.Size(826, 509);
             this.splitContainer1.SplitterDistance = 283;
             this.splitContainer1.TabIndex = 2;
+            // 
+            // items
+            // 
+            this.items.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.items.Location = new System.Drawing.Point(0, 0);
+            this.items.Name = "items";
+            this.items.Size = new System.Drawing.Size(826, 222);
+            this.items.TabIndex = 0;
+            this.items.UseCompatibleStateImageBehavior = false;
+            this.items.View = System.Windows.Forms.View.Details;
             // 
             // expressionTree
             // 
@@ -83,7 +93,8 @@
             this.expressionTree.Location = new System.Drawing.Point(0, 0);
             this.expressionTree.Multiline = true;
             this.expressionTree.Name = "expressionTree";
-            this.expressionTree.Size = new System.Drawing.Size(179, 509);
+            this.expressionTree.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
+            this.expressionTree.Size = new System.Drawing.Size(318, 509);
             this.expressionTree.TabIndex = 2;
             // 
             // menuStrip1
@@ -127,18 +138,8 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.expressionTree);
             this.splitContainer2.Size = new System.Drawing.Size(1148, 509);
-            this.splitContainer2.SplitterDistance = 965;
+            this.splitContainer2.SplitterDistance = 826;
             this.splitContainer2.TabIndex = 2;
-            // 
-            // items
-            // 
-            this.items.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.items.Location = new System.Drawing.Point(0, 0);
-            this.items.Name = "items";
-            this.items.Size = new System.Drawing.Size(965, 222);
-            this.items.TabIndex = 0;
-            this.items.UseCompatibleStateImageBehavior = false;
-            this.items.View = System.Windows.Forms.View.Details;
             // 
             // Form1
             // 

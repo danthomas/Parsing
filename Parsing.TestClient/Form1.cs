@@ -14,18 +14,22 @@ namespace Parsing.TestClient
 {
     public partial class Form1 : Form
     {
-        private readonly string _filePath;
+        private readonly string _settingsFilePath;
+        private readonly string _itemsFilePath;
         private readonly Parser _parser;
         private Builder _builder;
         private IDictionary<string, string> _values;
+        private Expander _expander;
 
         public Form1()
         {
             _parser = new Parser();
+            _expander = new Expander();
             _builder = new Builder();
             InitializeComponent();
 
-            _filePath = @"c:\temp\parsing.xml";
+            _settingsFilePath = @"c:\temp\parsing.xml";
+            _itemsFilePath = @"c:\temp\items.xml";
 
             LoadSetting();
             Parse();
@@ -33,15 +37,19 @@ namespace Parsing.TestClient
 
         private void LoadSetting()
         {
-            if (File.Exists(_filePath))
+            if (File.Exists(_settingsFilePath))
             {
-                var xDocument = XDocument.Load(_filePath, LoadOptions.PreserveWhitespace);
-
+                var xDocument = XDocument.Load(_settingsFilePath, LoadOptions.PreserveWhitespace);
 
                 template.Text = xDocument.Root.Element("template").Value;
+            }
+
+            if (File.Exists(_itemsFilePath))
+            {
+                var xDocument = XDocument.Load(_itemsFilePath, LoadOptions.PreserveWhitespace);
+
                 List<Dictionary<string, string>> items = xDocument
                     .Root
-                    .Element("items")
                     .Elements("item")
                     .Select(x => x.Attributes().ToDictionary(k => k.Name.LocalName, v => v.Value))
                     .ToList();
@@ -110,10 +118,9 @@ namespace Parsing.TestClient
         {
             XDocument xDocument = new XDocument(
                 new XElement("root",
-                    //new XElement("data", data.Text),
                     new XElement("template", template.Text)));
 
-            xDocument.Save(_filePath, SaveOptions.DisableFormatting);
+            xDocument.Save(_settingsFilePath, SaveOptions.DisableFormatting);
         }
 
         private void template_TextChanged(object sender, EventArgs e)
@@ -128,6 +135,12 @@ namespace Parsing.TestClient
             try
             {
                 var node = _parser.Parse(template.Text);
+                
+                WriteNode(node);
+
+                _expander.Expand(node);
+
+                WriteNode(node);
 
                 try
                 {
@@ -144,20 +157,36 @@ namespace Parsing.TestClient
                 }
                 catch (Exception e)
                 {
+                    SetAllItemsToError();
+
                     expressionTree.Text += Environment.NewLine + e.Message;
                 }
 
-                WriteNode(node);
             }
             catch (Exception e)
             {
+                SetAllItemsToError();
+
                 expressionTree.Text = e.Message;
+            }
+        }
+
+        private void SetAllItemsToError()
+        {
+            foreach (ListItem listItem in items.Items)
+            {
+                listItem
+                    .SubItems
+                    .Cast<ListViewItem.ListViewSubItem>()
+                    .Last()
+                    .Text = "Error";
             }
         }
 
         private void WriteNode(Node node)
         {
             WriteNode(node, 0);
+            expressionTree.Text += Environment.NewLine + "-----------------";
         }
 
         private void WriteNode(Node node, int indent)

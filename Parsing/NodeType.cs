@@ -13,6 +13,8 @@
         Colon,
         EqualTo,
         NotEqualTo,
-        Null
+        Null,
+        Dollar,
+        Attrib
     }
 }

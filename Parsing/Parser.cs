@@ -14,7 +14,7 @@ namespace Parsing
          * expression : text
          *              | statement
          *
-         * statement : openCurly identifier [equalTo|notEqualTo text] [question expression [colon expression]] closeCurly
+         * statement : dollar | openCurly identifier [equalTo|notEqualTo text] [question expressions [colon expressions]] closeCurly
          *   
          * text : .+
          * openCurly : {
@@ -31,6 +31,7 @@ namespace Parsing
 
         public Node Parse(string text)
         {
+            text = text.Replace("\r\n", "").Replace("\r", "").Replace("\n", "");
             _lexer = new Lexer(text);
             _index = -1;
 
@@ -41,7 +42,7 @@ namespace Parsing
 
         private Node Template()
         {
-            Node template = new Node(NodeType.Template);
+            Node template = new Node(null, NodeType.Template);
 
             Expressions(template);
 
@@ -50,35 +51,37 @@ namespace Parsing
 
         private void Expressions(Node node)
         {
-            Node expressions = new Node(NodeType.Expressions);
+            Node expressions = new Node(node, NodeType.Expressions);
             node.Children.Add(expressions);
 
-            while (Current.TokenType != TokenType.End)
+            while (Current.TokenType != TokenType.End
+                && Expression(expressions))
             {
-                Expression(expressions);
             }
         }
 
-        private void Expression(Node node, bool expected = false)
+        private bool Expression(Node node, bool expected = false)
         {
-            Node expression = new Node(NodeType.Expression);
-            node.Children.Add(expression);
+            Node expression = new Node(node, NodeType.Expression);
 
-            if (!Text(expression))
+            var ret = false;
+            if (Text(expression) || Statement(expression))
             {
-                if (!Statement(expression))
-                {
-                    if (expected)
-                    {
-                        throw new Exception("Expected Expression");
-                    }
-                }
+                node.Children.Add(expression);
+
+                ret = true;
             }
+
+            return ret;
         }
 
         private bool Statement(Node node)
         {
-            if (LeftCurly(node))
+            if (Dollar(node))
+            {
+                return true;
+            }
+            else if (LeftCurly(node))
             {
                 Identifier(node, true);
 
@@ -89,18 +92,25 @@ namespace Parsing
 
                 if (Question(node))
                 {
-                    Expression(node, true);
+                    Expressions(node);
 
                     if (Colon(node))
                     {
-                        Expression(node, true);
+                        Expressions(node);
                     }
                 }
+
                 RightCurly(node, true);
+
                 return true;
             }
 
             return false;
+        }
+
+        private bool Dollar(Node node)
+        {
+            return Check(node, TokenType.Dollar, NodeType.Dollar);
         }
 
         private bool EqualTo(Node node, bool expected = false)
@@ -143,14 +153,14 @@ namespace Parsing
             return Check(node, TokenType.Colon, NodeType.Colon, expected);
         }
 
-        [DebuggerStepThrough]
+        //[DebuggerStepThrough]
         private bool Check(Node node, TokenType tokenType, NodeType? nodeType = null, bool expected = false)
         {
             if (tokenType == Current.TokenType)
             {
                 if (nodeType.HasValue)
                 {
-                    node.Children.Add(new Node(nodeType.Value, Current.Text));
+                    node.Children.Add(new Node(node, nodeType.Value, Current.Text));
                 }
                 NextToken();
                 return true;
@@ -158,13 +168,13 @@ namespace Parsing
 
             if (expected)
             {
-                throw new Exception("Expected " + nodeType);
+                throw new Exception("Expected " + tokenType);
             }
 
             return false;
         }
 
-        [DebuggerStepThrough]
+        //[DebuggerStepThrough]
         private void NextToken()
         {
             _index++;

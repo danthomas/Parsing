@@ -19,6 +19,11 @@ namespace Parsing
 
                 switch(c)
                 {
+                    case '$':
+                        Tokens.Add(new Token(TokenType.Dollar));
+                        tokenType = TokenType.Text;
+                        token = null;
+                        break;
                     case '{':
                         Tokens.Add(new Token(TokenType.LeftCurly));
                         tokenType = TokenType.Identifier;

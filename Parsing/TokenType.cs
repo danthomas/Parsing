@@ -12,6 +12,7 @@
         Identifier,
         Start,
         EqualTo,
-        NotEqualTo
+        NotEqualTo,
+        Dollar
     }
 }
