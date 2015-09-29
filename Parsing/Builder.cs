@@ -76,7 +76,7 @@ namespace Parsing
                 else
                 {
                     return _values.ContainsKey(key.ToLower())
-                           && _values[key.ToLower()] == value;
+                           && _values[key.ToLower()].ToLower() == value.ToLower();
                 }
             }
 

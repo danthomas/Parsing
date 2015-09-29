@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Parsing
 {
     public class Expander
     {
-        public void Expand(Node node)
+        public Node Expand(Node node)
         {
             Walk(node, ExpandDollar);
             Walk(node, ExpandIdentifier);
             Walk(node, ExpandIdentifierQuestion);
             Walk(node, ExpandIdentifierEqualToValue);
+
+            return node;
         }
 
         private void ExpandDollar(Node node)
@@ -81,7 +80,7 @@ namespace Parsing
                 
                 node.Children.Add(new Node(node, NodeType.Expressions, "", 
                     new Node(null, NodeType.Expression, "", 
-                    new Node(null, NodeType.Identifier, node.Children[0].Text))));
+                    new Node(null, NodeType.Attrib, node.Children[0].Text))));
             }
         }
 

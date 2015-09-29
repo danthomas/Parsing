@@ -4,17 +4,21 @@ using NUnit.Framework;
 namespace Parsing.Tests
 {
     [TestFixture]
-    class Tests
+    class ParserTests
     {
-
         [Test]
-        public void xxxxx()
+        public void IdentifierEqualsText()
         {
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse("{def?xxx{abc}yyy}"));
+            var actual = NodesToString(parser.Parse("{def=yyy}"));
 
-            Assert.That(actual, Is.EqualTo(@""));
+            Assert.That(actual, Is.EqualTo(@"
+Expressions
+    Expression
+        Identifier:def
+        EqualTo
+        Text:yyy"));
         }
 
         [Test]
@@ -40,9 +44,7 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
-        Identifier:abc
-        RightCurly"));
+        Identifier:abc"));
         }
 
         [Test]
@@ -55,11 +57,9 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
         Identifier:abc
         EqualTo
-        Text:def ghi
-        RightCurly"));
+        Text:def ghi"));
         }
 
         [Test]
@@ -72,11 +72,9 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
         Identifier:abc
         NotEqualTo
-        Text:def ghi
-        RightCurly"));
+        Text:def ghi"));
         }
 
         [Test]
@@ -89,12 +87,11 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
         Identifier:abc
         Question
-        Expression
-            Text:def
-        RightCurly"));
+        Expressions
+            Expression
+                Text:def"));
         }
 
         [Test]
@@ -107,14 +104,11 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
         Identifier:abc
         Question
-        Expression
-            LeftCurly
-            Identifier:def
-            RightCurly
-        RightCurly"));
+        Expressions
+            Expression
+                Identifier:def"));
         }
 
         [Test]
@@ -127,19 +121,15 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
         Identifier:abc
         Question
-        Expression
-            LeftCurly
-            Identifier:def
-            RightCurly
+        Expressions
+            Expression
+                Identifier:def
         Colon
-        Expression
-            LeftCurly
-            Identifier:ghi
-            RightCurly
-        RightCurly"));
+        Expressions
+            Expression
+                Identifier:ghi"));
         }
 
         [Test]
@@ -155,9 +145,7 @@ Expressions
     Expression
         Text:abc
     Expression
-        LeftCurly
-        Identifier:def
-        RightCurly"));
+        Identifier:def"));
         }
 
         [Test]
@@ -171,15 +159,11 @@ Expressions
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
-        LeftCurly
         Identifier:abc
-        RightCurly
     Expression
         Text: 
     Expression
-        LeftCurly
-        Identifier:def
-        RightCurly"));
+        Identifier:def"));
         }
 
         [Test]
