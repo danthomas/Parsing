@@ -6,12 +6,29 @@ namespace Parsing.Tests
     [TestFixture]
     class BuidlerTests
     {
-        [Test]
-        public void Text()
-        {
-            var actual = Run("text");
 
-            Assert.That(actual, Is.EqualTo(@"text"));
+        [Test]
+        public void AttrTrimmed()
+        {
+            var actual = Run("{ abc }");
+
+            Assert.That(actual, Is.EqualTo(@"xxx"));
+        }
+
+        [Test]
+        public void AttrWithSpacesTrimmed()
+        {
+            var actual = Run("{ v w x }");
+
+            Assert.That(actual, Is.EqualTo(@"789"));
+        }
+        
+        [Test]
+        public void TextNotTrimmed()
+        {
+            var actual = Run(" text ");
+
+            Assert.That(actual, Is.EqualTo(@" text "));
         }
 
         [Test]
@@ -41,7 +58,7 @@ namespace Parsing.Tests
         [Test]
         public void AttrEqualToValue()
         {
-            var actual = Run("{abc=xxx}");
+            var actual = Run("{ abc = xxx }");
 
             Assert.That(actual, Is.EqualTo(@"xxx"));
         }
@@ -49,7 +66,7 @@ namespace Parsing.Tests
         [Test]
         public void AttrNotEqualToValue()
         {
-            var actual = Run("{abc!=zzz}");
+            var actual = Run("{abc != zzz}");
 
             Assert.That(actual, Is.EqualTo(@"xxx"));
         }
@@ -57,7 +74,7 @@ namespace Parsing.Tests
         [Test]
         public void AttrFormatted()
         {
-            var actual = Run("{mno?$Kg}");
+            var actual = Run("{mno ?$Kg}");
 
             Assert.That(actual, Is.EqualTo(@"456Kg"));
         }
@@ -141,6 +158,7 @@ namespace Parsing.Tests
                 {"mno", "456"},
                 {"pqr", ""},
                 {"stu", null},
+                {"v w x", "789"},
             };
 
             var actual = builder.Build(expander.Expand(parser.Parse(template)))(values);

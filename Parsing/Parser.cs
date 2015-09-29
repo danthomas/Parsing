@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Parsing
 {
@@ -9,15 +7,17 @@ namespace Parsing
         /*
          * template : expressions
          *
-         * expressions : expression*
+         * expressions : expression+
          *
-         * expression : text
+         * expression : text 
          *              | statement
          *
          * statement : dollar | openCurly identifier [equalTo|notEqualTo values] [question expressions [colon expressions]] closeCurly
-         *   
+         * 
+         * values : value+
+         * 
          * text : .+
-         * values : .+
+         * value : .+
          * openCurly : {
          * closeCurly : }
          * question : ?
@@ -25,6 +25,7 @@ namespace Parsing
          * notEqualTo : !=
          * question : ?
          * identifier : [a-zA-Z1-9]+
+         * dollar: $
          */
 
         private int _index;
@@ -50,18 +51,20 @@ namespace Parsing
             return template;
         }
 
+        //expressions : expression*
         private void Expressions(Node node)
         {
             Node expressions = new Node(node, NodeType.Expressions);
             node.Children.Add(expressions);
 
-            while (Current.TokenType != TokenType.End
+            while (Current.TokenType != TokenType.EndOfFile
                 && Expression(expressions))
             {
             }
         }
-
-        private bool Expression(Node node, bool expected = false)
+        // expression : text
+        //              | statement
+        private bool Expression(Node node)
         {
             Node expression = new Node(node, NodeType.Expression);
 
@@ -76,11 +79,14 @@ namespace Parsing
             return ret;
         }
 
+        // statement : dollar | openCurly identifier [equalTo|notEqualTo values] [question expressions [colon expressions]] closeCurly
         private bool Statement(Node node)
         {
+            bool ret = false;
+
             if (Dollar(node))
             {
-                return true;
+                ret = true;
             }
             else if (LeftCurly(node))
             {
@@ -103,10 +109,10 @@ namespace Parsing
 
                 RightCurly(node, true);
 
-                return true;
+                ret = true;
             }
 
-            return false;
+            return ret;
         }
 
         private bool Dollar(Node node)
@@ -131,7 +137,7 @@ namespace Parsing
 
         private bool Values(Node node, bool expected = false)
         {
-            return Check(node, TokenType.Text, NodeType.Values, expected);
+            return Check(node, TokenType.Values, NodeType.Values, expected);
         }
 
         private bool LeftCurly(Node node, bool expected = false)
@@ -184,9 +190,7 @@ namespace Parsing
         private void NextToken()
         {
             _index++;
-            Current = _index < _lexer.Tokens.Count
-                ? _lexer.Tokens[_index]
-                : new Token(TokenType.End);
+            Current = _lexer.Tokens[_index];
         }
 
         public Token Current { get; set; }

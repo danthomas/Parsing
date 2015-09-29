@@ -6,13 +6,14 @@
         LeftCurly,
         RightCurly,
         Template,
-        End,
         Question,
         Colon,
         Identifier,
         Start,
         EqualTo,
         NotEqualTo,
-        Dollar
+        Dollar,
+        EndOfFile,
+        Values
     }
 }
