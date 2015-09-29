@@ -73,7 +73,7 @@ namespace Parsing
             if (node.Children.Count ==3
                 && node.Children[0].NodeType == NodeType.Identifier
                 && (node.Children[1].NodeType == NodeType.EqualTo || node.Children[1].NodeType == NodeType.NotEqualTo)
-                && node.Children[2].NodeType == NodeType.Text)
+                && node.Children[2].NodeType == NodeType.Values)
             {
                 //identifier=text -> identifier=text?{identifier}
                 node.Children.Add(new Node(node, NodeType.Question));

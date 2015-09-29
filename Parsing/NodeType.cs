@@ -15,6 +15,7 @@
         NotEqualTo,
         Null,
         Dollar,
-        Attrib
+        Attrib,
+        Values
     }
 }

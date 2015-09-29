@@ -7,7 +7,7 @@ namespace Parsing.Tests
     class ParserTests
     {
         [Test]
-        public void IdentifierEqualsText()
+        public void IdentifierEqualsValues()
         {
             Parser parser = new Parser();
 
@@ -18,7 +18,7 @@ Expressions
     Expression
         Identifier:def
         EqualTo
-        Text:yyy"));
+        Values:yyy"));
         }
 
         [Test]
@@ -59,11 +59,11 @@ Expressions
     Expression
         Identifier:abc
         EqualTo
-        Text:def ghi"));
+        Values:def ghi"));
         }
 
         [Test]
-        public void IdentifierNotEqualToTextStatement()
+        public void IdentifierNotEqualToValuesStatement()
         {
             Parser parser = new Parser();
 
@@ -74,7 +74,7 @@ Expressions
     Expression
         Identifier:abc
         NotEqualTo
-        Text:def ghi"));
+        Values:def ghi"));
         }
 
         [Test]
@@ -239,6 +239,5 @@ Expressions
                 NodesToString(child, indent + 1, ref ret);
             }
         }
-
     }
 }
