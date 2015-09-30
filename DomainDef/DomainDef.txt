@@ -1,0 +1,28 @@
+﻿domain : entity*
+
+
+entity : Entity Name columns*
+
+columns: NewLine Name type [Unique | Ident]*]+
+
+type :   Int
+         | Bool
+         | String OpenParen Integer [Comma Integer] CloseParen
+
+
+
+
+
+entity Account
+	Id int identifier
+	AccountName string(6, 20) unique
+	Forenames string(1, 30)
+	Surname string(1, 30)
+	PreferredName string(0, 30)
+	IsActive bool
+
+domain
+  entity
+    Name:Account
+    column
+      Name:Id

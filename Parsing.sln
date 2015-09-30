@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parsing.Tests", "Parsing.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parsing.TestClient", "Parsing.TestClient\Parsing.TestClient.csproj", "{6B1113EE-AA4E-4EA0-8DB5-76C25143F6DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainDef", "DomainDef\DomainDef.csproj", "{6580E520-7B80-4940-95ED-9BA06C9179BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainDef.Tests", "DomainDef.Tests\DomainDef.Tests.csproj", "{37D327F7-17DB-4921-A7E0-24FBED9B1141}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{6B1113EE-AA4E-4EA0-8DB5-76C25143F6DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B1113EE-AA4E-4EA0-8DB5-76C25143F6DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B1113EE-AA4E-4EA0-8DB5-76C25143F6DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6580E520-7B80-4940-95ED-9BA06C9179BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6580E520-7B80-4940-95ED-9BA06C9179BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6580E520-7B80-4940-95ED-9BA06C9179BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6580E520-7B80-4940-95ED-9BA06C9179BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
