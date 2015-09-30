@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Parsing.Tests
 {
     [TestFixture]
-    class BuidlerTests
+    class BuilderTests
     {
 
         [Test]
