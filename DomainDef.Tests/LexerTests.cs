@@ -33,16 +33,5 @@ namespace DomainDef.Tests
         }
     }
 
-    [TestFixture]
-    public class ParserTests
-    {
-        [Test]
-        public void Test1()
-        {
-            Node node = new Parser(new Lexer(@"entity Account
-Id
-AccountName
-Forenames")).Parse();
-        }
-    }
+   
 }

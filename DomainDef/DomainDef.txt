@@ -14,7 +14,7 @@ type :   Int
 
 
 entity Account
-	Id int identifier
+	Id int ident
 	AccountName string(6, 20) unique
 	Forenames string(1, 30)
 	Surname string(1, 30)
@@ -26,3 +26,21 @@ domain
     Name:Account
     column
       Name:Id
+      Type
+         Name:Int
+      Ident
+    column
+      Name:AccountName
+      Type
+         Name:String
+         Min:6
+         Max:20
+      Unique
+
+
+add domain
+  while !eof
+    if entity name add entity name
+
+
+	domain

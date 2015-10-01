@@ -1,105 +1,222 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Xml;
+using System.Linq;
 
 namespace DomainDef
 {
     public class Parser
     {
         private readonly Lexer _lexer;
-        private Token _currentToken;
+        private readonly List<Token> _currentTokens;
+        private NoneOrMore _domain;
 
         public Parser(Lexer lexer)
         {
             _lexer = lexer;
+            _currentTokens = new List<Token>();
+
+
+            /*
+            Name : [a-zA-Z]
+            String : string openParen number comma number closeParen
+            Type : int | bool | String
+            Property : newLine Name Type [unique|ident]*
+            Entity : entity Name Property*
+            Object : Entity | Form
+            Domain : Object*
+            */
+
+            // Name : [a-zA-Z]
+            Thing @name = new Leaf(TokenType.Name);
+
+            //String : string openParen number comma number closeParen
+            Thing @string = new And(TokenType.String,
+                TokenType.OpenParen,
+                TokenType.Integer,
+                TokenType.Comma,
+                TokenType.Integer,
+                TokenType.CloseParen);
+
+            //Type : int | bool | String
+            Thing @type = new Or(new Leaf(TokenType.Int),
+                new Leaf(TokenType.Bool),
+                @string);
+
+            //Property : newLine Name Type [unique|ident]*
+            Thing @property = new And(new Leaf(TokenType.NewLine),
+                @name,
+                @type,
+                new NoneOrMore(new Leaf(TokenType.Unique),
+                    new Leaf(TokenType.Ident)));
+
+            //Entity : entity Name Property*
+            Thing @entity = new And(new Leaf(TokenType.Entity),
+                @name,
+                new NoneOrMore(@property));
+
+            Thing @form = new Leaf(TokenType.Form);
+
+            //Object : Entity | Form
+            Thing @object = new Or(@entity, @form);
+
+            //Domain : Object*
+            _domain = new NoneOrMore(@object);
+
         }
 
         public Node Parse()
         {
-            NextToken();
+            Reader reader = new Reader(_lexer);
 
-            return Domain();
+            _domain.Check(reader, 0);
+
+            return null;
         }
 
-
-        private Node Domain()
+        public class NoneOrMore : Thing
         {
-            Node node = new Node(null, NodeType.Domain);
-
-            while (Entity(node) 
-                &&_currentToken.TokenType != TokenType.EndOfFile)
+            public NoneOrMore(params Thing[] things) : base(things)
             {
             }
 
-            return node;
-        }
-
-        private bool Entity(Node node)
-        {
-            if(Check(TokenType.Entity, NodeType.Entity, node))
+            public override bool Check(Reader reader, int index)
             {
-                Node entity = node.Children[0];
-                if (Check(TokenType.Name, NodeType.Name, entity, true))
+                foreach (Thing thing in Things)
                 {
-                    while (Column(entity)
-                        && _currentToken.TokenType != TokenType.EndOfFile)
+                    if (thing.Check(reader, index))
                     {
+                        //                       reader.Consume();
                     }
                 }
-            }
 
-            return false;
-        }
-
-        private bool Column(Node node)
-        {
-            Node column = new Node(NodeType.Column);
-            if (NewLine() && Name(column) && Type(column))
-            {
-                
-            }
-        }
-
-        private bool Type(Node node)
-        {
-            return true;
-        }
-
-        private bool NewLine()
-        {
-            return Check(TokenType.NewLine);
-        }
-
-        private bool Name(Node node)
-        {
-            return Check(TokenType.Name, NodeType.Name, node);
-        }
-
-        [DebuggerStepThrough]
-        private bool Check(TokenType tokenType, NodeType? nodeType = null, Node parent = null, bool expected = false)
-        {
-            if (tokenType == _currentToken.TokenType)
-            {
-                if (nodeType.HasValue)
-                {
-                    parent.AddChild(nodeType.Value, _currentToken.Text);
-                }
-                NextToken();
                 return true;
             }
-
-            if (expected)
-            {
-                throw new Exception("Expected " + tokenType);
-            }
-
-            return false;
         }
 
-        [DebuggerStepThrough]
-        private void NextToken()
+        public class And : Thing
         {
-            _currentToken = _lexer.Next();
+            public And(params Thing[] things) : base(things)
+            {
+            }
+
+            public And(params TokenType[] tokenTypes) : base(tokenTypes.Select(x => new Leaf(x)).Cast<Thing>().ToArray())
+            {
+            }
+
+            public override bool Check(Reader reader, int index)
+            {
+                int i = 0;
+                List<TokenType> tokenTypes = new List<TokenType>();
+                foreach (Thing thing in Things)
+                {
+                    if (thing is Leaf)
+                    {
+                        Leaf leaf = thing as Leaf;
+                        
+                        if (leaf.Check(reader, index + i))
+                        {
+                            tokenTypes.Add(leaf.TokenType);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        i++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+
+                reader.Consume(i);
+                for (int j = i; j < Things.Count; ++j)
+                {
+                    Things[i].Check(reader, 0);
+                }
+
+
+
+                return true;
+            }
+        }
+
+        public class Or : Thing
+        {
+            public Or(params Thing[] things) : base(things)
+            {
+            }
+
+            public override bool Check(Reader reader, int index)
+            {
+                foreach (Thing thing in Things)
+                {
+                    if (thing.Check(reader, index))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public class Leaf : Thing
+        {
+            public TokenType TokenType { get; set; }
+
+            public Leaf(TokenType tokenType)
+            {
+                TokenType = tokenType;
+            }
+
+            public override bool Check(Reader reader, int index)
+            {
+                return reader[index].TokenType == TokenType;
+            }
+        }
+
+        public abstract class Thing
+        {
+            protected Thing(params Thing[] things)
+            {
+                Things = things.ToList();
+            }
+
+            public List<Thing> Things { get; private set; }
+
+            public abstract bool Check(Reader reader, int index);
+        }
+
+        public class Reader
+        {
+            private readonly Lexer _lexer;
+            private readonly List<Token> _tokens;
+
+            public Reader(Lexer lexer)
+            {
+                _lexer = lexer;
+                _tokens = new List<Token>();
+            }
+
+            public Token this[int index]
+            {
+                get
+                {
+                    while (_tokens.Count <= index)
+                    {
+                        _tokens.Add(_lexer.Next());
+                    }
+                    return _tokens[index];
+                }
+            }
+
+            public void Consume(int count)
+            {
+                _tokens.RemoveRange(0, count);
+            }
         }
     }
 }

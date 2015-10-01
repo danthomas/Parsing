@@ -20,6 +20,7 @@ namespace DomainDef
         public Node(NodeType nodeType)
         {
             NodeType = nodeType;
+            Children = new List<Node>();
         }
 
         public Node AddChild(NodeType nodeType, string text = "")

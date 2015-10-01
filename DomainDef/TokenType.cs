@@ -15,6 +15,7 @@ namespace DomainDef
         Bool,
         String,
         Int,
-        Unique
+        Unique,
+        Form
     }
 }

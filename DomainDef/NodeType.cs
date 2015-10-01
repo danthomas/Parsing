@@ -5,6 +5,9 @@
         Domain,
         Entity,
         Name,
-        Column
+        Column,
+        Int,
+        Bool,
+        String
     }
 }
