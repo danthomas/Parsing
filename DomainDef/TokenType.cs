@@ -7,7 +7,6 @@ namespace DomainDef
         Comma,
         Name,
         EndOfFile,
-        NewLine,
         Integer,
         Entity,
         Ident,
@@ -16,6 +15,16 @@ namespace DomainDef
         String,
         Int,
         Unique,
-        Form
+        Form,
+        Domain,
+        Property,
+        StartOfFile,
+        Default,
+        Value,
+        None,
+        Ref,
+        Short,
+        Byte,
+        Long
     }
 }

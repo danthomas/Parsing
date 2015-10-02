@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using static System.Char;
+using static System.Int32;
 
 namespace DomainDef
 {
@@ -20,13 +21,20 @@ namespace DomainDef
             _text = text.Replace("\r", "");
             _keywords = new Dictionary<string, TokenType>()
             {
+                {"domain", TokenType.Domain},
                 {"entity", TokenType.Entity},
+                {"prop", TokenType.Property},
                 {"int", TokenType.Int},
+                {"short", TokenType.Short},
+                {"byte", TokenType.Byte},
+                {"long", TokenType.Long},
                 {"string", TokenType.String},
                 {"bool", TokenType.Bool},
                 {"decimal", TokenType.Decimal},
                 {"ident", TokenType.Ident},
                 {"unique", TokenType.Unique},
+                {"default", TokenType.Default},
+                {"ref", TokenType.Ref},
             };
             NextChar();
         }
@@ -39,7 +47,7 @@ namespace DomainDef
 
         public Token Next()
         {
-            while (_index < _text.Length)
+            while (_index <= _text.Length)
             {
                 switch (_currentChar)
                 {
@@ -48,7 +56,8 @@ namespace DomainDef
                         break;
                     case '\n':
                         NextChar();
-                        return new Token(TokenType.NewLine);
+                        //return new Token(TokenType.NewLine);
+                        break;
                     case '(':
                         NextChar();
                         return new Token(TokenType.OpenParen);
@@ -75,12 +84,17 @@ namespace DomainDef
                                 return new Token(_keywords[text]);
                             }
 
-                            if (Int32.TryParse(text, out i))
+                            if (TryParse(text, out i))
                             {
                                 return new Token(TokenType.Integer, text);
                             }
 
-                            return new Token(TokenType.Name, text);
+                            if (IsLetter(text[0]) && text.Skip(1).All(IsLetterOrDigit))
+                            {
+                                return new Token(TokenType.Name, text);
+                            }
+
+                            return new Token(TokenType.Value, text);
                         }
                         break;
                 }

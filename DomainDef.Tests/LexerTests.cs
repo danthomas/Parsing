@@ -10,11 +10,14 @@ namespace DomainDef.Tests
         [Test]
         public void Test1()
         {
-            Assert(@"
-    entity Account
-    Id int ident
-    AccountName string(6, 20) unique",
-    @"NewLine|Entity|Name:Account|NewLine|Name:Id|Int|Ident|NewLine|Name:AccountName|String|OpenParen|Integer:6|Comma|Integer:20|CloseParen|Unique");
+//            Assert(@"
+//    entity Account
+//    Id int ident
+//    AccountName string(6, 20) unique",
+//    @"NewLine|Entity|Name:Account|NewLine|Name:Id|Int|Ident|NewLine|Name:AccountName|String|OpenParen|Integer:6|Comma|Integer:20|CloseParen|Unique");
+
+            Assert(@"default(true)",
+    @"Default|OpenParen|Name:true|CloseParen");
         }
 
         private static void Assert(string text, string expected)
