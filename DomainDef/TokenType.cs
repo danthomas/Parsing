@@ -25,6 +25,9 @@ namespace DomainDef
         Ref,
         Short,
         Byte,
-        Long
+        Long,
+        Field,
+        Page,
+        Grid
     }
 }

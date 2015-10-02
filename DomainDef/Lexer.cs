@@ -23,7 +23,11 @@ namespace DomainDef
             {
                 {"domain", TokenType.Domain},
                 {"entity", TokenType.Entity},
+                {"page", TokenType.Page},
+                {"form", TokenType.Form},
+                {"grid", TokenType.Grid},
                 {"prop", TokenType.Property},
+                {"field", TokenType.Field},
                 {"int", TokenType.Int},
                 {"short", TokenType.Short},
                 {"byte", TokenType.Byte},

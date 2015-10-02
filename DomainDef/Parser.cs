@@ -20,18 +20,6 @@ namespace DomainDef
 
             return Domain(node);
             /*
-            Domain : domain Name Object*
-            Object : Entity | Form
-            Entity : entity Name [Property|Ref|Unique]*
-            Form : form Name
-            Property : prop Name Type [unique|ident|Default]*
-            Ref : ref Name
-            Unique : unique openParen Name [Comma Name]* closeParen
-            Default : default openParen Value closeParen
-            Type : int | bool | String
-            String : string openParen number [comma number] closeParen
-            Name : [a-zA-Z]
-            Value : [a-zA-Z0-9]
             */
         }
 
@@ -53,9 +41,9 @@ namespace DomainDef
             {
                 Entity(domain);
             }
-            else if (IsTokenType(TokenType.Form))
+            else if (IsTokenType(TokenType.Page))
             {
-                Form(domain);
+                Page(domain);
             }
             else
             {
@@ -162,10 +150,46 @@ namespace DomainDef
             Consume(TokenType.CloseParen);
         }
 
-        private void Form(Node domain)
+        private void Page(Node domain)
         {
-            Node form = Consume(domain, TokenType.Form);
-            Consume(form, TokenType.Name);
+            Node page = Consume(domain, TokenType.Page);
+            Consume(page, TokenType.Name);
+            if (IsTokenType(TokenType.Grid))
+            {
+                Grid(page);
+            }
+            else if (IsTokenType(TokenType.Form))
+            {
+                Form(page);
+            }
+            else
+            {
+                throw  new Exception();
+            }
+        }
+
+        private void Grid(Node page)
+        {
+            Node grid = Consume(page, TokenType.Grid);
+            ConsumeAs(grid, TokenType.Entity);
+
+            while (IsTokenType(TokenType.Field))
+            {
+                Consume(TokenType.Field);
+                ConsumeAs(grid, TokenType.Field);
+            }
+        }
+
+        private void Form(Node page)
+        {
+            Node form = Consume(page, TokenType.Form);
+            ConsumeAs(form, TokenType.Entity);
+
+            while (IsTokenType(TokenType.Field))
+            {
+                Consume(TokenType.Field);
+                ConsumeAs(form, TokenType.Field);
+            }
         }
 
         private TokenType CurrentTokenType => _currentToken.TokenType;

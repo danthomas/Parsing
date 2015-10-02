@@ -13,7 +13,23 @@ namespace DomainDef.Tests
         [Test]
         public void Test1()
         {
-            Node node = new Parser().Parse(@"domain CrossfitJST
+            Node node = new Parser().Parse(@"
+domain CrossfitJST
+
+page AccountEdit
+    form Account
+        field AccountName
+        field Forenames
+        field Surname
+        field IsActive
+
+page AccountList
+    grid Account
+        field AccountName
+        field Forenames
+        field Surname
+        field IsActive
+
 entity Account
     prop Id int ident
     prop AccountName string(1, 20) unique
@@ -29,9 +45,7 @@ entity AccountRole
     prop Id int ident
     ref Account
     ref Role
-    unique (Account, Role)
-
-");
+    unique (Account, Role)");
 
             string actual = NodeToString(node);
         }
