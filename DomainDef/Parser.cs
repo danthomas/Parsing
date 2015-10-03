@@ -61,7 +61,7 @@ namespace DomainDef
         {
             Node entity = Consume(domain, TokenType.Entity);
             Consume(entity, TokenType.Name);
-            while (IsTokenType(TokenType.Property, TokenType.Ref, TokenType.Key))
+            while (IsTokenType(TokenType.Property, TokenType.Ref, TokenType.Key, TokenType.Enum))
             {
                 if (IsTokenType(TokenType.Property))
                 {
@@ -75,6 +75,10 @@ namespace DomainDef
                 {
                     Key(entity);
                 }
+                else if (IsTokenType(TokenType.Enum))
+                {
+                    Consume(entity, TokenType.Enum);
+                }
             }
         }
 
@@ -83,11 +87,15 @@ namespace DomainDef
             Node property = Consume(entity, TokenType.Property);
             Consume(property, TokenType.Name);
             Type(property);
-            if (IsTokenType(TokenType.Unique, TokenType.Ident, TokenType.Default))
+            while (IsTokenType(TokenType.Unique, TokenType.Ident, TokenType.Auto, TokenType.Default, TokenType.ReadOnly))
             {
                 if (IsTokenType(TokenType.Ident))
                 {
                     Consume(property, TokenType.Ident);
+                }
+                else if (IsTokenType(TokenType.Auto))
+                {
+                    Consume(property, TokenType.Auto);
                 }
                 else if (IsTokenType(TokenType.Unique))
                 {
@@ -96,6 +104,10 @@ namespace DomainDef
                 else if (IsTokenType(TokenType.Default))
                 {
                     Default(property);
+                }
+                else if (IsTokenType(TokenType.ReadOnly))
+                {
+                    Consume(property, TokenType.ReadOnly);
                 }
             }
         }
@@ -140,9 +152,36 @@ namespace DomainDef
             {
                 String(property);
             }
+            else if (IsTokenType(TokenType.DateTime))
+            {
+                DateTime(property);
+            }
             else
             {
                 Consume(property, TokenType.Int, TokenType.Bool, TokenType.Short, TokenType.Long, TokenType.Byte);
+            }
+        }
+
+        private void DateTime(Node property)
+        {
+            Node @datetime = Consume(property, TokenType.DateTime);
+
+            if (IsTokenType(TokenType.OpenParen))
+            {
+                Consume(TokenType.OpenParen);
+                if (IsTokenType(TokenType.Minutes))
+                {
+                    Consume(@datetime, TokenType.Minutes);
+                }
+                else if (IsTokenType(TokenType.Seconds))
+                {
+                    Consume(@datetime, TokenType.Seconds);
+                }
+                else
+                {
+                    throw new Exception();
+                }
+                Consume(TokenType.CloseParen);
             }
         }
 
@@ -217,7 +256,16 @@ namespace DomainDef
         {
             if (IsTokenType(tokenTypes))
             {
-                var ret = node?.AddChild(_currentToken.TokenType, _currentToken.Text);
+                Node ret = null;
+
+                if (_currentToken.TokenType == TokenType.Name)
+                {
+                    node.Text = _currentToken.Text;
+                }
+                else
+                {
+                    ret = node?.AddChild(_currentToken.TokenType, _currentToken.Text);
+                }
 
                 Next();
 

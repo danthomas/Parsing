@@ -40,6 +40,12 @@ namespace DomainDef
                 {"default", TokenType.Default},
                 {"ref", TokenType.Ref},
                 {"key", TokenType.Key},
+                {"enum", TokenType.Enum},
+                {"readonly", TokenType.ReadOnly},
+                {"auto", TokenType.Auto},
+                {"datetime", TokenType.DateTime},
+                {"mm", TokenType.Minutes},
+                {"ss", TokenType.Seconds},
             };
             NextChar();
         }

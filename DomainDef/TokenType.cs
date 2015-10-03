@@ -29,6 +29,12 @@ namespace DomainDef
         Field,
         Page,
         Grid,
-        Key
+        Key,
+        Enum,
+        ReadOnly,
+        Auto,
+        DateTime,
+        Minutes,
+        Seconds
     }
 }

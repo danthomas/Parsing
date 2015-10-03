@@ -57,10 +57,17 @@ namespace DomainDef.Designer
 
         private void RefreshDomain(Node node)
         {
-            domain.Nodes.Clear();
+            NodeTreeNode nodeTreeNode = domain.Nodes.Cast<NodeTreeNode>().FirstOrDefault();
 
-            var nodeTreeNode = new NodeTreeNode(node);
-            domain.Nodes.Add(nodeTreeNode);
+            if (nodeTreeNode == null)
+            {
+                nodeTreeNode = new NodeTreeNode(node);
+                domain.Nodes.Add(nodeTreeNode);
+            }
+            else
+            {
+                nodeTreeNode.Node = node;
+            }
 
             RefreshDomain(nodeTreeNode);
 
@@ -69,27 +76,80 @@ namespace DomainDef.Designer
 
         private void RefreshDomain(NodeTreeNode parent)
         {
-            foreach (Node node in parent.Node.Children.Where(x => x.TokenType != TokenType.Name))
+            List<Match> matches = parent.Node.Children
+                .Select(x => new Match { Node = x })
+                .ToList();
+
+            int i = 0;
+
+            foreach (Match match in matches)
             {
-                var child = new NodeTreeNode(node);
-                parent.Nodes.Add(child);
+                for (int j = i; j < parent.Nodes.Count; ++j)
+                {
+                    if (match.Node.ToString() == parent.Nodes[i].Text)
+                    {
+                        match.NodeTreeNode = (NodeTreeNode)parent.Nodes[i];
+                        i = j + 1;
+                    }
+                }
+            }
+
+            List<NodeTreeNode> matched = matches.Where(x => x.NodeTreeNode != null).Select(x => x.NodeTreeNode).ToList();
+
+            var notMatched = parent.Nodes.Cast<NodeTreeNode>().Where(x => !matched.Contains(x)).ToList();
+
+            foreach (NodeTreeNode nodeTreeNode in notMatched)
+            {
+                parent.Nodes.Remove(nodeTreeNode);
+            }
+
+            for (int j = 0; j < matches.Count; ++j)
+            {
+                if (matches[j].NodeTreeNode == null)
+                {
+                    parent.Nodes.Insert(j, new NodeTreeNode(matches[j].Node));
+                }
+                else
+                {
+                    ((NodeTreeNode) parent.Nodes[j]).Node = matches[j].Node;
+                }
+            }
+
+            foreach (NodeTreeNode child in parent.Nodes)
+            {
                 RefreshDomain(child);
             }
         }
 
-        private class NodeTreeNode : TreeNode
+        class Match
         {
             public Node Node { get; set; }
+            public NodeTreeNode NodeTreeNode { get; set; }
+        }
+
+        private class NodeTreeNode : TreeNode
+        {
+            private Node _node;
+
+            public Node Node
+            {
+                get { return _node; }
+                set
+                {
+                    _node = value;
+                    SetText();
+                }
+            }
 
             public NodeTreeNode(Node node)
             {
                 Node = node;
-                Text = node.TokenType + (node.Text == "" ? "" : " - " + node.Text);
-                var nameNode = node.Children.FirstOrDefault(x => x.TokenType == TokenType.Name);
-                if (nameNode != null)
-                {
-                    Text += " - " + nameNode.Text;
-                }
+                SetText();
+            }
+
+            private void SetText()
+            {
+                Text = Node.ToString();
             }
         }
 
