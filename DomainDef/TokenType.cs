@@ -28,6 +28,7 @@ namespace DomainDef
         Long,
         Field,
         Page,
-        Grid
+        Grid,
+        Key
     }
 }

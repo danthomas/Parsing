@@ -45,7 +45,7 @@ entity AccountRole
     prop Id int ident
     ref Account
     ref Role
-    unique (Account, Role)");
+    unique (Account, Role)").Node;
 
             string actual = NodeToString(node);
         }

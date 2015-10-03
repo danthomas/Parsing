@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainDef", "DomainDef\Doma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainDef.Tests", "DomainDef.Tests\DomainDef.Tests.csproj", "{37D327F7-17DB-4921-A7E0-24FBED9B1141}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainDef.Designer", "DomainDef.Designer\DomainDef.Designer.csproj", "{E594F9F1-0D2E-4225-966F-C249507A3DB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37D327F7-17DB-4921-A7E0-24FBED9B1141}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E594F9F1-0D2E-4225-966F-C249507A3DB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E594F9F1-0D2E-4225-966F-C249507A3DB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E594F9F1-0D2E-4225-966F-C249507A3DB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E594F9F1-0D2E-4225-966F-C249507A3DB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

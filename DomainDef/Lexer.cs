@@ -39,6 +39,7 @@ namespace DomainDef
                 {"unique", TokenType.Unique},
                 {"default", TokenType.Default},
                 {"ref", TokenType.Ref},
+                {"key", TokenType.Key},
             };
             NextChar();
         }

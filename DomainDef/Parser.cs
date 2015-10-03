@@ -10,17 +10,23 @@ namespace DomainDef
         private Token _currentToken;
         private Token _nextToken;
 
-        public Node Parse(string text)
+        public ParseResult Parse(string text)
         {
-            _lexer = new Lexer(text);
-            _currentToken = _lexer.Next();
-            _nextToken = _lexer.Next();
+            try
+            {
+                _lexer = new Lexer(text);
+                _currentToken = _lexer.Next();
+                _nextToken = _lexer.Next();
 
-            Node node = new Node(TokenType.StartOfFile);
+                Node node = new Node(TokenType.StartOfFile);
 
-            return Domain(node);
-            /*
-            */
+                return new ParseResult(Domain(node));
+
+            }
+            catch (Exception exception)
+            {
+                return new ParseResult(exception.Message);
+            }
         }
 
         private Node Domain(Node node)
@@ -55,8 +61,7 @@ namespace DomainDef
         {
             Node entity = Consume(domain, TokenType.Entity);
             Consume(entity, TokenType.Name);
-            while (IsTokenType(TokenType.Property, TokenType.Ref)
-                || (CurrentTokenType == TokenType.Unique && _nextToken.TokenType == TokenType.OpenParen))
+            while (IsTokenType(TokenType.Property, TokenType.Ref, TokenType.Key))
             {
                 if (IsTokenType(TokenType.Property))
                 {
@@ -66,9 +71,9 @@ namespace DomainDef
                 {
                     Ref(entity);
                 }
-                else if (IsTokenType(TokenType.Unique))
+                else if (IsTokenType(TokenType.Key))
                 {
-                    Unique(entity);
+                    Key(entity);
                 }
             }
         }
@@ -101,15 +106,19 @@ namespace DomainDef
             Consume(@ref, TokenType.Name);
         }
 
-        private void Unique(Node entity)
+        private void Key(Node entity)
         {
-            Node @unique = Consume(entity, TokenType.Unique);
+            Node key = Consume(entity, TokenType.Key);
+            if (IsTokenType(TokenType.Unique))
+            {
+                Consume(key, TokenType.Unique);
+            }
             Consume(TokenType.OpenParen);
-            Consume(@unique, TokenType.Name);
+            Consume(key, TokenType.Name);
             while (IsTokenType(TokenType.Comma))
             {
                 Consume(TokenType.Comma);
-                Consume(@unique, TokenType.Name);
+                Consume(key, TokenType.Name);
             }
             Consume(TokenType.CloseParen);
         }
@@ -164,7 +173,7 @@ namespace DomainDef
             }
             else
             {
-                throw  new Exception();
+                throw new Exception();
             }
         }
 

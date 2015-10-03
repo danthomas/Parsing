@@ -1,46 +1,14 @@
-﻿domain : entity*
-
-
-entity : Entity Name columns*
-
-columns: NewLine Name type [Unique | Ident]*]+
-
-type :   Int
-         | Bool
-         | String OpenParen Integer [Comma Integer] CloseParen
-
-
-
-
-
-entity Account
-	Id int ident
-	AccountName string(6, 20) unique
-	Forenames string(1, 30)
-	Surname string(1, 30)
-	PreferredName string(0, 30)
-	IsActive bool
-
-domain
-  entity
-    Name:Account
-    column
-      Name:Id
-      Type
-         Name:Int
-      Ident
-    column
-      Name:AccountName
-      Type
-         Name:String
-         Min:6
-         Max:20
-      Unique
-
-
-add domain
-  while !eof
-    if entity name add entity name
-
-
-	domain
+﻿Domain : domain Name Object*
+Object : Entity | Page
+Entity : entity Name [Prop|Ref|Key]
+Prop : prop Name Type [ident|unique|Default]
+Type : bool | byte | short | int | long | decimal | String
+String : string openParen integer [comma integer] closeParen
+Default : default openParen value closeParen
+Page : page Name [Grid|Form]*
+Grid : grid Name Field*
+Form : grid Name Field*
+Field : field Name
+Name : [a-zA-Z]
+Ref : ref Name
+Key : key [unique] openParen Name [comma Name]* closeParen
