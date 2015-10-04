@@ -113,14 +113,17 @@ namespace DomainDef
         private void Select(Node procs)
         {
             Node select = Consume(procs, TokenType.Select);
-            Consume(TokenType.OpenParen);
-            Consume(select, TokenType.Name);
-            while (IsTokenType(TokenType.Comma))
+            if (IsTokenType(TokenType.OpenParen))
             {
-                Consume(TokenType.Comma);
+                Consume(TokenType.OpenParen);
                 Consume(select, TokenType.Name);
+                while (IsTokenType(TokenType.Comma))
+                {
+                    Consume(TokenType.Comma);
+                    Consume(select, TokenType.Name);
+                }
+                Consume(TokenType.CloseParen);
             }
-            Consume(TokenType.CloseParen);
         }
 
         private void Row(Node entity)

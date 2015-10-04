@@ -18,7 +18,7 @@ namespace DomainDef.Designer
 
         public Form1()
         {
-            _filePath = @"C:\Temp\Domain.txt";
+            _filePath = @"C:\Dev\Parsing\DomainDef.Designer\Domain.txt";
             InitializeComponent();
             LoadDomainDef();
             Build();

@@ -1,0 +1,156 @@
+domain CrossfitJST
+
+taskType New selectedIds 15 ids 1 edit
+taskType Edit selectedIds 2 edit
+taskType View selectedIds 2 view
+taskType Delete selectedIds 14
+taskType DeleteAll selectedIds 14
+taskType Activate selectedIds 14
+taskType DeActivate selectedIds 14
+
+entity LogItemType enum
+  prop Id byte ident
+  prop Name string(9) unique readonly
+  row 1 Debug
+  row 2 Info
+  row 3 Warning  
+  row 4 Error
+  row 5 Exception
+
+entity LogItem
+  prop Id int
+  prop LogItemTypeId LogItemType
+  prop Message string(-1)
+  prop StackTrace string(-1)
+  prop DateTime datetime(ss)
+  prop AccountId Account
+  procs insert
+
+entity Registration
+  prop Id short
+  prop Forenames string(2, 50)
+  prop Surname string(2, 30)
+  prop Email string(200)
+  procs
+    insert
+    deleteMany
+    select(Id)
+    select(Email)
+
+entity Account
+  prop Id int
+  prop Name string(4, 30) unique
+  prop Forenames string(2, 50)
+  prop Surname string(2, 30)
+  prop PreferredName string(2, 100)
+  prop Email string(200)
+  prop Salt string(100)
+  prop Password string(1, 1000)
+  prop ResetKey string(100)
+  prop IsActive bool default(true)
+  procs
+    select(Id)
+    select(Name)
+    select(Email)
+    insert
+    update
+    deleteMany
+
+entity Session
+  prop Id int
+  prop AccountId Account
+  prop StartDateTime datetime(mm)
+  procs
+    insert
+    select(AccountId)
+    deleteAll
+ 
+entity Role
+  prop Id short
+  prop Code string(1, 10) unique
+  prop Name string(1, 40) unique
+  procs
+    insert
+    update
+    select(Id)
+    select(Code, Name)
+    
+    
+    
+        
+entity AccountRole
+  prop Id int
+  prop AccountId Account
+  prop RoleId Role
+  key unique (Account, Role)
+  procs
+    insert
+
+
+entity RegisrationProgramme
+    prop Id int
+    prop RegistrationId Registration
+    prop ProgrammeId Programme
+    key unique (Registration, Programme)
+  procs
+    select(RegistrationId)
+    insert
+    deleteMany
+
+entity Programme
+  prop Id short
+  prop Code string(1, 10) unique
+  prop Name string(1, 50) unique
+  prop IsActive bool default(true)
+  procs
+    select
+    select(Id)
+    select(Code)
+    select(Name)
+    select(IsActive)
+    insert
+    update
+    deleteMany
+
+entity Email
+  prop Id int
+  prop AccountId Account
+  prop Address string(1, 200)
+  prop Subject string(1, 200)
+  prop Body string(1, 4000)
+  prop SentDateTime datetime(ss)
+  procs
+    insert
+    select(Id)
+    deleteMany
+    deleteAll
+
+entity AccountProgramme
+  prop Id int
+  prop AccountId Account
+  prop ProgrammeId Programme
+  key unique (Registration, Programme)
+  procs
+    select(AccountId)
+    insert
+    deleteMany
+
+
+
+
+
+
+page AccountEdit
+    form Account
+        field AccountName
+        field Forenames
+        field Surname
+        field IsActive
+
+page AccountList
+    grid Account
+        field AccountName
+        field Forenames
+        field Surname
+        field IsActive
+
