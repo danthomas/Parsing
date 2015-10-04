@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using static System.String;
 
@@ -51,6 +52,10 @@ namespace DomainDef
             {
                 Page(domain);
             }
+            else if (IsTokenType(TokenType.TaskType))
+            {
+                TaskType(domain);
+            }
             else
             {
                 throw new Exception();
@@ -61,7 +66,7 @@ namespace DomainDef
         {
             Node entity = Consume(domain, TokenType.Entity);
             Consume(entity, TokenType.Name);
-            while (IsTokenType(TokenType.Property, TokenType.Ref, TokenType.Key, TokenType.Enum))
+            while (IsTokenType(TokenType.Property, TokenType.Ref, TokenType.Key, TokenType.Enum, TokenType.Row))
             {
                 if (IsTokenType(TokenType.Property))
                 {
@@ -79,6 +84,19 @@ namespace DomainDef
                 {
                     Consume(entity, TokenType.Enum);
                 }
+                else if (IsTokenType(TokenType.Row))
+                {
+                    Row(entity);
+                }
+            }
+        }
+
+        private void Row(Node entity)
+        {
+            Node row = Consume(entity, TokenType.Row);
+            while (IsTokenType(TokenType.Value, TokenType.Name, TokenType.Integer))
+            {
+                ConsumeAs(row, TokenType.Value);
             }
         }
 
@@ -198,6 +216,45 @@ namespace DomainDef
             Consume(TokenType.CloseParen);
         }
 
+        private void TaskType(Node domain)
+        {
+            Node taskType = Consume(domain, TokenType.TaskType);
+            Consume(taskType, TokenType.Name);
+
+            while (IsTokenType(TokenType.Ids, TokenType.SelectedIds, TokenType.Edit, TokenType.View))
+            {
+                if (IsTokenType(TokenType.Ids))
+                {
+                    Ids(taskType);
+                }
+                else if (IsTokenType(TokenType.SelectedIds))
+                {
+                    SelectedIds(taskType);
+                }
+                else if (IsTokenType(TokenType.Edit, TokenType.View))
+                {
+                    Model(taskType);
+                }
+            }
+        }
+
+        private void Model(Node taskType)
+        {
+            Consume(taskType, TokenType.Edit, TokenType.View);
+        }
+
+        private void Ids(Node taskType)
+        {
+            Consume(TokenType.Ids);
+            ConsumeAs(taskType, TokenType.Integer, TokenType.Ids);
+        }
+
+        private void SelectedIds(Node taskType)
+        {
+            Consume(TokenType.SelectedIds);
+            ConsumeAs(taskType, TokenType.Integer, TokenType.SelectedIds);
+        }
+
         private void Page(Node domain)
         {
             Node page = Consume(domain, TokenType.Page);
@@ -273,6 +330,20 @@ namespace DomainDef
             }
 
             throw new Exception("Expected " + Join(", ", tokenTypes.Select(x => x.ToString())));
+        }
+
+        private Node ConsumeAs(Node node, TokenType expectedTokenType, TokenType asTokenType)
+        {
+            if (IsTokenType(expectedTokenType))
+            {
+                var ret = node.AddChild(asTokenType, _currentToken.Text);
+
+                Next();
+
+                return ret;
+            }
+
+            throw new Exception("Expected " + expectedTokenType);
         }
 
         private Node ConsumeAs(Node node, TokenType tokenType)

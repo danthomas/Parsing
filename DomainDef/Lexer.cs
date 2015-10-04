@@ -46,6 +46,12 @@ namespace DomainDef
                 {"datetime", TokenType.DateTime},
                 {"mm", TokenType.Minutes},
                 {"ss", TokenType.Seconds},
+                {"taskType", TokenType.TaskType},
+                {"selectedIds", TokenType.SelectedIds},
+                {"ids", TokenType.Ids},
+                {"edit", TokenType.Edit},
+                {"view", TokenType.View},
+                {"row", TokenType.Row},
             };
             NextChar();
         }

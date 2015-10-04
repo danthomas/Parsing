@@ -35,6 +35,12 @@ namespace DomainDef
         Auto,
         DateTime,
         Minutes,
-        Seconds
+        Seconds,
+        TaskType,
+        Ids,
+        SelectedIds,
+        Edit,
+        View,
+        Row
     }
 }

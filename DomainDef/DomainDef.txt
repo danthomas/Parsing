@@ -1,6 +1,11 @@
 ﻿Domain : domain Name Object*
-Object : Entity | Page
-Entity : entity Name [Prop|Ref|Key|enum]*
+Object : Entity | Page | TaskType
+TaskType : taskType [SelectedIds|Ids|Model]*
+SelectedIds : selectedIds integer
+Ids : ids integer
+Model : edit|view
+Entity : entity Name [Prop|Ref|Key|enum|Row]*
+Row : row [value]*
 Prop : prop Name Type [ident|unique|Default|readonly]*
 Type : bool | byte | short | int | long | decimal | String | DateTime
 String : string openParen integer [comma integer] closeParen
