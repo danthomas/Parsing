@@ -4,7 +4,9 @@ TaskType : taskType [SelectedIds|Ids|Model]*
 SelectedIds : selectedIds integer
 Ids : ids integer
 Model : edit|view
-Entity : entity Name [Prop|Key|enum|Row]*
+Entity : entity Name [Prop|Key|enum|Row|Proc]*
+Procs : procs [insert|update|delete|deleteMany|deleteAll|activate|deactivate|Select]*
+Select : select openParen Name [comma Name]* closeParen
 Row : row [value]*
 Prop : prop Name Type [ident|unique|Default|readonly]*
 Type : Name | bool | byte | short | int | long | decimal | String | DateTime

@@ -51,6 +51,16 @@ namespace DomainDef
                 {"edit", TokenType.Edit},
                 {"view", TokenType.View},
                 {"row", TokenType.Row},
+                {"procs", TokenType.Procs},
+                {"insert", TokenType.Insert},
+                {"update", TokenType.Update},
+                {"delete", TokenType.Delete},
+                {"deleteMany", TokenType.DeleteMany},
+                {"deleteAll", TokenType.DeleteAll},
+                {"activate", TokenType.Activate},
+                {"deactivate", TokenType.Deactivate},
+                {"select", TokenType.Select},
+
             };
             NextChar();
         }

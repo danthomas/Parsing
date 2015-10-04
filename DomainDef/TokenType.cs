@@ -40,6 +40,15 @@ namespace DomainDef
         SelectedIds,
         Edit,
         View,
-        Row
+        Row,
+        Procs,
+        Insert,
+        Update,
+        Delete,
+        DeleteMany,
+        DeleteAll,
+        Activate,
+        Deactivate,
+        Select
     }
 }

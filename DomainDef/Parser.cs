@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using static System.String;
 
@@ -66,7 +67,7 @@ namespace DomainDef
         {
             Node entity = Consume(domain, TokenType.Entity);
             Consume(entity, TokenType.Name);
-            while (IsTokenType(TokenType.Property, TokenType.Key, TokenType.Enum, TokenType.Row))
+            while (IsTokenType(TokenType.Property, TokenType.Key, TokenType.Enum, TokenType.Row, TokenType.Procs))
             {
                 if (IsTokenType(TokenType.Property))
                 {
@@ -84,7 +85,42 @@ namespace DomainDef
                 {
                     Row(entity);
                 }
+                else if (IsTokenType(TokenType.Procs))
+                {
+                    Procs(entity);
+                }
             }
+        }
+
+        private void Procs(Node entity)
+        {
+            Node procs = Consume(entity, TokenType.Procs);
+            while (IsTokenType(TokenType.Procs, TokenType.Insert, TokenType.Update, TokenType.Delete,
+                TokenType.DeleteAll, TokenType.DeleteMany, TokenType.Activate, TokenType.Deactivate, TokenType.Select))
+            {
+                if (IsTokenType(TokenType.Select))
+                {
+                    Select(procs);
+                }
+                else
+                {
+                    Consume(procs, TokenType.Procs, TokenType.Insert, TokenType.Update, TokenType.Delete,
+                        TokenType.DeleteAll, TokenType.DeleteMany, TokenType.Activate, TokenType.Deactivate);
+                }
+            }
+        }
+
+        private void Select(Node procs)
+        {
+            Node select = Consume(procs, TokenType.Select);
+            Consume(TokenType.OpenParen);
+            Consume(select, TokenType.Name);
+            while (IsTokenType(TokenType.Comma))
+            {
+                Consume(TokenType.Comma);
+                Consume(select, TokenType.Name);
+            }
+            Consume(TokenType.CloseParen);
         }
 
         private void Row(Node entity)
