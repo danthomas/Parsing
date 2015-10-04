@@ -38,7 +38,6 @@ namespace DomainDef
                 {"ident", TokenType.Ident},
                 {"unique", TokenType.Unique},
                 {"default", TokenType.Default},
-                {"ref", TokenType.Ref},
                 {"key", TokenType.Key},
                 {"enum", TokenType.Enum},
                 {"readonly", TokenType.ReadOnly},

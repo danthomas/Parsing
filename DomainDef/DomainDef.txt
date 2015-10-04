@@ -4,10 +4,10 @@ TaskType : taskType [SelectedIds|Ids|Model]*
 SelectedIds : selectedIds integer
 Ids : ids integer
 Model : edit|view
-Entity : entity Name [Prop|Ref|Key|enum|Row]*
+Entity : entity Name [Prop|Key|enum|Row]*
 Row : row [value]*
 Prop : prop Name Type [ident|unique|Default|readonly]*
-Type : bool | byte | short | int | long | decimal | String | DateTime
+Type : Name | bool | byte | short | int | long | decimal | String | DateTime
 String : string openParen integer [comma integer] closeParen
 DateTime : datetime [openParen mm|ss closeParen]
 Default : default openParen value closeParen
@@ -16,5 +16,4 @@ Grid : grid Name Field*
 Form : grid Name Field*
 Field : field Name
 Name : [a-zA-Z]
-Ref : ref Name Name
 Key : key [unique] openParen Name [comma Name]* closeParen

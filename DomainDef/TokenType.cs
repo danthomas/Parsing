@@ -22,7 +22,6 @@ namespace DomainDef
         Default,
         Value,
         None,
-        Ref,
         Short,
         Byte,
         Long,

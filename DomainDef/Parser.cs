@@ -66,15 +66,11 @@ namespace DomainDef
         {
             Node entity = Consume(domain, TokenType.Entity);
             Consume(entity, TokenType.Name);
-            while (IsTokenType(TokenType.Property, TokenType.Ref, TokenType.Key, TokenType.Enum, TokenType.Row))
+            while (IsTokenType(TokenType.Property, TokenType.Key, TokenType.Enum, TokenType.Row))
             {
                 if (IsTokenType(TokenType.Property))
                 {
                     Property(entity);
-                }
-                else if (IsTokenType(TokenType.Ref))
-                {
-                    Ref(entity);
                 }
                 else if (IsTokenType(TokenType.Key))
                 {
@@ -130,12 +126,6 @@ namespace DomainDef
             }
         }
 
-        private void Ref(Node entity)
-        {
-            Node @ref = Consume(entity, TokenType.Ref);
-            Consume(@ref, TokenType.Name);
-        }
-
         private void Key(Node entity)
         {
             Node key = Consume(entity, TokenType.Key);
@@ -176,7 +166,7 @@ namespace DomainDef
             }
             else
             {
-                Consume(property, TokenType.Int, TokenType.Bool, TokenType.Short, TokenType.Long, TokenType.Byte);
+                Consume(property, TokenType.Name, TokenType.Int, TokenType.Bool, TokenType.Short, TokenType.Long, TokenType.Byte);
             }
         }
 
