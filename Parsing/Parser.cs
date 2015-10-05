@@ -28,6 +28,7 @@ namespace Parsing
          * question : ?
          * identifier : [a-zA-Z1-9]+
          * dollar: $
+         * pipe: |
          */
 
         private Lexer _lexer;
@@ -64,9 +65,7 @@ namespace Parsing
                 Expression(expressions);
             }
         }
-
-        // expression : text
-        //              | statement
+        
         private void Expression(Node expressions)
         {
             Node expression = Add(expressions, TokenType.Expression);
@@ -80,8 +79,7 @@ namespace Parsing
                 Statement(expression);
             }
         }
-
-        // Statement : dollar | openCurly identifier [equalTo|notEqualTo Values] [question Expressions [colon Expressions]] closeCurly
+        
         private void Statement(Node expression)
         {
             if (IsTokenType(TokenType.Dollar))
