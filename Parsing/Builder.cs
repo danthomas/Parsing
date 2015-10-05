@@ -111,7 +111,7 @@ namespace Parsing
 
             public Expression Build(Node node, ParameterExpression helper)
             {
-                if (node.NodeType != NodeType.Expressions)
+                if (node.TokenType != TokenType.Expressions)
                 {
                     throw new Exception("Expressions Node expected");
                 }
@@ -128,42 +128,43 @@ namespace Parsing
 
             private Expression BuildExpression(Node node, ParameterExpression helper)
             {
-                if (node.NodeType != NodeType.Expression)
+                if (node.TokenType != TokenType.Expression)
                 {
                     throw new Exception("Expression Node expected");
                 }
 
                 Expression expression;
 
-                if (node.Children.Count == 1 && node.Children[0].NodeType == NodeType.Text)
+                if (node.Children.Count == 1 && node.Children[0].TokenType == TokenType.Text)
                 {
                     expression = Expression.Call(helper, _appendText, Expression.Constant(node.Children[0].Text));
                 }
                 else if (node.Children.Count == 1
-                    && (node.Children[0].NodeType == NodeType.Identifier || node.Children[0].NodeType == NodeType.Attrib))
+                    && (node.Children[0].TokenType == TokenType.Identifier || node.Children[0].TokenType == TokenType.Attrib))
                 {
                     expression = Expression.Call(helper, _appendValue, Expression.Constant(node.Children[0].Text));
                 }
                 else
                 {
-                    if (node.Children.Any(x => x.NodeType == NodeType.Question)
-                        && node.Children.Any(x => x.NodeType == NodeType.Colon))
-                    {
-                        Expression condition = Expression.Call(helper, _isEqualTo, Expression.Constant(node.Children[0].Text), Expression.Constant(node.Children[2].Text));
-                        if (node.Children[1].NodeType == NodeType.NotEqualTo)
-                        {
-                            condition = Expression.Not(condition);
-                        }
+                    Expression condition = Expression.Call(helper, _isEqualTo, Expression.Constant(node.Children[0].Text), Expression.Constant(node.Children[2].Children[0].Text));
 
+                    foreach (Node value in node.Children[2].Children.Skip(1))
+                    {
+                        condition = Expression.Or(condition, Expression.Call(helper, _isEqualTo, Expression.Constant(node.Children[0].Text), Expression.Constant(value.Text)));
+                    }
+
+                    if (node.Children[1].TokenType == TokenType.NotEqualTo)
+                    {
+                        condition = Expression.Not(condition);
+                    }
+
+                    if (node.Children.Any(x => x.TokenType == TokenType.Question)
+                        && node.Children.Any(x => x.TokenType == TokenType.Colon))
+                    {
                         expression = Expression.IfThenElse(condition, Build(node.Children[4], helper), Build(node.Children[6], helper));
                     }
-                    else if (node.Children.Any(x => x.NodeType == NodeType.Question))
+                    else if (node.Children.Any(x => x.TokenType == TokenType.Question))
                     {
-                        Expression condition = Expression.Call(helper, _isEqualTo, Expression.Constant(node.Children[0].Text), Expression.Constant(node.Children[2].Text));
-                        if (node.Children[1].NodeType == NodeType.NotEqualTo)
-                        {
-                            condition = Expression.Not(condition);
-                        }
 
                         expression = Expression.IfThen(condition, Build(node.Children[4], helper));
                     }

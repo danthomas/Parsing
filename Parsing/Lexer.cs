@@ -5,6 +5,7 @@ namespace Parsing
 {
     public class Lexer
     {
+        private int _index;
 
         public Lexer(string text)
         {
@@ -22,11 +23,14 @@ namespace Parsing
                     case '$':
                         tokenType = AddToken(TokenType.Dollar, TokenType.Text, ref currentToken);
                         break;
+                    case '|':
+                        tokenType = AddToken(TokenType.Pipe, TokenType.Value, ref currentToken);
+                        break;
                     case '{':
-                        tokenType = AddToken(TokenType.LeftCurly, TokenType.Identifier, ref currentToken);
+                        tokenType = AddToken(TokenType.OpenCurly, TokenType.Identifier, ref currentToken);
                         break;
                     case '}':
-                        tokenType = AddToken(TokenType.RightCurly, TokenType.Text, ref currentToken);
+                        tokenType = AddToken(TokenType.CloseCurly, TokenType.Text, ref currentToken);
                         break;
                     case '?':
                         tokenType = AddToken(TokenType.Question, TokenType.Text, ref currentToken);
@@ -35,13 +39,13 @@ namespace Parsing
                         tokenType = AddToken(TokenType.Colon, TokenType.Text, ref currentToken);
                         break;
                     case '=':
-                        tokenType = AddToken(TokenType.EqualTo, TokenType.Values, ref currentToken);
+                        tokenType = AddToken(TokenType.EqualTo, TokenType.Value, ref currentToken);
                         break;
                     case '!':
                         if (n == '=')
                         {
                             i++;
-                            tokenType = AddToken(TokenType.NotEqualTo, TokenType.Values, ref currentToken);
+                            tokenType = AddToken(TokenType.NotEqualTo, TokenType.Value, ref currentToken);
                         }
                         else
                         {
@@ -59,7 +63,7 @@ namespace Parsing
                             currentToken.Text += c;
                         }
                         else if (currentToken.TokenType == TokenType.Identifier
-                            || currentToken.TokenType == TokenType.Values)
+                            || currentToken.TokenType == TokenType.Value)
                         {
                             if (c != ' ' && !Char.IsLetter(c) && !Char.IsNumber(c))
                             {
@@ -87,12 +91,19 @@ namespace Parsing
         {
             if (token != null
                 && (token.TokenType == TokenType.Identifier
-                || token.TokenType == TokenType.Values))
+                || token.TokenType == TokenType.Value))
             {
                 token.Text = token.Text.Trim();
             }
         }
 
         public List<Token> Tokens { get; }
+
+        public Token Next()
+        {
+            return _index + 1 < Tokens.Count
+                ? Tokens[_index++]
+                : new Token(TokenType.EndOfFile);
+        }
     }
 }

@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
@@ -195,7 +190,7 @@ namespace Parsing.TestClient
             {
                 expressionTree.Text += Environment.NewLine +
                     new string(' ', indent * 4) +
-                    child.NodeType +
+                    child.TokenType +
                     (child.Text == "" ? "" : ":" + child.Text);
 
                 WriteNode(child, indent + 1);

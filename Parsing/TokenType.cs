@@ -3,8 +3,8 @@
     public enum TokenType
     {
         Text,
-        LeftCurly,
-        RightCurly,
+        OpenCurly,
+        CloseCurly,
         Template,
         Question,
         Colon,
@@ -14,6 +14,14 @@
         NotEqualTo,
         Dollar,
         EndOfFile,
+        Value,
+        StartOfFile,
+        Statement,
+        Expressions,
+        Attrib,
+        Null,
+        Expression,
+        Pipe,
         Values
     }
 }

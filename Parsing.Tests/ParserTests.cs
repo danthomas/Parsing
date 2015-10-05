@@ -11,14 +11,17 @@ namespace Parsing.Tests
         {
             Parser parser = new Parser();
 
-            var actual = NodesToString(parser.Parse("{def=yyy}"));
+            var actual = NodesToString(parser.Parse("{def=xxx|yyy|zzz}"));
 
             Assert.That(actual, Is.EqualTo(@"
 Expressions
     Expression
         Identifier:def
         EqualTo
-        Values:yyy"));
+        Values
+            Value:xxx
+            Value:yyy
+            Value:zzz"));
         }
 
         [Test]
@@ -59,7 +62,8 @@ Expressions
     Expression
         Identifier:abc
         EqualTo
-        Values:def ghi"));
+        Values
+            Value:def ghi"));
         }
 
         [Test]
@@ -74,7 +78,8 @@ Expressions
     Expression
         Identifier:abc
         NotEqualTo
-        Values:def ghi"));
+        Values
+            Value:def ghi"));
         }
 
         [Test]
@@ -217,7 +222,7 @@ Expressions
                 message = e.Message;
             }
 
-            Assert.That(message, Is.EqualTo("Expected RightCurly"));
+            Assert.That(message, Is.EqualTo("Expected CloseCurly"));
         }
 
         private string NodesToString(Node node)
@@ -233,7 +238,7 @@ Expressions
             {
                 ret += Environment.NewLine +
                     new string(' ', indent * 4) +
-                    child.NodeType +
+                    child.TokenType +
                     (child.Text == "" ? "" : ":" + child.Text);
 
                 NodesToString(child, indent + 1, ref ret);

@@ -17,16 +17,16 @@ namespace Parsing
 
         private void ExpandDollar(Node node)
         {
-            if (node.NodeType == NodeType.Dollar)
+            if (node.TokenType == TokenType.Dollar)
             {
-                node.NodeType = NodeType.Attrib;
+                node.TokenType = TokenType.Attrib;
 
                 Node parent = node.Parent;
                 string text = "";
 
                 while (parent != null)
                 {
-                    Node identifier = parent.Children.FirstOrDefault(x => x.NodeType == NodeType.Identifier);
+                    Node identifier = parent.Children.FirstOrDefault(x => x.TokenType == TokenType.Identifier);
 
                     if (identifier != null)
                     {
@@ -36,51 +36,53 @@ namespace Parsing
 
                     parent = parent.Parent;
                 }
-                
+
                 node.Text = text;
             }
         }
 
         private void ExpandIdentifier(Node node)
         {
-            if (node.Children.Count == 1 && node.Children[0].NodeType == NodeType.Identifier)
+            if (node.Children.Count == 1 && node.Children[0].TokenType == TokenType.Identifier)
             {
                 //identifier -> identifier != null ? attrib
-                node.Children.Add(new Node(node, NodeType.NotEqualTo));
-                node.Children.Add(new Node(node, NodeType.Null));
-                node.Children.Add(new Node(node, NodeType.Question));
-                node.Children.Add(new Node(node, NodeType.Expressions, "",
-                    new Node(null, NodeType.Expression, "",
-                    new Node(null, NodeType.Attrib, node.Children[0].Text))));
+                node.AddChild(TokenType.NotEqualTo);
+                Node values = node.AddChild(TokenType.Values);
+                values.AddChild(TokenType.Null);
+                node.AddChild(TokenType.Question);
+                Node expressions = node.AddChild(TokenType.Expressions);
+                Node expression = expressions.AddChild(TokenType.Expression);
+                expression.AddChild(TokenType.Attrib, node.Children[0].Text);
             }
         }
 
         private void ExpandIdentifierQuestion(Node node)
         {
             if (node.Children.Count > 2
-                && node.Children[0].NodeType == NodeType.Identifier
-                && node.Children[1].NodeType == NodeType.Question)
+                && node.Children[0].TokenType == TokenType.Identifier
+                && node.Children[1].TokenType == TokenType.Question)
             {
                 //identifier?expression -> identifier != null ? expression
 
-                node.Children.Insert(1, new Node(node, NodeType.NotEqualTo));
-                node.Children.Insert(2, new Node(node, NodeType.Null));
+                node.InsertChild(1, TokenType.NotEqualTo);
+                Node values = node.InsertChild(2, TokenType.Values);
+                values.AddChild(TokenType.Null);
             }
         }
 
         private void ExpandIdentifierEqualToValue(Node node)
         {
-            if (node.Children.Count ==3
-                && node.Children[0].NodeType == NodeType.Identifier
-                && (node.Children[1].NodeType == NodeType.EqualTo || node.Children[1].NodeType == NodeType.NotEqualTo)
-                && node.Children[2].NodeType == NodeType.Values)
+            if (node.Children.Count == 3
+                && node.Children[0].TokenType == TokenType.Identifier
+                && (node.Children[1].TokenType == TokenType.EqualTo || node.Children[1].TokenType == TokenType.NotEqualTo)
+                && node.Children[2].TokenType == TokenType.Values)
             {
                 //identifier=text -> identifier=text?{identifier}
-                node.Children.Add(new Node(node, NodeType.Question));
-                
-                node.Children.Add(new Node(node, NodeType.Expressions, "", 
-                    new Node(null, NodeType.Expression, "", 
-                    new Node(null, NodeType.Attrib, node.Children[0].Text))));
+                node.AddChild(TokenType.Question);
+
+                Node expressions = node.AddChild(TokenType.Expressions);
+                Node expression = expressions.AddChild(TokenType.Expression);
+                expression.AddChild(TokenType.Attrib, node.Children[0].Text);
             }
         }
 

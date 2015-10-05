@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
@@ -143,7 +144,15 @@ namespace Parsing.Tests
             Assert.That(actual, Is.EqualTo(@"456"));
         }
 
-        private static string Run(string template)
+        [Test]
+        public void MultipleValues()
+        {
+            var actual = Run("{abc=xxx|yyy|zzz} {def=xxx|yyy|zzz}");
+
+            Assert.That(actual, Is.EqualTo(@"xxx yyy"));
+        }
+
+        private string Run(string template)
         {
             Builder builder = new Builder();
             Expander expander = new Expander();
@@ -161,8 +170,32 @@ namespace Parsing.Tests
                 {"v w x", "789"},
             };
 
-            var actual = builder.Build(expander.Expand(parser.Parse(template)))(values);
+            var parsed = parser.Parse(template);
+            var parsedText = NodesToString(parsed);
+            var expanded = expander.Expand(parsed);
+            var expandedText = NodesToString(expanded);
+            var actual = builder.Build(expanded)(values);
             return actual;
+        }
+
+        private string NodesToString(Node node)
+        {
+            string ret = "";
+            NodesToString(node, 0, ref ret);
+            return ret;
+        }
+
+        private void NodesToString(Node node, int indent, ref string ret)
+        {
+            foreach (Node child in node.Children)
+            {
+                ret += Environment.NewLine +
+                    new string(' ', indent * 4) +
+                    child.TokenType +
+                    (child.Text == "" ? "" : ":" + child.Text);
+
+                NodesToString(child, indent + 1, ref ret);
+            }
         }
     }
 }

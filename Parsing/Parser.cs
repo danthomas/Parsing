@@ -1,20 +1,22 @@
 using System;
+using System.Linq;
+using static System.String;
 
 namespace Parsing
 {
     public class Parser
     {
         /*
-         * template : expressions
+         * Template : Expressions
          *
-         * expressions : expression+
+         * Expressions : Expression+
          *
-         * expression : text 
-         *              | statement
+         * Expression : text 
+         *              | Statement
          *
-         * statement : dollar | openCurly identifier [equalTo|notEqualTo values] [question expressions [colon expressions]] closeCurly
+         * Statement : dollar | openCurly identifier [equalTo|notEqualTo Values] [question Expressions [colon Expressions]] closeCurly
          * 
-         * values : value+
+         * Values : value [pipe value]
          * 
          * text : .+
          * value : .+
@@ -28,171 +30,165 @@ namespace Parsing
          * dollar: $
          */
 
-        private int _index;
         private Lexer _lexer;
+        private Token _currentToken;
+        private Token _nextToken;
 
         public Node Parse(string text)
         {
             text = text.Replace("\r\n", "").Replace("\r", "").Replace("\n", "");
             _lexer = new Lexer(text);
-            _index = -1;
+            _currentToken = _lexer.Next();
+            _nextToken = _lexer.Next();
 
-            NextToken();
+            Node node = new Node(TokenType.StartOfFile);
 
-            return Template();
+            return Template(node);
         }
 
-        private Node Template()
+        private Node Template(Node node)
         {
-            Node template = new Node(null, NodeType.Template);
+            Node template = Add(node, TokenType.Template);
 
             Expressions(template);
 
             return template;
         }
 
-        //expressions : expression*
-        private void Expressions(Node node)
+        private void Expressions(Node template)
         {
-            Node expressions = new Node(node, NodeType.Expressions);
-            node.Children.Add(expressions);
+            Node expressions = Add(template, TokenType.Expressions);
 
-            while (Current.TokenType != TokenType.EndOfFile
-                && Expression(expressions))
+            while (IsTokenType(TokenType.Text, TokenType.Dollar, TokenType.OpenCurly))
             {
+                Expression(expressions);
             }
         }
+
         // expression : text
         //              | statement
-        private bool Expression(Node node)
+        private void Expression(Node expressions)
         {
-            Node expression = new Node(node, NodeType.Expression);
+            Node expression = Add(expressions, TokenType.Expression);
 
-            var ret = false;
-            if (Text(expression) || Statement(expression))
+            if (IsTokenType(TokenType.Text))
             {
-                node.Children.Add(expression);
-
-                ret = true;
+                Text(expression);
             }
-
-            return ret;
+            else
+            {
+                Statement(expression);
+            }
         }
 
-        // statement : dollar | openCurly identifier [equalTo|notEqualTo values] [question expressions [colon expressions]] closeCurly
-        private bool Statement(Node node)
+        // Statement : dollar | openCurly identifier [equalTo|notEqualTo Values] [question Expressions [colon Expressions]] closeCurly
+        private void Statement(Node expression)
         {
-            bool ret = false;
-
-            if (Dollar(node))
+            if (IsTokenType(TokenType.Dollar))
             {
-                ret = true;
+                Consume(expression, TokenType.Dollar);
             }
-            else if (LeftCurly(node))
+            else if (IsTokenType(TokenType.OpenCurly))
             {
-                Identifier(node, true);
+                Consume(TokenType.OpenCurly);
+                Consume(expression, TokenType.Identifier);
 
-                if (EqualTo(node) || NotEqualTo(node))
+                if (IsTokenType(TokenType.EqualTo, TokenType.NotEqualTo))
                 {
-                    Values(node, true);
-                }
+                    Consume(expression, TokenType.EqualTo, TokenType.NotEqualTo);
+                    Node values = Add(expression, TokenType.Values);
+                    Consume(values, TokenType.Value);
 
-                if (Question(node))
-                {
-                    Expressions(node);
-
-                    if (Colon(node))
+                    while (IsTokenType(TokenType.Pipe))
                     {
-                        Expressions(node);
+                        Consume(TokenType.Pipe);
+                        Consume(values, TokenType.Value);
                     }
                 }
 
-                RightCurly(node, true);
+                if (IsTokenType(TokenType.Question))
+                {
+                    Consume(expression, TokenType.Question);
+                    Expressions(expression);
 
-                ret = true;
+                    if (IsTokenType(TokenType.Colon))
+                    {
+                        Consume(expression, TokenType.Colon);
+                        Expressions(expression);
+                    }
+                }
+
+                Consume(TokenType.CloseCurly);
             }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        private void Text(Node template)
+        {
+            Consume(template, TokenType.Text);
+        }
+
+        private TokenType CurrentTokenType => _currentToken.TokenType;
+
+        private bool IsTokenType(params TokenType[] tokenTypes)
+        {
+            return tokenTypes.Contains(CurrentTokenType);
+        }
+
+        private Node Add(Node parent, TokenType tokenType, string text = "")
+        {
+            return parent.AddChild(tokenType, text);
+        }
+
+        private Node Consume(TokenType tokenType)
+        {
+            return Consume(null, tokenType);
+        }
+
+        private Node Consume(Node node, params TokenType[] tokenTypes)
+        {
+            if (IsTokenType(tokenTypes))
+            {
+                var ret = node?.AddChild(_currentToken.TokenType, _currentToken.Text);
+
+                Next();
+
+                return ret;
+            }
+
+            throw new Exception("Expected " + Join(", ", tokenTypes.Select(x => x.ToString())));
+        }
+
+        private Node ConsumeAs(Node node, TokenType expectedTokenType, TokenType asTokenType)
+        {
+            if (IsTokenType(expectedTokenType))
+            {
+                var ret = node.AddChild(asTokenType, _currentToken.Text);
+
+                Next();
+
+                return ret;
+            }
+
+            throw new Exception("Expected " + expectedTokenType);
+        }
+
+        private Node ConsumeAs(Node node, TokenType tokenType)
+        {
+            var ret = node.AddChild(tokenType, _currentToken.Text);
+
+            Next();
 
             return ret;
         }
 
-        private bool Dollar(Node node)
+        private void Next()
         {
-            return Check(node, TokenType.Dollar, NodeType.Dollar);
+            _currentToken = _nextToken;
+            _nextToken = _lexer.Next();
         }
-
-        private bool EqualTo(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.EqualTo, NodeType.EqualTo, expected);
-        }
-
-        private bool NotEqualTo(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.NotEqualTo, NodeType.NotEqualTo, expected);
-        }
-
-        private bool Text(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.Text, NodeType.Text, expected);
-        }
-
-        private bool Values(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.Values, NodeType.Values, expected);
-        }
-
-        private bool LeftCurly(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.LeftCurly, null, expected);
-        }
-
-        private bool Identifier(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.Identifier, NodeType.Identifier, expected);
-        }
-
-        private bool RightCurly(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.RightCurly, null, expected);
-        }
-
-        private bool Question(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.Question, NodeType.Question, expected);
-        }
-
-        private bool Colon(Node node, bool expected = false)
-        {
-            return Check(node, TokenType.Colon, NodeType.Colon, expected);
-        }
-
-        //[DebuggerStepThrough]
-        private bool Check(Node node, TokenType tokenType, NodeType? nodeType = null, bool expected = false)
-        {
-            if (tokenType == Current.TokenType)
-            {
-                if (nodeType.HasValue)
-                {
-                    node.Children.Add(new Node(node, nodeType.Value, Current.Text));
-                }
-                NextToken();
-                return true;
-            }
-
-            if (expected)
-            {
-                throw new Exception("Expected " + tokenType);
-            }
-
-            return false;
-        }
-
-        //[DebuggerStepThrough]
-        private void NextToken()
-        {
-            _index++;
-            Current = _lexer.Tokens[_index];
-        }
-
-        public Token Current { get; set; }
     }
 }

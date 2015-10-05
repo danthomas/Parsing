@@ -7,27 +7,41 @@ namespace Parsing
     public class Node
     {
         public Node Parent { get; set; }
-        public NodeType NodeType { get; set; }
+        public TokenType TokenType { get; set; }
         public string Text { get; set; }
+        public List<Node> Children { get; set; }
 
-        [DebuggerStepThrough]
-        public Node(Node parent, NodeType nodeType, string text = "", params Node[] children)
+        private Node(Node parent, TokenType tokenType, string text = "")
         {
             Parent = parent;
-            NodeType = nodeType;
-            Text = text;
-            foreach (var child in children)
-            {
-                child.Parent = this;
-            }
-            Children = children.ToList();
+            TokenType = tokenType;
+            Text = text ?? "";
+            Children = new List<Node>();
         }
 
-        public List<Node> Children { get; set; }
+        public Node(TokenType tokenType)
+        {
+            TokenType = tokenType;
+            Children = new List<Node>();
+        }
+
+        public Node AddChild(TokenType tokenType, string text = "")
+        {
+            Node child = new Node(this, tokenType, text);
+            Children.Add(child);
+            return child;
+        }
+
+        public Node InsertChild(int index, TokenType tokenType, string text = "")
+        {
+            Node child = new Node(this, tokenType, text);
+            Children.Insert(index, child);
+            return child;
+        }
 
         public override string ToString()
         {
-            return NodeType + (Text == "" ? "" : ":" + Text);
+            return TokenType + (Text == "" ? "" : ":" + Text);
         }
     }
 }
