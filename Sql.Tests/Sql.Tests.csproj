@@ -55,6 +55,10 @@
       <Project>{946CDAE0-5CBB-4AF3-A1F4-818E6338A2BF}</Project>
       <Name>Parsing.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Sql\Sql.csproj">
+      <Project>{4475B7A6-77F8-4DFD-AB4C-C8CDD6C117CA}</Project>
+      <Name>Sql</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
