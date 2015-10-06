@@ -9,7 +9,7 @@ namespace Parsing.Core
     public abstract class ParserBase<T, N> where T : struct
     {
         private readonly LexerBase<T> _lexer;
-        private Token<T> _currentToken;
+        protected Token<T> _currentToken;
         private Token<T> _nextToken;
 
         protected ParserBase(LexerBase<T> lexer)
@@ -48,7 +48,7 @@ namespace Parsing.Core
                 return node;
             }
 
-            throw new Exception();
+            throw new Exception($"Expected {tokenType} but was {_currentToken.TokenType}");
         }
 
         public void Consume(params T[] tokenTypes)
