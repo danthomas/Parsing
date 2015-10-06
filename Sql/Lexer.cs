@@ -53,6 +53,7 @@ namespace Sql
                 {"with", TokenType.With },
                 {"nolock", TokenType.Nolock },
                 {"like", TokenType.Like },
+                {"distinct", TokenType.Distinct },
             };
 
             _ignoreTokenTypes = new List<TokenType>

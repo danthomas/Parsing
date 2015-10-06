@@ -14,9 +14,10 @@ namespace Sql
     SelectField : text 
                 | count openParen Field closeParen 
                 | [min|max] openParen Field closeParen
-    Field : * | text [dot text]                                 // * | Name | alias.Name
+    Field : * | ObjectRef                                 // * | Name | alias.Name
     Table : text [as] [text]
-    Join : [inner|left|right] [outer] join Table on
+    Join : [inner|left|right] [outer] join Table on ObjectRef = ObjectRef
+    ObjectRef : text [dot text] [dot text]
     */
     public class Parser : ParserBase<TokenType, NodeType>
     {
@@ -77,6 +78,26 @@ namespace Sql
                 Table(join);
 
                 Consume(join, TokenType.On, NodeType.On);
+                ObjectRef(join);
+                Consume(join, TokenType.EqualTo, NodeType.EqualTo);
+                ObjectRef(join);
+            }
+        }
+
+        private void ObjectRef(Node<NodeType> parent)
+        {
+            Node<NodeType> objectRef = Add(parent, NodeType.ObjectRef);
+
+            Consume(objectRef, TokenType.Text, NodeType.Text);
+            if (IsTokenType(TokenType.Dot))
+            {
+                Consume(objectRef, TokenType.Dot, NodeType.Dot);
+                Consume(objectRef, TokenType.Text, NodeType.Text);
+            }
+            if (IsTokenType(TokenType.Dot))
+            {
+                Consume(objectRef, TokenType.Dot, NodeType.Dot);
+                Consume(objectRef, TokenType.Text, NodeType.Text);
             }
         }
 
@@ -125,7 +146,7 @@ namespace Sql
 
             if (IsTokenType(TokenType.Text))
             {
-                Consume(selectField, TokenType.Text, NodeType.Text);
+                ObjectRef(selectField);
             }
             else if (IsTokenType(TokenType.Count))
             {
@@ -166,13 +187,7 @@ namespace Sql
 
             if (IsTokenType(TokenType.Text))
             {
-                Consume(field, TokenType.Text, NodeType.Text);
-                if (IsTokenType(TokenType.Dot))
-                {
-                    Consume(field, TokenType.Dot, NodeType.Dot);
-                    Consume(field, TokenType.Text, NodeType.Text);
-                }
-
+                ObjectRef(field);
             }
             else if (IsTokenType(TokenType.Star))
             {
@@ -223,6 +238,7 @@ namespace Sql
         SelectField,
         Field,
         Table,
-        Distinct
+        Distinct,
+        ObjectRef
     }
 }

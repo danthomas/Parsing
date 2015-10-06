@@ -46,7 +46,7 @@ SelectFields : star | Field*", @"");
 
             str = Environment.NewLine + new string(' ', indent * 2);
 
-            ret += str + node.TokenType + (node.Text == "" ? "" : " : " + node.Text);
+            ret += str + node.NodeType + (node.Text == "" ? "" : " : " + node.Text);
 
             foreach (Node<NodeType> child in node.Children)
             {
