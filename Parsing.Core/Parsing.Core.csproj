@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Grammar\Lexer.cs" />
+    <Compile Include="Grammar\Parser.cs" />
     <Compile Include="LexerBase.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="ParserBase.cs" />
