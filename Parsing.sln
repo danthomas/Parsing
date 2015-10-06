@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sql.Tests", "Sql.Tests\Sql.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sql.UI", "Sql.UI\Sql.UI.csproj", "{EC226EFD-70CE-4283-9DC2-66534628CCF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sql", "Sql\Sql.csproj", "{4475B7A6-77F8-4DFD-AB4C-C8CDD6C117CA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,10 +69,6 @@ Global
 		{EC226EFD-70CE-4283-9DC2-66534628CCF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC226EFD-70CE-4283-9DC2-66534628CCF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC226EFD-70CE-4283-9DC2-66534628CCF2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4475B7A6-77F8-4DFD-AB4C-C8CDD6C117CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4475B7A6-77F8-4DFD-AB4C-C8CDD6C117CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4475B7A6-77F8-4DFD-AB4C-C8CDD6C117CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4475B7A6-77F8-4DFD-AB4C-C8CDD6C117CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
