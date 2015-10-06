@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Parsing.Core;
-using static System.String;
 
 namespace Sql.Tests
 {
@@ -11,21 +9,46 @@ namespace Sql.Tests
     public class Tests
     {
         [Test]
-        public void SelectStar()
+        public void SelectStarFrom()
         {
             Run(@"
-select *", @"
+select * from Account as a", @"
 Root
   Select
   SelectFields
-    Star");
+    Star
+  From
+  Table
+    Text : Account
+    As
+    Text : a");
+        }
+
+        [Test]
+        public void SelectStarFromJoin()
+        {
+            Run(@"
+select * from Account a join AccountType at", @"
+Root
+  Select
+  SelectFields
+    Star
+  From
+  Table
+    Text : Account
+    Text : a
+  Join
+    Join
+    Table
+      Text : AccountType
+      Text : at");
         }
 
         [Test]
         public void SelectFields()
         {
             Run(@"
-select Field1, Field2 FieldB, FieldB as FieldC", @"
+select Field1, Field2 FieldB, FieldB as FieldC from Account", @"
 Root
   Select
   SelectFields
@@ -37,13 +60,43 @@ Root
     SelectField
       Text : FieldB
       As
-      Text : FieldC");
+      Text : FieldC
+  From
+  Table
+    Text : Account");
         }
 
         [Test]
-        public void SelectCountStar()
+        public void SelectCountStarMaxMin()
         {
-            Run(@"select count(*)", @"");
+            Run(@"select count(*), min(a.CreateDate), max(CreateDate) from Account a", @"
+Root
+  Select
+  SelectFields
+    SelectField
+      Count
+      OpenParen
+      Field
+        Star
+      CloseParen
+    SelectField
+      Min
+      OpenParen
+      Field
+        Text : a
+        Dot
+        Text : CreateDate
+      CloseParen
+    SelectField
+      Max
+      OpenParen
+      Field
+        Text : CreateDate
+      CloseParen
+  From
+  Table
+    Text : Account
+    Text : a");
         }
 
         private void Run(string text, string expected)
@@ -74,7 +127,7 @@ Root
 
             str = Environment.NewLine + new string(' ', indent * 2);
 
-            ret += str + node.TokenType + (node.Text == "" ? "" : " : " + node.Text);
+            ret += str + node.NodeType + (node.Text == "" ? "" : " : " + node.Text);
 
             foreach (Node<NodeType> child in node.Children)
             {

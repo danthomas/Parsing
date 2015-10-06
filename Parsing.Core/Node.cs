@@ -4,13 +4,13 @@ namespace Parsing.Core
 {
     public class Node<N>
     {
-        public N TokenType { get; set; }
+        public N NodeType { get; set; }
         public string Text { get; set; }
         public List<Node<N>> Children { get; set; }
 
         public Node(N nodeType, string text = "")
         {
-            TokenType = nodeType;
+            NodeType = nodeType;
             Text = text;
             Children = new List<Node<N>>();
         }
