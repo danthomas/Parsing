@@ -24,25 +24,22 @@ namespace Sql
 
         public void Select(Node<NodeType> root)
         {
-            if (IsTokenType(TokenType.Select))
+            Consume(root, TokenType.Select, NodeType.Select);
+
+            if (IsTokenType(TokenType.Top))
             {
-                Consume(root, TokenType.Select, NodeType.Select);
-
-                if (IsTokenType(TokenType.Top))
-                {
-                    TopX(root);
-                }
-
-                if (IsTokenType(TokenType.Distinct))
-                {
-                    Consume(root, TokenType.Distinct, NodeType.Distinct);
-                }
-
-                SelectFields(root);
-                Consume(root, TokenType.From, NodeType.From);
-                Table(root);
-                Join(root);
+                TopX(root);
             }
+
+            if (IsTokenType(TokenType.Distinct))
+            {
+                Consume(root, TokenType.Distinct, NodeType.Distinct);
+            }
+
+            SelectFields(root);
+            Consume(root, TokenType.From, NodeType.From);
+            Table(root);
+            Join(root);
         }
 
         private void TopX(Node<NodeType> root)

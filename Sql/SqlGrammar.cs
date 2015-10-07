@@ -26,14 +26,16 @@ namespace Sql
     //equals : =
     
 
-    public class Grammar : GrammarBase
+    public class SqlGrammar : Grammar
     {
-        public Grammar() : base("Sql")
+        public SqlGrammar() : base("Sql")
         {
-            var dot = new Token("dot", ".");
-            var star = new Token("star", "*");
-            var equals = new Token("equals", "=");
-            var comma = new Token("comma", ",");
+            var dot = new Token("Dot", ".");
+            var star = new Token("Star", "*");
+            var equals = new Token("Equals", "=");
+            var comma = new Token("Comma", ",");
+            var openParen = new Token("OpenParen", "(");
+            var closeParen = new Token("CloseParen", ")");
 
             var _select = new Token("select");
             var _from = new Token("from");
@@ -47,14 +49,11 @@ namespace Sql
             var _on = new Token("on");
             var _as = new Token("as");
             var _count = new Token("count");
-            var _openParen = new Token("openParen");
-            var _closeParen = new Token("closeParen");
             var _min = new Token("min");
             var _max = new Token("max");
 
             var integer = new Text("integer", "[0-9]+");
             var text = new Text("text", ".+");
-            
 
             //ObjectRef : Text [dot Text] [dot Text]
             var objectRef = new Def("ObjectRef", text, new Optional(dot, text), new Optional(dot, text));
@@ -72,8 +71,8 @@ namespace Sql
             //             | count openParen Field closeParen 
             //             | [min|max] openParen Field closeParen
             var selectField2 = new Def("SelectField2", new OneOf(text, 
-                new Def(null, _count, _openParen, field, _closeParen),
-                new OptionalOneOf(_min, _max), _openParen, field, _closeParen));
+                new Def(null, _count, openParen, field, closeParen),
+                new OptionalOneOf(_min, _max), openParen, field, closeParen));
 
             //SelectField : SelectField [as] [Text] 
             var selectField = new Def("SelectField", selectField2, new Optional(_as), new Optional(text));
@@ -85,7 +84,7 @@ namespace Sql
             var topX = new Def("TopX", _top, integer);
 
             //Select : select [TopX] [distinct] SelectFields from Table Join*
-            var select = new Def("Select", _select, new Optional(topX), new Optional(_distinct), selectFields, _from, table, join);
+            Children.Add(new Def("Select", _select, new Optional(topX), new Optional(_distinct), selectFields, _from, table, join));
         }
     }
 }

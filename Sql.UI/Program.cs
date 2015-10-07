@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Parsing.Core.GrammarDef;
 
 namespace Sql.UI
 {
@@ -15,7 +17,8 @@ namespace Sql.UI
         static void Main()
         {
 
-            Sql.
+            File.WriteAllText(@"C:\temp\parser.cs", new ParserGenerator().Generate(new SqlGrammar()));
+            return;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

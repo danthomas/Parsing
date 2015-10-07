@@ -41,10 +41,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GrammarDef\ParserGenerator.cs" />
-    <Compile Include="GrammarDef\GrammarBase.cs" />
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="GrammarDef\Thing.cs" />
+    <Compile Include="GrammarDef\ThingType.cs" />
     <Compile Include="LexerBase.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="ParserBase.cs" />
