@@ -14,6 +14,9 @@ namespace Sql.UI
         [STAThread]
         static void Main()
         {
+
+            Sql.
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

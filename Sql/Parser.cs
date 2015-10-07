@@ -7,19 +7,6 @@ using Parsing.Core;
 
 namespace Sql
 {
-    /*
-    Select : select [TopX] [distinct] SelectFields from Table Join*
-    TopX : top integer
-    SelectFields : * | SelectField [comma SelectField]
-    SelectField : SelectField [as] [text] 
-    SelectField : text 
-                | count openParen Field closeParen 
-                | [min|max] openParen Field closeParen
-    Field : * | ObjectRef                                 // * | Name | alias.Name
-    Table : text [as] [text]
-    Join : [inner|left|right] [outer] join Table on ObjectRef = ObjectRef
-    ObjectRef : text [dot text] [dot text]
-    */
     public class Parser : ParserBase<TokenType, NodeType>
     {
         public Parser() : base(new Lexer())

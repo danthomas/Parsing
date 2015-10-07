@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Parsing.Core;
-using Parsing.Core.Grammar;
+using Parsing.Core.GrammarDef;
 
 namespace Sql.Tests
 {
