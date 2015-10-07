@@ -11,6 +11,7 @@ namespace Sql
     {
         private readonly Dictionary<char, TokenType> _punctuation;
         private readonly Dictionary<string, TokenType> _keywords;
+        private readonly Dictionary<string, TokenType> _texts;
         private readonly List<TokenType> _ignoreTokenTypes;
         private readonly char _stringQuote;
 
@@ -54,6 +55,13 @@ namespace Sql
                 {"nolock", TokenType.Nolock },
                 {"like", TokenType.Like },
                 {"distinct", TokenType.Distinct },
+                {"top", TokenType.Top },
+            };
+
+            _texts = new Dictionary<string, TokenType>
+            {
+                { "[0-9]+", TokenType.Integer },
+                { ".+", TokenType.Text },
             };
 
             _ignoreTokenTypes = new List<TokenType>
@@ -65,10 +73,11 @@ namespace Sql
         }
 
         public override TokenType EndOfFileTokenType => TokenType.EndOfFile;
-        public override TokenType TextTokenType => TokenType.Text;
+        //public override TokenType TextTokenType => TokenType.Text;
         public override TokenType StringTokenType => TokenType.String;
         public override Dictionary<char, TokenType> Punctuation => _punctuation;
         public override Dictionary<string, TokenType> KeyWords => _keywords;
+        public override Dictionary<string, TokenType> Texts => _texts;
         public override List<TokenType> IgnoreTokenTypes => _ignoreTokenTypes;
         public override char StringQuote => _stringQuote;
     }
@@ -106,6 +115,8 @@ namespace Sql
         Count,
         Min,
         Max,
-        Distinct
+        Distinct,
+        Top,
+        Integer
     }
 }

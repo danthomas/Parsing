@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Parsing.Core
 {
@@ -30,7 +32,7 @@ namespace Parsing.Core
 
         public Token<T> Next()
         {
-            Token<T> ret;
+            Token<T> ret = null;
 
             if (_index <= _text.Length)
             {
@@ -71,7 +73,16 @@ namespace Parsing.Core
                         }
                         else
                         {
-                            ret = new Token<T>(TextTokenType, text);
+                            KeyValuePair<string, T> match = Texts.FirstOrDefault(x => new Regex(x.Key).IsMatch(text));
+                            if (match.Key != null)
+                            {
+                                ret = new Token<T>(match.Value, text);
+                            }
+                        }
+
+                        if (ret == null)
+                        {
+                            throw new Exception($"Unexpected text {text}");
                         }
                     }
                 }
@@ -105,13 +116,15 @@ namespace Parsing.Core
 
         public abstract T EndOfFileTokenType { get; }
 
-        public abstract T TextTokenType { get; }
+        //public abstract T TextTokenType { get; }
 
         public abstract T StringTokenType { get; }
 
         public abstract Dictionary<char, T> Punctuation { get; }
 
         public abstract Dictionary<string, T> KeyWords { get; }
+
+        public abstract Dictionary<string, T> Texts { get; }
 
         public abstract List<T> IgnoreTokenTypes { get; }
 

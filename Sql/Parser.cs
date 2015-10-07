@@ -8,7 +8,8 @@ using Parsing.Core;
 namespace Sql
 {
     /*
-    Select : select [distinct] SelectFields from Table Join*
+    Select : select [TopX] [distinct] SelectFields from Table Join*
+    TopX : top integer
     SelectFields : * | SelectField [comma SelectField]
     SelectField : SelectField [as] [text] 
     SelectField : text 
@@ -39,15 +40,29 @@ namespace Sql
             if (IsTokenType(TokenType.Select))
             {
                 Consume(root, TokenType.Select, NodeType.Select);
+
+                if (IsTokenType(TokenType.Top))
+                {
+                    TopX(root);
+                }
+
                 if (IsTokenType(TokenType.Distinct))
                 {
                     Consume(root, TokenType.Distinct, NodeType.Distinct);
                 }
+
                 SelectFields(root);
                 Consume(root, TokenType.From, NodeType.From);
                 Table(root);
                 Join(root);
             }
+        }
+
+        private void TopX(Node<NodeType> root)
+        {
+            var topX = Add(root, NodeType.TopX);
+            Consume(topX, TokenType.Top, NodeType.Top);
+            Consume(topX, TokenType.Integer, NodeType.Integer);
         }
 
         private void Join(Node<NodeType> root)
@@ -239,6 +254,9 @@ namespace Sql
         Field,
         Table,
         Distinct,
-        ObjectRef
+        ObjectRef,
+        Top,
+        Integer,
+        TopX
     }
 }
