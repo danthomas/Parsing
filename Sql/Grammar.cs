@@ -35,22 +35,22 @@ namespace Sql
             var equals = new Token("equals", "=");
             var comma = new Token("comma", ",");
 
-            var _select = new Token("select", "select");
-            var _from = new Token("from", "from");
-            var _distinct = new Token("distinct", "distinct");
-            var _top = new Token("top", "top");
-            var _inner = new Token("inner", "inner");
-            var _left = new Token("left", "left");
-            var _right = new Token("right", "right");
-            var _outer = new Token("outer", "outer");
-            var _join = new Token("join", "join");
-            var _on = new Token("on", "on");
-            var _as = new Token("as", "as");
-            var _count = new Token("count", "count");
-            var _openParen = new Token("openParen", "openParen");
-            var _closeParen = new Token("closeParen", "closeParen");
-            var _min = new Token("min", "min");
-            var _max = new Token("max", "max");
+            var _select = new Token("select");
+            var _from = new Token("from");
+            var _distinct = new Token("distinct");
+            var _top = new Token("top");
+            var _inner = new Token("inner");
+            var _left = new Token("left");
+            var _right = new Token("right");
+            var _outer = new Token("outer");
+            var _join = new Token("join");
+            var _on = new Token("on");
+            var _as = new Token("as");
+            var _count = new Token("count");
+            var _openParen = new Token("openParen");
+            var _closeParen = new Token("closeParen");
+            var _min = new Token("min");
+            var _max = new Token("max");
 
             var integer = new Text("integer", "[0-9]+");
             var text = new Text("text", ".+");

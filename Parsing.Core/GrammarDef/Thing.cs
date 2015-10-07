@@ -60,7 +60,7 @@ namespace Parsing.Core.GrammarDef
 
     public class Token : Thing
     {
-        public Token(string name, string text) : base(name, text)
+        public Token(string name, string text = null) : base(name, text??name)
         {
         }
     }
