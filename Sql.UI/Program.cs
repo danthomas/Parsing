@@ -16,8 +16,9 @@ namespace Sql.UI
         [STAThread]
         static void Main()
         {
+            File.WriteAllText(@"C:\temp\parser.cs", new Generator().GenerateParser(new SqlGrammar()));
+            File.WriteAllText(@"C:\temp\lexer.cs", new Generator().GenerateLexer(new SqlGrammar()));
 
-            File.WriteAllText(@"C:\temp\parser.cs", new ParserGenerator().Generate(new SqlGrammar()));
             return;
 
             Application.EnableVisualStyles();

@@ -40,7 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrammarDef\ParserGenerator.cs" />
+    <Compile Include="GrammarDef\Generator.cs" />
+    <Compile Include="GrammarDef\Grammar.cs" />
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="GrammarDef\Thing.cs" />

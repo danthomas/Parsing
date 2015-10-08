@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Parsing.Core;
 
 namespace Sql
@@ -15,45 +11,45 @@ namespace Sql
 
         public override Node<NodeType> Root()
         {
-            Node<NodeType> root = new Node<NodeType>(NodeType.Root);
+            Node<NodeType> root = new Node<NodeType>(NodeType.SelectStatement);
 
-            Select(root);
+            SelectStatement(root);
 
             return root;
         }
 
-        public void Select(Node<NodeType> root)
+        public void SelectStatement(Node<NodeType> parent)
         {
-            Consume(root, TokenType.Select, NodeType.Select);
+            Consume(parent, TokenType.Select, NodeType.Select);
 
             if (IsTokenType(TokenType.Top))
             {
-                TopX(root);
+                TopX(parent);
             }
 
             if (IsTokenType(TokenType.Distinct))
             {
-                Consume(root, TokenType.Distinct, NodeType.Distinct);
+                Consume(parent, TokenType.Distinct, NodeType.Distinct);
             }
 
-            SelectFields(root);
-            Consume(root, TokenType.From, NodeType.From);
-            Table(root);
-            Join(root);
+            SelectFields(parent);
+            Consume(parent, TokenType.From, NodeType.From);
+            Table(parent);
+            Join(parent);
         }
 
-        private void TopX(Node<NodeType> root)
+        private void TopX(Node<NodeType> parent)
         {
-            var topX = Add(root, NodeType.TopX);
+            var topX = Add(parent, NodeType.TopX);
             Consume(topX, TokenType.Top, NodeType.Top);
             Consume(topX, TokenType.Integer, NodeType.Integer);
         }
 
-        private void Join(Node<NodeType> root)
+        private void Join(Node<NodeType> parent)
         {
             while (IsTokenType(TokenType.Inner, TokenType.Left, TokenType.Right, TokenType.Outer, TokenType.Join))
             {
-                Node<NodeType> join = Add(root, NodeType.Join);
+                Node<NodeType> join = Add(parent, NodeType.Join);
                 if (IsTokenType(TokenType.Inner))
                 {
                     Consume(join, TokenType.Inner, NodeType.Inner);
@@ -100,9 +96,9 @@ namespace Sql
             }
         }
 
-        private void Table(Node<NodeType> root)
+        private void Table(Node<NodeType> parent)
         {
-            var table = Add(root, NodeType.Table);
+            var table = Add(parent, NodeType.Table);
 
             if (IsTokenType(TokenType.Text))
             {
@@ -120,9 +116,9 @@ namespace Sql
             }
         }
 
-        private void SelectFields(Node<NodeType> root)
+        private void SelectFields(Node<NodeType> parent)
         {
-            var selectFields = Add(root, NodeType.SelectFields);
+            var selectFields = Add(parent, NodeType.SelectFields);
 
             if (IsTokenType(TokenType.Star))
             {
@@ -139,9 +135,9 @@ namespace Sql
             }
         }
 
-        private void SelectField(Node<NodeType> fields)
+        private void SelectField(Node<NodeType> parent)
         {
-            var selectField = Add(fields, NodeType.SelectField);
+            var selectField = Add(parent, NodeType.SelectField);
 
             if (IsTokenType(TokenType.Text))
             {
@@ -201,46 +197,36 @@ namespace Sql
 
     public enum NodeType
     {
-        EndOfFile,
+        SelectStatement,
+        TopX,
+        SelectFields,
+        SelectField,
+        SelectField2,
+        Field,
+        ObjectRef,
+        Table,
+        JoinDef,
+        Integer,
         Text,
-        Comma,
-        Dot,
-        OpenParen,
-        CloseParen,
         Select,
+        Top,
+        Distinct,
         Star,
+        Count,
+        OpenParen,
+        Dot,
+        CloseParen,
+        Min,
+        Max,
+        As,
+        Comma,
         From,
-        Where,
-        Order,
-        OpenSquare,
-        CloseSquare,
-        Whitespace,
-        String,
         Inner,
         Left,
         Right,
         Outer,
-        Cross,
         Join,
-        By,
         On,
-        As,
         EqualTo,
-        With,
-        Nolock,
-        Like,
-        Count,
-        Min,
-        Max,
-        Root,
-        SelectFields,
-        SelectField,
-        Field,
-        Table,
-        Distinct,
-        ObjectRef,
-        Top,
-        Integer,
-        TopX
     }
 }

@@ -3,8 +3,6 @@ using Parsing.Core.GrammarDef;
 
 namespace Sql
 {
-
-    
     //Select : select [TopX] [distinct] SelectFields from Table Join*
     //TopX : top Integer
     //SelectFields : * | SelectField [comma SelectField]
@@ -28,14 +26,22 @@ namespace Sql
 
     public class SqlGrammar : Grammar
     {
-        public SqlGrammar() : base("Sql")
+        private Def _root;
+
+        public SqlGrammar()
         {
             var dot = new Token("Dot", ".");
             var star = new Token("Star", "*");
-            var equals = new Token("Equals", "=");
+            var equalTo = new Token("EqualTo", "=");
             var comma = new Token("Comma", ",");
             var openParen = new Token("OpenParen", "(");
             var closeParen = new Token("CloseParen", ")");
+            var whitespace1 = new Token("CloseParen", " ");
+            var whitespace2 = new Token("CloseParen", "\t");
+            var whitespace3 = new Token("CloseParen", "\n");
+            var whitespace4 = new Token("CloseParen", "\r");
+            var openSquare = new Token("CloseParen", "[");
+            var closeSquare = new Token("CloseParen", "]");
 
             var _select = new Token("select");
             var _from = new Token("from");
@@ -51,9 +57,16 @@ namespace Sql
             var _count = new Token("count");
             var _min = new Token("min");
             var _max = new Token("max");
+            var _where = new Token("where");
+            var _cross = new Token("cross");
+            var _order = new Token("order");
+            var _by = new Token("by");
+            var _with = new Token("with");
+            var _nolock = new Token("nolock");
+            var _like = new Token("like");
 
-            var integer = new Text("integer", "[0-9]+");
-            var text = new Text("text", ".+");
+            var integer = new Text("Integer", "[0-9]+");
+            var text = new Text("Text", ".+");
 
             //ObjectRef : Text [dot Text] [dot Text]
             var objectRef = new Def("ObjectRef", text, new Optional(dot, text), new Optional(dot, text));
@@ -61,8 +74,8 @@ namespace Sql
             //Table : Text [as] [Text]
             var table = new Def("Table", text, new Optional(_as), new Optional(text));
 
-            //Join : [inner|left|right] [outer] join TableRef on ObjectRef equals ObjectRef
-            var join = new Def("Join", new OptionalOneOf(_inner, _left, _right), new Optional(_outer), _join, table, _on, objectRef, equals, objectRef);
+            //JoinDef : [inner|left|right] [outer] join TableRef on ObjectRef equals ObjectRef
+            var joinDef = new Def("JoinDef", new OptionalOneOf(_inner, _left, _right), new Optional(_outer), _join, table, _on, objectRef, equalTo, objectRef);
 
             //Field : * | ObjectRef
             var field = new Def("Field", new OneOf(star, objectRef));
@@ -84,7 +97,11 @@ namespace Sql
             var topX = new Def("TopX", _top, integer);
 
             //Select : select [TopX] [distinct] SelectFields from Table Join*
-            Children.Add(new Def("Select", _select, new Optional(topX), new Optional(_distinct), selectFields, _from, table, join));
+            _root = new Def("SelectStatement", _select, new Optional(topX), new Optional(_distinct), selectFields, _from, table, joinDef);
         }
+
+        public override Thing Root => _root;
+
+        public override char StringQuote => '\'';
     }
 }

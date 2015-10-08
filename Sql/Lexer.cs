@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Parsing.Core;
 
 namespace Sql
@@ -19,43 +15,44 @@ namespace Sql
         {
             _punctuation = new Dictionary<char, TokenType>
             {
+                {'.', TokenType.Dot},
+                {'*', TokenType.Star},
+                {'=', TokenType.EqualTo},
+                {',', TokenType.Comma},
+                {'(', TokenType.OpenParen},
+                {')', TokenType.CloseParen},
                 {' ', TokenType.Whitespace},
                 {'\t', TokenType.Whitespace},
                 {'\n', TokenType.Whitespace},
                 {'\r', TokenType.Whitespace},
-                {'.', TokenType.Dot},
-                {',', TokenType.Comma},
-                {'(', TokenType.OpenParen},
-                {')', TokenType.CloseParen},
                 {'[', TokenType.OpenSquare},
                 {']', TokenType.CloseSquare},
-                {'*', TokenType.Star},
-                {'=', TokenType.EqualTo},
             };
 
             _keywords = new Dictionary<string, TokenType>
             {
                 {"select", TokenType.Select },
-                {"count", TokenType.Count },
-                {"min", TokenType.Min },
-                {"max", TokenType.Max },
                 {"from", TokenType.From },
-                {"as", TokenType.As },
-                {"where", TokenType.Where },
+                {"distinct", TokenType.Distinct },
+                {"top", TokenType.Top },
                 {"inner", TokenType.Inner },
                 {"left", TokenType.Left },
                 {"right", TokenType.Right },
                 {"outer", TokenType.Outer },
-                {"cross", TokenType.Cross },
                 {"join", TokenType.Join },
                 {"on", TokenType.On },
+                {"as", TokenType.As },
+                {"count", TokenType.Count },
+                {"min", TokenType.Min },
+                {"max", TokenType.Max },
+
+                {"where", TokenType.Where },
+                {"cross", TokenType.Cross },
                 {"order", TokenType.Order },
                 {"by", TokenType.By },
                 {"with", TokenType.With },
                 {"nolock", TokenType.Nolock },
                 {"like", TokenType.Like },
-                {"distinct", TokenType.Distinct },
-                {"top", TokenType.Top },
             };
 
             _texts = new Dictionary<string, TokenType>
@@ -73,7 +70,6 @@ namespace Sql
         }
 
         public override TokenType EndOfFileTokenType => TokenType.EndOfFile;
-        //public override TokenType TextTokenType => TokenType.Text;
         public override TokenType StringTokenType => TokenType.String;
         public override Dictionary<char, TokenType> Punctuation => _punctuation;
         public override Dictionary<string, TokenType> KeyWords => _keywords;

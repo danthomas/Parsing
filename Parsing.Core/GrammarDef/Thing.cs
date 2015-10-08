@@ -23,15 +23,6 @@ namespace Parsing.Core.GrammarDef
         }
     }
 
-    public class Grammar : Thing
-    {
-        public override ThingType ThingType => ThingType.Grammar;
-
-        public Grammar(string name, params Thing[] children) : base(name, null, children)
-        {
-        }
-    }
-
     public class Def : Thing
     {
         public override ThingType ThingType => ThingType.Def;
@@ -80,6 +71,10 @@ namespace Parsing.Core.GrammarDef
     public class Token : Thing
     {
         public override ThingType ThingType => ThingType.Token;
+
+        public Token(string text) : base(text.Substring(0, 1).ToUpper() + text.Substring(1), text)
+        {
+        }
 
         public Token(string name, string text = null) : base(name, text ?? name.Substring(0, 1).ToUpper() + name.Substring(1))
         {
