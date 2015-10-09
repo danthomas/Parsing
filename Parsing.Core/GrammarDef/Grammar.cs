@@ -1,8 +1,9 @@
 namespace Parsing.Core.GrammarDef
 {
-    public abstract class Grammar
+    public class Grammar
     {
-        public abstract Thing Root { get; }
-        public abstract char StringQuote { get; }
+        public virtual Thing Root { get; set; }
+        public virtual char StringQuote { get; set; }
+        public Token[] IgnoreTokens { get; set; }
     }
 }

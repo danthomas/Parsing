@@ -40,12 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GrammarDef\Extensions.cs" />
     <Compile Include="GrammarDef\Generator.cs" />
     <Compile Include="GrammarDef\Grammar.cs" />
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="GrammarDef\Thing.cs" />
     <Compile Include="GrammarDef\ThingType.cs" />
+    <Compile Include="GrammarGrammar\Lexer.cs" />
+    <Compile Include="GrammarGrammar\NodeType.cs" />
+    <Compile Include="GrammarGrammar\Parser.cs" />
+    <Compile Include="GrammarGrammar\TokenType.cs" />
     <Compile Include="LexerBase.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="ParserBase.cs" />

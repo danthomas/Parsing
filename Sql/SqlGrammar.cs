@@ -3,14 +3,14 @@ using Parsing.Core.GrammarDef;
 
 namespace Sql
 {
-    //Select : select [TopX] [distinct] SelectFields from Table Join*
+    //Select : select [TopX] [distinct] SelectFields from Table JoinDef*
     //TopX : top Integer
-    //SelectFields : * | SelectField [comma SelectField]
+    //SelectFields : star | SelectField [comma SelectField]
     //SelectField : SelectField [as] [Text] 
     //SelectField2 : Text 
     //             | count openParen Field closeParen 
     //             | [min|max] openParen Field closeParen
-    //Field : * | ObjectRef                                 // * | Name | alias.Name
+    //Field : star | ObjectRef                                 // * | Name | alias.Name
     //Join : [inner|left|right] [outer] join Table on ObjectRef equals ObjectRef
     //Table : Text [as] [Text]
     //ObjectRef : Text [dot Text] [dot Text]
@@ -30,18 +30,18 @@ namespace Sql
 
         public SqlGrammar()
         {
-            var dot = new Token("Dot", ".");
-            var star = new Token("Star", "*");
-            var equalTo = new Token("EqualTo", "=");
-            var comma = new Token("Comma", ",");
-            var openParen = new Token("OpenParen", "(");
-            var closeParen = new Token("CloseParen", ")");
-            var whitespace1 = new Token("CloseParen", " ");
-            var whitespace2 = new Token("CloseParen", "\t");
-            var whitespace3 = new Token("CloseParen", "\n");
-            var whitespace4 = new Token("CloseParen", "\r");
-            var openSquare = new Token("CloseParen", "[");
-            var closeSquare = new Token("CloseParen", "]");
+            var dot = new Token("dot", ".");
+            var star = new Token("star", "*");
+            var equalTo = new Token("equalTo", "=");
+            var comma = new Token("comma", ",");
+            var openParen = new Token("openParen", "(");
+            var closeParen = new Token("closeParen", ")");
+            var whitespace1 = new Token("whitespace", " ");
+            var whitespace2 = new Token("whitespace", "\t");
+            var whitespace3 = new Token("whitespace", "\n");
+            var whitespace4 = new Token("whitespace", "\r");
+            var openSquare = new Token("openSquare", "[");
+            var closeSquare = new Token("closeSquare", "]");
 
             var _select = new Token("select");
             var _from = new Token("from");
@@ -57,6 +57,7 @@ namespace Sql
             var _count = new Token("count");
             var _min = new Token("min");
             var _max = new Token("max");
+            var _avg = new Token("avg");
             var _where = new Token("where");
             var _cross = new Token("cross");
             var _order = new Token("order");
@@ -67,37 +68,30 @@ namespace Sql
 
             var integer = new Text("Integer", "[0-9]+");
             var text = new Text("Text", ".+");
-
-            //ObjectRef : Text [dot Text] [dot Text]
+            
             var objectRef = new Def("ObjectRef", text, new Optional(dot, text), new Optional(dot, text));
-
-            //Table : Text [as] [Text]
+            
             var table = new Def("Table", text, new Optional(_as), new Optional(text));
+            
+            var joinDef = new Def("JoinDef", new Optional(new OneOf(_inner, _left, _right)), new Optional(_outer), _join, table, _on, objectRef, equalTo, objectRef);
+            
+            var starOrObjectRef = new Def("StarOrObjectRef", new OneOf(star, objectRef));
 
-            //JoinDef : [inner|left|right] [outer] join TableRef on ObjectRef equals ObjectRef
-            var joinDef = new Def("JoinDef", new OptionalOneOf(_inner, _left, _right), new Optional(_outer), _join, table, _on, objectRef, equalTo, objectRef);
+            var aggregate = new Def("Aggregate", new Def("Agg", new OneOf(_count, _min, _max, _avg)), openParen, starOrObjectRef, closeParen);
 
-            //Field : * | ObjectRef
-            var field = new Def("Field", new OneOf(star, objectRef));
+            var objectRefOrAggregate = new Def("ObjectRefOrAggregate", new OneOf(objectRef, aggregate));
+            
+            var selectField = new Def("SelectField", objectRefOrAggregate, new Optional(_as), new Optional(text));
 
-            //SelectField2 : Text 
-            //             | count openParen Field closeParen 
-            //             | [min|max] openParen Field closeParen
-            var selectField2 = new Def("SelectField2", new OneOf(text, 
-                new Def(null, _count, openParen, field, closeParen),
-                new OptionalOneOf(_min, _max), openParen, field, closeParen));
+            var commaSelectField = new Def("CommaSelectField", comma, selectField);
 
-            //SelectField : SelectField [as] [Text] 
-            var selectField = new Def("SelectField", selectField2, new Optional(_as), new Optional(text));
+            var selectFieldList = new Def("SelectFieldList", selectField, new ZeroOrMore(commaSelectField));
 
-            //SelectFields : * | SelectField [comma SelectField]
-            var selectFields = new Def("SelectFields", new OneOf(star, new Def(null, selectField, new Optional(comma, selectField))));
-
-            //TopX : top Integer
+            var selectFields = new Def("SelectFields", new OneOf(star, selectFieldList));
+            
             var topX = new Def("TopX", _top, integer);
-
-            //Select : select [TopX] [distinct] SelectFields from Table Join*
-            _root = new Def("SelectStatement", _select, new Optional(topX), new Optional(_distinct), selectFields, _from, table, joinDef);
+            
+            _root = new Def("SelectStatement", _select, new Optional(topX), new Optional(_distinct), selectFields, _from, table, new ZeroOrMore(joinDef));
         }
 
         public override Thing Root => _root;

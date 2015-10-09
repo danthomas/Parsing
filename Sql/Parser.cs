@@ -11,7 +11,7 @@ namespace Sql
 
         public override Node<NodeType> Root()
         {
-            Node<NodeType> root = new Node<NodeType>(NodeType.SelectStatement);
+            Node<NodeType> root = new Node<NodeType>(null, NodeType.SelectStatement);
 
             SelectStatement(root);
 
@@ -21,62 +21,59 @@ namespace Sql
         public void SelectStatement(Node<NodeType> parent)
         {
             Consume(parent, TokenType.Select, NodeType.Select);
-
             if (IsTokenType(TokenType.Top))
             {
-                TopX(parent);
+                var topX = Add(parent, NodeType.TopX);
+                TopX(topX);
             }
-
             if (IsTokenType(TokenType.Distinct))
             {
                 Consume(parent, TokenType.Distinct, NodeType.Distinct);
             }
-
             SelectFields(parent);
             Consume(parent, TokenType.From, NodeType.From);
             Table(parent);
-            Join(parent);
+            while (IsTokenType(TokenType.Inner, TokenType.Left, TokenType.Right, TokenType.Outer, TokenType.Join))
+            {
+                Node<NodeType> join = Add(parent, NodeType.JoinDef);
+                JoinDef(join);
+            }
         }
 
         private void TopX(Node<NodeType> parent)
         {
-            var topX = Add(parent, NodeType.TopX);
-            Consume(topX, TokenType.Top, NodeType.Top);
-            Consume(topX, TokenType.Integer, NodeType.Integer);
+            Consume(parent, TokenType.Top, NodeType.Top);
+            Consume(parent, TokenType.Integer, NodeType.Integer);
         }
 
-        private void Join(Node<NodeType> parent)
+        private void JoinDef(Node<NodeType> parent)
         {
-            while (IsTokenType(TokenType.Inner, TokenType.Left, TokenType.Right, TokenType.Outer, TokenType.Join))
+            if (IsTokenType(TokenType.Inner))
             {
-                Node<NodeType> join = Add(parent, NodeType.Join);
-                if (IsTokenType(TokenType.Inner))
-                {
-                    Consume(join, TokenType.Inner, NodeType.Inner);
-                }
-                else if (IsTokenType(TokenType.Left))
-                {
-                    Consume(join, TokenType.Left, NodeType.Left);
-                }
-                else if (IsTokenType(TokenType.Right))
-                {
-                    Consume(join, TokenType.Right, NodeType.Right);
-                }
-
-                if (IsTokenType(TokenType.Outer))
-                {
-                    Consume(join, TokenType.Outer, NodeType.Outer);
-                }
-
-                Consume(join, TokenType.Join, NodeType.Join);
-
-                Table(join);
-
-                Consume(join, TokenType.On, NodeType.On);
-                ObjectRef(join);
-                Consume(join, TokenType.EqualTo, NodeType.EqualTo);
-                ObjectRef(join);
+                Consume(parent, TokenType.Inner, NodeType.Inner);
             }
+            else if (IsTokenType(TokenType.Left))
+            {
+                Consume(parent, TokenType.Left, NodeType.Left);
+            }
+            else if (IsTokenType(TokenType.Right))
+            {
+                Consume(parent, TokenType.Right, NodeType.Right);
+            }
+
+            if (IsTokenType(TokenType.Outer))
+            {
+                Consume(parent, TokenType.Outer, NodeType.Outer);
+            }
+
+            Consume(parent, TokenType.Join, NodeType.Join);
+
+            Table(parent);
+
+            Consume(parent, TokenType.On, NodeType.On);
+            ObjectRef(parent);
+            Consume(parent, TokenType.EqualTo, NodeType.EqualTo);
+            ObjectRef(parent);
         }
 
         private void ObjectRef(Node<NodeType> parent)

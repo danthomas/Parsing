@@ -14,7 +14,7 @@
 
         public override Node<NodeType> Root()
         {
-            Node<NodeType> root = new Node<NodeType>(NodeType.Root);
+            Node<NodeType> root = new Node<NodeType>(null, NodeType.Root);
 
             Grammar(root);
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Parsing.Tests
+namespace TitleBuilder.Tests
 {
     [TestFixture]
     class BuilderTests

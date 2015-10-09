@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
-namespace Parsing.TestClient
+namespace TitleBuilder.Designer
 {
     public partial class Form1 : Form
     {

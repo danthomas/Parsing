@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace Parsing.Tests
+namespace TitleBuilder.Tests
 {
     [TestFixture]
     class ParserTests

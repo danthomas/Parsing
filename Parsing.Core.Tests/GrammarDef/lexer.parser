@@ -1,0 +1,43 @@
+using System;
+using Parsing.Core;
+
+namespace Xxx
+{
+    public class Parser : ParserBase<TokenType, NodeType>
+    {
+        public Parser() : base(new Lexer())
+        {
+        }
+
+        public override Node<NodeType> Root()
+        {
+            Node<NodeType> root = new Node<NodeType>(null, NodeType.ObjectRef);
+
+            ObjectRef(root);
+
+            return root;
+        }
+
+        public void ObjectRef(Node<NodeType> parent)
+        {
+            Consume(parent, TokenType.Text, NodeType.Text);
+            if (IsTokenType(TokenType.Dot))
+            {
+                Consume(parent, TokenType.Dot, NodeType.Dot);
+                Consume(parent, TokenType.Text, NodeType.Text);
+            }
+            if (IsTokenType(TokenType.Dot))
+            {
+                Consume(parent, TokenType.Dot, NodeType.Dot);
+                Consume(parent, TokenType.Text, NodeType.Text);
+            }
+        }
+    }
+
+    public enum NodeType
+    {
+        ObjectRef,
+        Text,
+        Dot,
+    }
+}

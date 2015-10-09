@@ -19,8 +19,14 @@ namespace Parsing.Core.GrammarDef
         {
             Name = name;
             Text = text;
+            foreach(Thing child in children)
+            {
+                child.Parent = this;
+            }
             Children = children.ToList();
         }
+
+        public Thing Parent { get; set; }
     }
 
     public class Def : Thing
@@ -41,15 +47,6 @@ namespace Parsing.Core.GrammarDef
         }
     }
 
-    public class OptionalOneOf : Thing
-    {
-        public override ThingType ThingType => ThingType.OptionalOneOf;
-
-        public OptionalOneOf(params Thing[] children) : base(null, null, children)
-        {
-        }
-    }
-
     public class OneOf : Thing
     {
         public override ThingType ThingType => ThingType.OneOf;
@@ -58,6 +55,25 @@ namespace Parsing.Core.GrammarDef
         {
         }
     }
+
+    public class OneOrMore : Thing
+    {
+        public override ThingType ThingType => ThingType.OneOrMore;
+
+        public OneOrMore(params Thing[] children) : base(null, null, children)
+        {
+        }
+    }
+
+    public class ZeroOrMore : Thing
+    {
+        public override ThingType ThingType => ThingType.ZeroOrMore;
+
+        public ZeroOrMore(params Thing[] children) : base(null, null, children)
+        {
+        }
+    }
+
 
     public class Text : Thing
     {
@@ -72,11 +88,11 @@ namespace Parsing.Core.GrammarDef
     {
         public override ThingType ThingType => ThingType.Token;
 
-        public Token(string text) : base(text.Substring(0, 1).ToUpper() + text.Substring(1), text)
+        public Token(string text) : base(text, text)
         {
         }
 
-        public Token(string name, string text = null) : base(name, text ?? name.Substring(0, 1).ToUpper() + name.Substring(1))
+        public Token(string name, string text ) : base(name, text)
         {
         }
     }

@@ -44,7 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Grammar\ParserTests.cs" />
+    <Compile Include="GrammarDef\GeneratorTests.cs" />
+    <Compile Include="GrammarDef\Lexer.cs" />
+    <Compile Include="GrammarDef\Parser.cs" />
+    <Compile Include="GrammarGrammar\ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

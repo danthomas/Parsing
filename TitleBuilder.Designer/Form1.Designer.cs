@@ -1,4 +1,4 @@
-﻿namespace Parsing.TestClient
+﻿namespace TitleBuilder.Designer
 {
     partial class Form1
     {
