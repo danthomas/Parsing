@@ -11,40 +11,44 @@ namespace Xxx
 
         public override Node<NodeType> Root()
         {
-            Node<NodeType> root = new Node<NodeType>(null, NodeType.StarOrObjectRef);
+            Node<NodeType> root = new Node<NodeType>(null, NodeType.Statement);
 
-            StarOrObjectRef(root);
+            Statement(root);
 
             return root;
         }
 
-        public void StarOrObjectRef(Node<NodeType> parent)
+        public void Statement(Node<NodeType> parent)
+        {
+            Consume(parent, TokenType.Select, NodeType.Select);
+            StarOrFieldList(parent);
+        }
+
+        public void StarOrFieldList(Node<NodeType> parent)
         {
         }
 
-        public void ObjectRef(Node<NodeType> parent)
+        public void FieldList(Node<NodeType> parent)
+        {
+            Field(parent);
+        }
+
+        public void Field(Node<NodeType> parent)
         {
             Consume(parent, TokenType.Text, NodeType.Text);
-            if (IsTokenType(TokenType.Dot))
-            {
-                Consume(parent, TokenType.Dot, NodeType.Dot);
-                Consume(parent, TokenType.Text, NodeType.Text);
-            }
-            if (IsTokenType(TokenType.Dot))
-            {
-                Consume(parent, TokenType.Dot, NodeType.Dot);
-                Consume(parent, TokenType.Text, NodeType.Text);
-            }
         }
     }
 
     public enum NodeType
     {
-        StarOrObjectRef,
-        ObjectRef,
+        Statement,
+        StarOrFieldList,
+        FieldList,
+        Field,
         Text,
+        Select,
         Star,
-        Dot,
+        Comma,
     }
 
     public class Walker

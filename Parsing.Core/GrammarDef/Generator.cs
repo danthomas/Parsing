@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using static System.Char;
+using Parsing.Core.GrammarGrammar;
 using static System.String;
 
 namespace Parsing.Core.GrammarDef
@@ -88,8 +88,7 @@ namespace Parsing.Core.GrammarDef
 
 namespace Xxx
 {{
-    public class {GetFirstTextText(node)
-                    } : Grammar
+    public class {GetFirstTextText(node)}Grammar : Grammar
     {{
         private Def _root;
 
@@ -97,16 +96,16 @@ namespace Xxx
         {{
             //punctuation";
 
-            foreach (var child in punctuation.Children)
+            if (punctuation != null)
             {
-                string firstText = GetFirstTextText(child);
-                var firstPart = GetFirstPart(child);
-
-                if (firstPart != null)
+                foreach (var child in punctuation.Children)
                 {
-                    var firstPartText = GetFirstTextText(firstPart);
+                    string name = child.Text;
+                    string value = child.Children[0].Children[0].Children[0].Text;
+
                     ret += $@"
-            var _{firstText} = new Token(""{firstText}"", ""{firstPartText}"");";
+            var @{name} = new Token(""{name}"", ""{value}"");";
+
                 }
             }
 
@@ -114,16 +113,15 @@ namespace Xxx
 
             //keywords";
 
-            foreach (var child in keywords.Children)
+            if (keywords != null)
             {
-                string firstText = GetFirstTextText(child);
-
-                var firstPart = GetFirstPart(child);
-
-                if (firstPart != null)
+                foreach (var child in keywords.Children)
                 {
+                    string name = child.Text;
+
                     ret += $@"
-            var _{firstText} = new Token(""{firstText}"");";
+            var @{name} = new Token(""{name}"");";
+
                 }
             }
 
@@ -131,17 +129,16 @@ namespace Xxx
 
             //texts";
 
-            foreach (var child in texts.Children)
+            if (texts != null)
             {
-                string firstText = GetFirstTextText(child);
-
-                var firstPart = GetFirstPart(child);
-
-                if (firstPart != null)
+                foreach (var child in texts.Children)
                 {
-                    var firstPartText = GetFirstTextText(firstPart);
+                    string name = child.Text;
+                    string value = child.Children[0].Children[0].Children[0].Text;
+
                     ret += $@"
-            var _{firstText} = new Text(""{firstText}"", ""{firstPartText}"");";
+            var @{name} = new Text(""{name}"", ""{value}"");";
+
                 }
             }
 
@@ -149,23 +146,80 @@ namespace Xxx
 
             //defs";
 
-            foreach (var child in defs.Children)
+            if (defs != null)
             {
-                string firstText = GetFirstTextText(child);
+                defs.Children.Reverse();
 
-                var firstPart = GetFirstPart(child);
-
-                if (firstPart != null)
+                foreach (var def in defs.Children)
                 {
+                    string name = def.Text;
+
                     ret += $@"
-            var _{firstText} = new Def(""{firstText}"");";
+
+            var @{name} = new Def(""{name}""";
+
+                    foreach (var part in def.Children)
+                    {
+                        ret += ", ";
+                        var names = part.Children.First(x => x.NodeType == GrammarGrammar.NodeType.Names);
+
+                        if (part.Children.Last().NodeType == GrammarGrammar.NodeType.Plus)
+                        {
+                            ret += "new OneOrMore(";
+                        }
+                        else if (part.Children.Last().NodeType == GrammarGrammar.NodeType.Star)
+                        {
+                            ret += "new ZeroOrMore(";
+                        }
+
+                        if (part.Children[0].NodeType == GrammarGrammar.NodeType.OpenSquare)
+                        {
+                            ret += "new Optional(";
+                        }
+
+                        if (names.Children.Any(x => x.NodeType == GrammarGrammar.NodeType.Pipe))
+                        {
+                            ret += "new OneOf(";
+                        }
+
+                        ret += String.Join(", ", names.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text).Select(x => "@" + x.Text));
+
+                        if (names.Children.Any(x => x.NodeType == GrammarGrammar.NodeType.Pipe))
+                        {
+                            ret += ")";
+                        }
+
+                        if (part.Children[0].NodeType == GrammarGrammar.NodeType.OpenSquare)
+                        {
+                            ret += ")";
+                        }
+
+                        if (part.Children.Last().NodeType == GrammarGrammar.NodeType.Plus
+                            || part.Children.Last().NodeType == GrammarGrammar.NodeType.Star)
+                        {
+                            ret += ")";
+                        }
+                    }
+
+                    ret += ");";
                 }
+
+                ret += $@"
+
+            _root = @{defs.Children.Last().Text};
+
+                IgnoreTokens = new Token[0];";
+
             }
 
-            ret += $@"
-        }}
-    }}
-}}
+            ret += @"
+        }
+
+        public override Thing Root { get { return _root; } }
+
+        public override char StringQuote{ get { return '\''; } }
+    }
+}
 ";
             return ret;
         }
@@ -191,13 +245,13 @@ namespace Xxx
 
             var texts = GetThings(grammar.Root, ThingType.Text);
 
-            stringBuilder.Append($@"using System.Collections.Generic;
+            stringBuilder.Append(@"using System.Collections.Generic;
 using Parsing.Core;
 
 namespace Xxx
-{{
+{
     public class Lexer : LexerBase<TokenType>
-    {{
+    {
         private readonly Dictionary<char, TokenType> _punctuation;
         private readonly Dictionary<string, TokenType> _keywords;
         private readonly Dictionary<string, TokenType> _texts;
@@ -205,9 +259,9 @@ namespace Xxx
         private readonly char _stringQuote;
 
         public Lexer()
-        {{
+        {
             _punctuation = new Dictionary<char, TokenType>
-            {{");
+            {");
 
             foreach (Thing token in tokens.Where(x => x.Text.Length == 1))
             {
@@ -529,6 +583,52 @@ namespace Xxx
             }
         }
 
+        public string GenerateNodeTree(Node<GrammarGrammar.NodeType> node)
+        {
+            string ret = "";
 
+            GenerateNodeTree(node, ref ret, 0);
+
+            return ret;
+        }
+
+        private void GenerateNodeTree(Node<GrammarGrammar.NodeType> node, ref string ret, int indent)
+        {
+            ret += Environment.NewLine + new string(' ', indent * 2) + node.NodeType + (node.Text == "" ? "" : " - " + node.Text);
+            foreach (var child in node.Children)
+            {
+                GenerateNodeTree(child, ref ret, indent + 1);
+            }
+        }
+
+        public Node<GrammarGrammar.NodeType> Rejig(Node<GrammarGrammar.NodeType> node)
+        {
+            var copy = new Node<GrammarGrammar.NodeType>(null, node.NodeType, node.Text);
+
+            Rejig(node, copy);
+
+            return copy;
+        }
+
+        private void Rejig(Node<GrammarGrammar.NodeType> parent, Node<GrammarGrammar.NodeType> copy)
+        {
+            foreach (var nodeChild in parent.Children)
+            {
+                if (new[] { GrammarGrammar.NodeType.NewLine, GrammarGrammar.NodeType.Colon }.Contains(nodeChild.NodeType))
+                {
+
+                }
+                else if (nodeChild.Parent.NodeType == GrammarGrammar.NodeType.Def && nodeChild.NodeType == GrammarGrammar.NodeType.Text)
+                {
+                    copy.Text = nodeChild.Text;
+                }
+                else
+                {
+                    var copyChild = copy.AddNode(nodeChild.NodeType, nodeChild.Text);
+
+                    Rejig(nodeChild, copyChild);
+                }
+            }
+        }
     }
 }

@@ -16,22 +16,21 @@ namespace Xxx
             _punctuation = new Dictionary<char, TokenType>
             {
                 { '*', TokenType.Star },
-                { '.', TokenType.Dot },
-                { ' ', TokenType.Whitespace },
+                { ',', TokenType.Comma },
             };
 
             _keywords = new Dictionary<string, TokenType>
             {
+                { "select", TokenType.Select },
             };
 
             _texts = new Dictionary<string, TokenType>
             {
-                { ".+", TokenType.Text },
+                { ".*", TokenType.Text },
             };
 
             _ignoreTokenTypes = new List<TokenType>
             {
-                TokenType.Whitespace,
             };
             _stringQuote = '\'';
         }
@@ -51,8 +50,8 @@ namespace Xxx
         EndOfFile,
         String,
         Text,
+        Select,
         Star,
-        Dot,
-        Whitespace,
+        Comma,
     }
 }

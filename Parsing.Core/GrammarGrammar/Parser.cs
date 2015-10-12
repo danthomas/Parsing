@@ -7,7 +7,9 @@ Grammar : Text [Defs]
 Defs : newLine defs Def+ [Ignore]
 Def : newLine Text colon Part*
 Part : [openSquare] Names [closeSquare] [star | plus]
-Names : Text [pipe Text]*
+Names : Options*
+Options : Name [pipe Name]*
+Name : Text  [star | plus]
 Ignore : newLine ignore Text+
 keywords
 ignore
@@ -160,12 +162,38 @@ ignore : return
 
         private void Names(Node<NodeType> parent)
         {
-            Consume(parent, TokenType.Text, NodeType.Text);
-
-            while (IsTokenType(TokenType.Pipe))
+            while (IsTokenType(TokenType.Text))
             {
-                Consume(parent, TokenType.Pipe, NodeType.Pipe);
-                Consume(parent, TokenType.Text, NodeType.Text);
+                var names = Add(parent, NodeType.Names);
+                Options(names);
+            }
+        }
+
+        private void Options(Node<NodeType> parent)
+        {
+            Name(parent);
+
+            while (IsTokenType(TokenType.Pipe, TokenType.Text))
+            {
+                if (IsTokenType(TokenType.Pipe))
+                {
+                    Consume(parent, TokenType.Pipe, NodeType.Pipe);
+                }
+                Name(parent);
+            }
+        }
+
+        private void Name(Node<NodeType> parent)
+        {
+            Consume(parent, TokenType.Text, NodeType.Text);
+            if (IsTokenType(TokenType.Plus))
+            {
+                Consume(parent, TokenType.Plus, NodeType.Plus);
+            }
+            else
+            if (IsTokenType(TokenType.Star))
+            {
+                Consume(parent, TokenType.Star, NodeType.Star);
             }
         }
     }
