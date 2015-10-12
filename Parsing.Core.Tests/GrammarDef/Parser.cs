@@ -26,6 +26,18 @@ namespace Xxx
 
         public void StarOrFieldList(Node<NodeType> parent)
         {
+            if (IsTokenType(TokenType.Star))
+            {
+                Consume(parent, TokenType.Star, NodeType.Star);
+            }
+            else
+            {
+                var fieldList = Add(parent, NodeType.FieldList);
+                while(IsTokenType(TokenType.Text))
+                {
+                    FieldList(parent);
+                }
+            }
         }
 
         public void FieldList(Node<NodeType> parent)

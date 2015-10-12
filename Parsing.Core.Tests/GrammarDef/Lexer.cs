@@ -52,6 +52,6 @@ namespace Xxx
         Text,
         Select,
         Star,
-        Comma,
+        Comma
     }
 }
