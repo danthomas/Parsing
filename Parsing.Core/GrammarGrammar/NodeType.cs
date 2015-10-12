@@ -3,7 +3,6 @@ namespace Parsing.Core.GrammarGrammar
     public enum NodeType
     {
         Text,
-        Grammar,
         NewLine,
         Colon,
         OpenSquare,
@@ -12,6 +11,12 @@ namespace Parsing.Core.GrammarGrammar
         Part,
         Star,
         Plus,
-        Pipe
+        Pipe,
+        Grammar,
+        Ignore,
+        Defs,
+        Texts,
+        Keywords,
+        Punctuation
     }
 }

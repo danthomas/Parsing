@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static System.Char;
 using static System.String;
 
 namespace Parsing.Core.GrammarDef
@@ -74,7 +75,112 @@ namespace Parsing.Core.GrammarDef
             }
             return ret;
         }
-        
+
+        public string GenerateGrammar(Node<GrammarGrammar.NodeType> node)
+        {
+
+            var defs = node.FirstChild(GrammarGrammar.NodeType.Defs);
+            var texts = node.FirstChild(GrammarGrammar.NodeType.Texts);
+            var keywords = node.FirstChild(GrammarGrammar.NodeType.Keywords);
+            var punctuation = node.FirstChild(GrammarGrammar.NodeType.Punctuation);
+
+            string ret = $@"using Parsing.Core.GrammarDef;
+
+namespace Xxx
+{{
+    public class {GetFirstTextText(node)
+                    } : Grammar
+    {{
+        private Def _root;
+
+        public SqlGrammar()
+        {{
+            //punctuation";
+
+            foreach (var child in punctuation.Children)
+            {
+                string firstText = GetFirstTextText(child);
+                var firstPart = GetFirstPart(child);
+
+                if (firstPart != null)
+                {
+                    var firstPartText = GetFirstTextText(firstPart);
+                    ret += $@"
+            var _{firstText} = new Token(""{firstText}"", ""{firstPartText}"");";
+                }
+            }
+
+            ret += @"
+
+            //keywords";
+
+            foreach (var child in keywords.Children)
+            {
+                string firstText = GetFirstTextText(child);
+
+                var firstPart = GetFirstPart(child);
+
+                if (firstPart != null)
+                {
+                    ret += $@"
+            var _{firstText} = new Token(""{firstText}"");";
+                }
+            }
+
+            ret += @"
+
+            //texts";
+
+            foreach (var child in texts.Children)
+            {
+                string firstText = GetFirstTextText(child);
+
+                var firstPart = GetFirstPart(child);
+
+                if (firstPart != null)
+                {
+                    var firstPartText = GetFirstTextText(firstPart);
+                    ret += $@"
+            var _{firstText} = new Text(""{firstText}"", ""{firstPartText}"");";
+                }
+            }
+
+            ret += @"
+
+            //defs";
+
+            foreach (var child in defs.Children)
+            {
+                string firstText = GetFirstTextText(child);
+
+                var firstPart = GetFirstPart(child);
+
+                if (firstPart != null)
+                {
+                    ret += $@"
+            var _{firstText} = new Def(""{firstText}"");";
+                }
+            }
+
+            ret += $@"
+        }}
+    }}
+}}
+";
+            return ret;
+        }
+
+        private string GetFirstTextText(Node<GrammarGrammar.NodeType> node)
+        {
+            var child = node.FirstChild(GrammarGrammar.NodeType.Text);
+            return child == null ? "" : child.Text;
+        }
+
+        private Node<GrammarGrammar.NodeType> GetFirstPart(Node<GrammarGrammar.NodeType> node)
+        {
+            return node.FirstChild(GrammarGrammar.NodeType.Part);
+        }
+
         public string GenerateLexer(Grammar grammar)
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -82,7 +188,7 @@ namespace Parsing.Core.GrammarDef
             var defs = GetThings(grammar.Root, ThingType.Def);
             var tokens = GetThings(grammar.Root, ThingType.Token);
             tokens.AddRange(grammar.IgnoreTokens.Where(x => !tokens.Contains(x)));
-            
+
             var texts = GetThings(grammar.Root, ThingType.Text);
 
             stringBuilder.Append($@"using System.Collections.Generic;
@@ -149,7 +255,7 @@ namespace Xxx
             }};");
 
             stringBuilder.Append($@"
-            _stringQuote = '{(grammar.StringQuote == '\'' ? "\\" : "") +  grammar.StringQuote}';
+            _stringQuote = '{(grammar.StringQuote == '\'' ? "\\" : "") + grammar.StringQuote}';
         }}");
 
             stringBuilder.Append(@"
@@ -339,7 +445,8 @@ namespace Xxx
         private Thing GetFirstToken(Thing parent)
         {
             Thing ret = null;
-            Walk(parent, child => {
+            Walk(parent, child =>
+            {
                 if (ret == null && (child.ThingType == ThingType.Token || child.ThingType == ThingType.Text))
                 {
                     ret = child;
@@ -379,7 +486,7 @@ namespace Xxx
 
             return paths;
         }
-        
+
         private List<Thing> GetRequiredTokens(Thing parent)
         {
             List<Thing> things = new List<Thing>();
@@ -421,5 +528,7 @@ namespace Xxx
                 Walk(child, action);
             }
         }
+
+
     }
 }

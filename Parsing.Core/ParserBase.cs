@@ -8,6 +8,7 @@ namespace Parsing.Core
         private readonly LexerBase<T> _lexer;
         protected Token<T> _currentToken;
         private Token<T> _nextToken;
+        private Token<T> _nextNextToken;
 
         protected ParserBase(LexerBase<T> lexer)
         {
@@ -19,6 +20,7 @@ namespace Parsing.Core
             _lexer.Init(text);
             _currentToken = _lexer.Next();
             _nextToken = _lexer.Next();
+            _nextNextToken = _lexer.Next();
 
             return Root();
         }
@@ -26,7 +28,8 @@ namespace Parsing.Core
         private void Next()
         {
             _currentToken = _nextToken;
-            _nextToken = _lexer.Next();
+            _nextToken = _nextNextToken;
+            _nextNextToken = _lexer.Next();
         }
 
         public abstract Node<N> Root();
@@ -34,6 +37,19 @@ namespace Parsing.Core
         public bool IsTokenType(params T[] tokenTypes)
         {
             return tokenTypes.Contains(_currentToken.TokenType);
+        }
+
+        public bool AreTokenTypes(T current, T next)
+        {
+            return _currentToken.TokenType.Equals(current)
+                && _nextToken.TokenType.Equals(next);
+        }
+
+        public bool AreTokenTypes(T current, T next, T nextNext)
+        {
+            return _currentToken.TokenType.Equals(current)
+                && _nextToken.TokenType.Equals(next)
+                && _nextNextToken.TokenType.Equals(nextNext);
         }
 
         public Node<N> Consume(Node<N> parent, T tokenType, N nodeType)

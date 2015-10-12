@@ -5,7 +5,6 @@
         Text,
         Grammar,
         EndOfFile,
-        String,
         Space,
         OpenSquare,
         CloseSquare,
@@ -14,6 +13,11 @@
         Return,
         NewLine,
         Colon,
-        Pipe
+        Pipe,
+        Ignore,
+        Defs,
+        Keywords,
+        Punctuation,
+        Texts
     }
 }

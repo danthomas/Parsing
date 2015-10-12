@@ -6,10 +6,7 @@ using System.CodeDom.Compiler;
 using Microsoft.CSharp;
 using NUnit.Framework;
 using Parsing.Core.GrammarDef;
-using Xxx;
 using static System.String;
-using NodeType = Parsing.Core.GrammarDef.NodeType;
-using Parser = Parsing.Core.GrammarDef.Parser;
 
 namespace Parsing.Core.Tests.GrammarDef
 {

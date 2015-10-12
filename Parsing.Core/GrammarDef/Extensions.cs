@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Parsing.Core.GrammarDef
 {
     public static class Extensions
@@ -6,9 +8,15 @@ namespace Parsing.Core.GrammarDef
         {
             return thisString.Substring(0, 1).ToLower() + thisString.Substring(1);
         }
+
         public static string ToIdentifier(this string thisString)
         {
             return thisString.Substring(0, 1).ToUpper() + thisString.Substring(1);
+        }
+
+        public static Node<T> FirstChild<T>(this Node<T> node, T t)
+        {
+            return node.Children.FirstOrDefault(x => x.NodeType.Equals(t));
         }
     }
 }

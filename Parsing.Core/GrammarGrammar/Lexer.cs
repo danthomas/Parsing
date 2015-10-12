@@ -8,7 +8,7 @@ namespace Parsing.Core.GrammarGrammar
         {
             EndOfFileTokenType = TokenType.EndOfFile;
 
-            StringTokenType = TokenType.String;
+            StringTokenType = TokenType.Text;
 
             StringQuote = '"';
 
@@ -29,7 +29,11 @@ namespace Parsing.Core.GrammarGrammar
 
             KeyWords = new Dictionary<string, TokenType>
             {
-                {"grammar", TokenType.Grammar}
+                {"defs", TokenType.Defs },
+                {"texts", TokenType.Texts },
+                {"keywords", TokenType.Keywords },
+                {"punctuation", TokenType.Punctuation },
+                {"ignore", TokenType.Ignore },
             };
 
             Texts = new Dictionary<string, TokenType>

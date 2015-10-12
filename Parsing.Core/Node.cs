@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static System.String;
 
 namespace Parsing.Core
 {
@@ -29,6 +30,11 @@ namespace Parsing.Core
             var node = new Node<N>(this, nodeType);
             Children.Add(node);
             return node;
+        }
+
+        public override string ToString()
+        {
+            return NodeType + (IsNullOrWhiteSpace(Text) ? "" : " - " + Text);
         }
     }
 }

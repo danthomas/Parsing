@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Parsing.Core.GrammarDef;
+﻿using Parsing.Core.GrammarDef;
 
 namespace Sql
 {
