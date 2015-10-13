@@ -63,11 +63,10 @@ ignore : return
             {
                 Punctuation(parent);
             }
-            //if (AreTokenTypes(TokenType.NewLine, TokenType.Ignore))
-            //{
-            //    var ignore = Add(parent, NodeType.Ignore);
-            //    Ignore(ignore);
-            //}
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Ignore))
+            {
+                Ignore(parent);
+            }
         }
 
         private void Defs(Node<NodeType> parent)
@@ -117,11 +116,11 @@ ignore : return
         private void Ignore(Node<NodeType> parent)
         {
             Consume(parent, TokenType.NewLine, NodeType.NewLine);
-            Consume(parent, TokenType.Ignore, NodeType.Ignore);
-            Consume(parent, TokenType.Colon, NodeType.Colon);
-            while (IsTokenType(TokenType.Text))
+            var ignore = Consume(parent, TokenType.Ignore, NodeType.Ignore);
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Text))
             {
-                Consume(parent, TokenType.Text, NodeType.Text);
+                Consume(ignore, TokenType.NewLine, NodeType.NewLine);
+                Consume(ignore, TokenType.Text, NodeType.Text);
             }
         }
         private void Def(Node<NodeType> parent)

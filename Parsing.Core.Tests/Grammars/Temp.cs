@@ -11,12 +11,14 @@ namespace Parsing.Core.Tests.Grammars
         {
             var def = @"OneOrMoreOptional
 defs
-Statement : xxx [one]+ xxx
+  Statement : xxx [one]+ xxx
 keywords
-xxx : xxx
-one : one
+  xxx : xxx
+  one : one
 punctuation
-space : "" """;
+  space : "" ""
+ignore
+  space";
 
             var parser = new Core.GrammarGrammar.Parser();
 
@@ -27,13 +29,12 @@ space : "" """;
             node = generator.Rejig(node);
 
             string grammar = generator.GenerateGrammar(node);
-
-            
-string lexerDef = generator.GenerateLexer(new OneOrMoreOptionalGrammar());
+            string lexerDef = generator.GenerateLexer(new OneOrMoreOptionalGrammar());
             string parserDef = generator.GenerateParser(new OneOrMoreOptionalGrammar());
             /*
             */
         }
+
         public class OneOrMoreOptionalGrammar : Grammar
         {
             private Def _root;
@@ -55,7 +56,7 @@ string lexerDef = generator.GenerateLexer(new OneOrMoreOptionalGrammar());
 
                 _root = @Statement;
 
-                IgnoreTokens = new [] { @space };
+                IgnoreTokens = new[] { @space, };
             }
 
             public override Thing Root { get { return _root; } }
