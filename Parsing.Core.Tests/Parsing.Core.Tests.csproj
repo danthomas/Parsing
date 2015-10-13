@@ -48,6 +48,12 @@
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="GrammarGrammar\ParserTests.cs" />
+    <Compile Include="Grammars\OneOf.cs" />
+    <Compile Include="Grammars\OneOrMore.cs" />
+    <Compile Include="Grammars\OneOrMoreOptional.cs" />
+    <Compile Include="Grammars\Optional.cs" />
+    <Compile Include="Grammars\OptionalOneOf.cs" />
+    <Compile Include="Grammars\Temp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

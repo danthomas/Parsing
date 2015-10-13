@@ -16,6 +16,43 @@ namespace Parsing.Core.Tests.GrammarDef
     {
 
         [Test]
+        public void OneOf()
+        {
+            var text = @"OneOf
+defs
+Statement : one | two | three
+keywords
+one : one
+two : two
+three : three";
+
+            Run(text, "one", "");
+        }
+
+        private void Run(string grammarDef, string input, string expected)
+        {
+            var parser = new Core.GrammarGrammar.Parser();
+
+            var generator = new Generator();
+
+            var node = parser.Parse(grammarDef);
+
+            node = generator.Rejig(node);
+
+            string grammar = generator.GenerateGrammar(node);
+
+            var assembly = Build(grammar);
+
+            Grammar xxx = (Grammar)Activator.CreateInstance(assembly.GetTypes()[0]);
+
+            string actual = GenerateAndBuildParser(xxx, input);
+
+            Assert.That(actual, Is.EqualTo(expected));
+
+        }
+
+
+        [Test]
         public void Sql()
         {
             var parser = new Core.GrammarGrammar.Parser();
@@ -45,8 +82,7 @@ comma : ,");
             var assembly = Build(grammar);
 
             Grammar xxx = (Grammar) Activator.CreateInstance(assembly.GetType("Xxx.SqlGrammar"));
-
-
+            
             string actual = GenerateAndBuildParser(xxx, "select abc def ghi");
         }
 
@@ -154,8 +190,8 @@ Table
 
         private string GenerateAndBuildParser(Grammar grammar, string text)
         {
-            Xxx.Parser parser = new Xxx.Parser();
-            var node = parser.Parse(text);
+            //Xxx.Parser parser = new Xxx.Parser();
+            //var node = parser.Parse(text);
             //return new Xxx.Walker().NodesToString(node);
 
             return Generated(grammar, text);
@@ -171,9 +207,6 @@ Table
 
             var assembly = Build(lexerDef, parserDef);
             
-            File.WriteAllText(@"C:\Temp\Parsing\Parsing.Core.Tests\GrammarDef\Lexer.cs", lexerDef);
-            File.WriteAllText(@"C:\Temp\Parsing\Parsing.Core.Tests\GrammarDef\Parser.cs", parserDef);
-
             object parser = Activator.CreateInstance(assembly.GetType("Xxx.Parser"));
             object walker = Activator.CreateInstance(assembly.GetType("Xxx.Walker"));
 
