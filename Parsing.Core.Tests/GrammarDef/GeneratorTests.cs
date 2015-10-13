@@ -34,6 +34,7 @@ three : three";
             var parser = new Core.GrammarGrammar.Parser();
 
             var generator = new Generator();
+            var builder = new Builder();
 
             var node = parser.Parse(grammarDef);
 
@@ -41,14 +42,13 @@ three : three";
 
             string grammar = generator.GenerateGrammar(node);
 
-            var assembly = Build(grammar);
+            var assembly = builder.Build(grammar);
 
             Grammar xxx = (Grammar)Activator.CreateInstance(assembly.GetTypes()[0]);
 
             string actual = GenerateAndBuildParser(xxx, input);
 
             Assert.That(actual, Is.EqualTo(expected));
-
         }
 
 

@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +18,12 @@ namespace Parsing.Designer
 {
     public partial class Form1 : Form
     {
+        private object _parser;
+
+        private MethodInfo _parseMethod;
+        private object _walker;
+        private MethodInfo _nodesToStringMethod;
+
         public Form1()
         {
             InitializeComponent();
@@ -35,6 +42,10 @@ namespace Parsing.Designer
 
         private void Build()
         {
+            genGrammar.Text = "";
+            genLexer.Text = "";
+            genParser.Text = "";
+
             Parser parser = new Parser();
             Generator generator = new Generator();
             Builder builder = new Builder();
@@ -46,7 +57,7 @@ namespace Parsing.Designer
 
                 node = generator.Rejig(node);
 
-                var generateGrammar = generator.GenerateGrammar(node);  
+                var generateGrammar = generator.GenerateGrammar(node);
 
                 genGrammar.Text = generateGrammar;
 
@@ -57,13 +68,39 @@ namespace Parsing.Designer
                 genLexer.Text = generator.GenerateLexer(grammar);
                 genParser.Text = generator.GenerateParser(grammar);
 
+                assembly = builder.Build(genLexer.Text, genParser.Text);
+
+                var parserType = assembly.GetType("Xxx.Parser");
+                _parser = Activator.CreateInstance(parserType);
+                _parseMethod = parserType.GetMethod("Parse");
+
+                var walkerType = assembly.GetType("Xxx.Walker");
+                _walker = Activator.CreateInstance(walkerType);
+                _nodesToStringMethod = walkerType.GetMethod("NodesToString");
+
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                _parser = null;
+                _parseMethod = null;
+
+                MessageBox.Show(exception.Message);
             }
 
             RefreshNodes(node);
+        }
+
+        private void Parse()
+        {
+            try
+            {
+                var node = _parseMethod.Invoke(_parser, new object[] { input.Text });
+                output.Text = _nodesToStringMethod.Invoke(_walker, new object[] { node }).ToString();
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
         }
 
         private void RefreshNodes(Node<NodeType> node)
@@ -97,6 +134,11 @@ namespace Parsing.Designer
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             File.WriteAllText(@"c:\temp\grammar.txt", grammarText.Text);
+        }
+
+        private void testToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Parse();
         }
     }
 

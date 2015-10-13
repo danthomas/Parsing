@@ -209,16 +209,20 @@ namespace Xxx
 
             _root = @{defs.Children.Last().Text};
 
-            IgnoreTokens = new Token[]{{";
+            IgnoreTokens = new Token[]
+            {{";
 
-                foreach(var v in ignore.Children)
+                if (ignore != null)
                 {
-                    ret += $@"
+                    foreach (var v in ignore.Children)
+                    {
+                        ret += $@"
                 @{v.Text},";
-                }
+                    }
 
+                }
                 ret += @"
-                };";
+            };";
 
             }
 
