@@ -34,7 +34,7 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.grammar = new System.Windows.Forms.RichTextBox();
+            this.grammarText = new System.Windows.Forms.RichTextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -110,7 +110,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.grammar);
+            this.splitContainer1.Panel1.Controls.Add(this.grammarText);
             // 
             // splitContainer1.Panel2
             // 
@@ -121,13 +121,13 @@
             // 
             // grammar
             // 
-            this.grammar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grammar.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grammar.Location = new System.Drawing.Point(0, 0);
-            this.grammar.Name = "grammar";
-            this.grammar.Size = new System.Drawing.Size(288, 570);
-            this.grammar.TabIndex = 0;
-            this.grammar.Text = "";
+            this.grammarText.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grammarText.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.grammarText.Location = new System.Drawing.Point(0, 0);
+            this.grammarText.Name = "grammarText";
+            this.grammarText.Size = new System.Drawing.Size(288, 570);
+            this.grammarText.TabIndex = 0;
+            this.grammarText.Text = "";
             // 
             // splitContainer2
             // 
@@ -267,7 +267,7 @@
         private System.Windows.Forms.ToolStripMenuItem buildToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.RichTextBox grammar;
+        private System.Windows.Forms.RichTextBox grammarText;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.TreeView nodes;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;

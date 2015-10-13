@@ -23,7 +23,7 @@ namespace Parsing.Designer
 
             if (File.Exists(@"c:\temp\grammar.txt"))
             {
-                grammar.Text = File.ReadAllText(@"c:\temp\grammar.txt");
+                grammarText.Text = File.ReadAllText(@"c:\temp\grammar.txt");
                 Build();
             }
         }
@@ -37,13 +37,25 @@ namespace Parsing.Designer
         {
             Parser parser = new Parser();
             Generator generator = new Generator();
+            Builder builder = new Builder();
 
-            Node<NodeType> node = (Node<NodeType>)null;
+            Node<NodeType> node = null;
             try
             {
-                node = parser.Parse(grammar.Text);
-                
-                genGrammar.Text = generator.GenerateGrammar(node);
+                node = parser.Parse(grammarText.Text);
+
+                node = generator.Rejig(node);
+
+                var generateGrammar = generator.GenerateGrammar(node);  
+
+                genGrammar.Text = generateGrammar;
+
+                var assembly = builder.Build(generateGrammar);
+
+                Grammar grammar = (Grammar)Activator.CreateInstance(assembly.GetType("Xxx.SqlGrammar"));
+
+                genLexer.Text = generator.GenerateLexer(grammar);
+                genParser.Text = generator.GenerateParser(grammar);
 
             }
             catch (Exception exception)
@@ -84,7 +96,7 @@ namespace Parsing.Designer
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            File.WriteAllText(@"c:\temp\grammar.txt", grammar.Text);
+            File.WriteAllText(@"c:\temp\grammar.txt", grammarText.Text);
         }
     }
 

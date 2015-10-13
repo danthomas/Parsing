@@ -22,19 +22,30 @@ namespace Parsing.Core.Tests.GrammarDef
 
             var node = parser.Parse(@"Sql
 defs
-Statement : select StarOrFieldList
-StarOrFieldList : star | FieldList
-FieldList : Field [comma Field]*
-Field : text
+Statement : select StartOrFieldList
+StartOrFieldList : star | FieldList
+FieldList : FieldDef [comma FieldDef]
+FieldDef : [Agg openBracket] Field [closeBracket]
+Agg : count | min | max | avg
+Field : [openSquare] Text [closeSquare]
 texts
-text : "".*""
+Text : "".*""
 keywords
-select : select
+select: select
+count: count
+min: min
+max: max
+avg: avg
 punctuation
-star : ""*""
-comma : ,");
+star: ""*""
+comma: ,
+openBracket: (
+closeBracket : )
+openSquare: ""[""
+closeSquare: ""]""");
 
             var generator = new Generator();
+            var builder = new Builder();
 
             node = generator.Rejig(node);
 
@@ -42,11 +53,10 @@ comma : ,");
 
             var grammar = generator.GenerateGrammar(node);
 
-            var assembly = Build(grammar);
+            var assembly = builder.Build(grammar);
 
             Grammar xxx = (Grammar) Activator.CreateInstance(assembly.GetType("Xxx.SqlGrammar"));
-
-
+            
             string actual = GenerateAndBuildParser(xxx, "select abc def ghi");
         }
 
@@ -164,12 +174,12 @@ Table
         private static string Generated(Grammar grammar, string text)
         {
             Generator generator = new Generator();
-
+            Builder builder = new Builder();
             string lexerDef = generator.GenerateLexer(grammar);
 
             string parserDef = generator.GenerateParser(grammar);
 
-            var assembly = Build(lexerDef, parserDef);
+            var assembly = builder.Build(lexerDef, parserDef);
             
             File.WriteAllText(@"C:\Temp\Parsing\Parsing.Core.Tests\GrammarDef\Lexer.cs", lexerDef);
             File.WriteAllText(@"C:\Temp\Parsing\Parsing.Core.Tests\GrammarDef\Parser.cs", parserDef);
@@ -181,38 +191,5 @@ Table
             return (string)walker.GetType().GetMethod("NodesToString").Invoke(walker, new[] { node });
         }
 
-        private static Assembly Build(params string[] sources)
-        {
-            var options = new Dictionary<string, string> {{"CompilerVersion", "v4.0"}};
-            var cs = new CSharpCodeProvider(options);
-
-            var compilerParams = new CompilerParameters();
-
-            var r = cs.CompileAssemblyFromSource(compilerParams,
-                "namespace ns { class program { public static Main(string[] args) { System.Console.WriteLine(\"Hello world\"); } } }");
-
-
-            CodeDomProvider codeDomProvider = CSharpCodeProvider.CreateProvider("C#",
-                new Dictionary<string, string>() {{"CompilerVersion", "v4.0"}});
-
-
-            CompilerParameters compilerParameters = new CompilerParameters {GenerateInMemory = true};
-            compilerParameters.ReferencedAssemblies.Add("System.dll");
-            compilerParameters.ReferencedAssemblies.Add("System.Data.dll");
-            compilerParameters.ReferencedAssemblies.Add("System.Core.dll");
-            compilerParameters.ReferencedAssemblies.Add("Parsing.Core.dll");
-
-            compilerParameters.IncludeDebugInformation = false;
-            
-            CompilerResults compilerResults = codeDomProvider.CompileAssemblyFromSource(compilerParameters, sources);
-
-            if (compilerResults.Errors.HasErrors)
-            {
-                var errors =
-                    compilerResults.Errors.Cast<CompilerError>().Select(item => item.Line + ": " + item.ErrorText).ToList();
-                throw new Exception(Join(Environment.NewLine, errors));
-            }
-            return compilerResults.CompiledAssembly;
-        }
     }
 }

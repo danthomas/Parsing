@@ -92,7 +92,7 @@ namespace Xxx
     {{
         private Def _root;
 
-        public SqlGrammar()
+        public {GetFirstTextText(node)}Grammar()
         {{
             //punctuation";
 
