@@ -83,6 +83,7 @@ namespace Parsing.Core.GrammarDef
             var texts = node.FirstChild(GrammarGrammar.NodeType.Texts);
             var keywords = node.FirstChild(GrammarGrammar.NodeType.Keywords);
             var punctuation = node.FirstChild(GrammarGrammar.NodeType.Punctuation);
+            var ignore = node.FirstChild(GrammarGrammar.NodeType.Ignore);
 
             string ret = $@"using Parsing.Core.GrammarDef;
 
@@ -208,7 +209,16 @@ namespace Xxx
 
             _root = @{defs.Children.Last().Text};
 
-                IgnoreTokens = new Token[0];";
+            IgnoreTokens = new Token[]{{";
+
+                foreach(var v in ignore.Children)
+                {
+                    ret += $@"
+                @{v.Text},";
+                }
+
+                ret += @"
+                };";
 
             }
 
