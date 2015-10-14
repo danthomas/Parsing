@@ -471,10 +471,10 @@ namespace Xxx
 
             foreach (Thing child in def.Children)
             {
-                if (child.ThingType == ThingType.Text)
+                if (child.ThingType == ThingType.Text || child.ThingType == ThingType.Token)
                 {
                     stringBuilder.Append($@"
-            {indent}Consume(parent, TokenType.{child.Name}, NodeType.{child.Name});");
+            {indent}Consume(parent, TokenType.{child.Name.ToIdentifier()}, NodeType.{child.Name.ToIdentifier()});");
                 }
                 else if (child.ThingType == ThingType.Def)
                 {
@@ -624,43 +624,45 @@ namespace Xxx
                 foreach (var part in def.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Part))
                 {
                     Thing thing = null;
-
-                    if (part.Children.Last().NodeType == GrammarGrammar.NodeType.Plus)
-                    {
-                        thing = new OneOrMore();
-                    }
-                    else if (part.Children.Last().NodeType == GrammarGrammar.NodeType.Star)
-                    {
-                        thing = new ZeroOrMore();
-                    }
-
-                    if (part.Children.First().NodeType == GrammarGrammar.NodeType.OpenSquare)
-                    {
-                        if (thing == null)
-                        {
-                            thing = new Optional();
-                        }
-                        else
-                        {
-                            thing.Children = new List<Thing>() {new Optional()};
-
-                            thing = thing.Children.First();
-                        }
-                    }
+                    Thing thing2 = null;
 
                     var names = part.Children.Single(x => x.NodeType == GrammarGrammar.NodeType.Names);
 
+
+
+                    if (names.Children.Last().NodeType == GrammarGrammar.NodeType.Plus)
+                    {
+                        thing = thing2 = new OneOrMore();
+                    }
+                    else if (names.Children.Last().NodeType == GrammarGrammar.NodeType.Star)
+                    {
+                        thing = thing2 = new ZeroOrMore();
+                    }
+
+                    if (names.Children.First().NodeType == GrammarGrammar.NodeType.OpenSquare)
+                    {
+                        if (thing == null)
+                        {
+                            thing = thing2 = new Optional();
+                        }
+                        else
+                        {
+                            thing2 = new Optional();
+                            thing.Children = new List<Thing>() {thing2};
+                        }
+                    }
+
+                    
                     if (names.Children.Any(x => x.NodeType == GrammarGrammar.NodeType.Pipe))
                     {
                         if (thing == null)
                         {
-                            thing = new OneOf();
+                            thing = thing2 = new OneOf();
                         }
                         else
                         {
-                            thing.Children = new List<Thing>() { new OneOf() };
-
-                            thing = thing.Children.First();
+                            thing2 = new OneOf();
+                            thing.Children = new List<Thing>() { thing2 };
                         }
                     }
                     
@@ -697,17 +699,23 @@ namespace Xxx
                         }
                     }
 
-                    thing.Children = things;
-
-                    defs.Add(new Def(textNode.Text, thing));
+                    if (thing == null)
+                    {
+                        defs.Add(new Def(textNode.Text, things.ToArray()));
+                    }
+                    else
+                    {
+                        thing2.Children = things;
+                        defs.Add(new Def(textNode.Text, thing));
+                    }
                 }
-
-
-
             }
 
             grammar.Root = defs.First();
 
+            grammar.IgnoreTokens = new Token[0];
+
+            grammar.StringQuote = '\'';
             return grammar;
         }
 

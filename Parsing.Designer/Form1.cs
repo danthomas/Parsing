@@ -57,27 +57,19 @@ namespace Parsing.Designer
                 node = parser.Parse(grammarText.Text);
 
                 Grammar grammar = generator.BuildGrammar(node);
-
-                //var generateGrammar = generator.GenerateGrammar(node);
-                //
-                //genGrammar.Text = generateGrammar;
-                //
-                //var assembly = builder.Build(generateGrammar);
-                //
-                //Grammar grammar = (Grammar)Activator.CreateInstance(assembly.GetTypes()[0]);
-                //
-                //genLexer.Text = generator.GenerateLexer(grammar);
-                //genParser.Text = generator.GenerateParser(grammar);
-                //
-                //assembly = builder.Build(genLexer.Text, genParser.Text);
-                //
-                //var parserType = assembly.GetType("Xxx.Parser");
-                //_parser = Activator.CreateInstance(parserType);
-                //_parseMethod = parserType.GetMethod("Parse");
-                //
-                //var walkerType = assembly.GetType("Xxx.Walker");
-                //_walker = Activator.CreateInstance(walkerType);
-                //_nodesToStringMethod = walkerType.GetMethod("NodesToString");
+                
+                genLexer.Text = generator.GenerateLexer(grammar);
+                genParser.Text = generator.GenerateParser(grammar);
+                
+                var assembly = builder.Build(genLexer.Text, genParser.Text);
+                
+                var parserType = assembly.GetType("Xxx.Parser");
+                _parser = Activator.CreateInstance(parserType);
+                _parseMethod = parserType.GetMethod("Parse");
+                
+                var walkerType = assembly.GetType("Xxx.Walker");
+                _walker = Activator.CreateInstance(walkerType);
+                _nodesToStringMethod = walkerType.GetMethod("NodesToString");
 
             }
             catch (Exception exception)
