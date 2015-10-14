@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Parsing.Core.Domain;
 using Parsing.Core.GrammarDef;
 
 namespace Parsing.Core.Tests.Grammars
@@ -25,14 +26,14 @@ ignore
             var generator = new Generator();
 
             var node = parser.Parse(def);
-
-            node = generator.Rejig(node);
-
-            string grammar = generator.GenerateGrammar(node);
-            string lexerDef = generator.GenerateLexer(new OneOrMoreOptionalGrammar());
-            string parserDef = generator.GenerateParser(new OneOrMoreOptionalGrammar());
             /*
-            */
+
+           node = generator.Rejig(node);
+
+           string grammar = generator.GenerateGrammar(node);
+           string lexerDef = generator.GenerateLexer(new OneOrMoreOptionalGrammar());
+           string parserDef = generator.GenerateParser(new OneOrMoreOptionalGrammar());
+           */
         }
 
         public class OneOrMoreOptionalGrammar : Grammar

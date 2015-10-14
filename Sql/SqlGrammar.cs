@@ -1,4 +1,4 @@
-﻿using Parsing.Core.GrammarDef;
+﻿using Parsing.Core.Domain;
 
 namespace Sql
 {

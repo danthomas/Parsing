@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Parsing.Core.Domain;
 using Parsing.Core.GrammarDef;
 
 namespace Parsing.Core.Tests.Grammars

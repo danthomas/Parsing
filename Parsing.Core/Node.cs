@@ -36,5 +36,18 @@ namespace Parsing.Core
         {
             return NodeType + (IsNullOrWhiteSpace(Text) ? "" : " - " + Text);
         }
+
+        public Node<N> AddNode(Node<N> node)
+        {
+            node.Parent = this;
+            Children.Add(node);
+            return node;
+        }
+
+        public void RemoveNode(Node<N> node )
+        {
+            node.Parent = null;
+            Children.Remove(node);
+        }
     }
 }

@@ -40,14 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\Def.cs" />
+    <Compile Include="Domain\OneOf.cs" />
+    <Compile Include="Domain\OneOrMore.cs" />
+    <Compile Include="Domain\Optional.cs" />
+    <Compile Include="Domain\Text.cs" />
+    <Compile Include="Domain\Token.cs" />
+    <Compile Include="Domain\ZeroOrMore.cs" />
     <Compile Include="GrammarDef\Builder.cs" />
     <Compile Include="GrammarDef\Extensions.cs" />
     <Compile Include="GrammarDef\Generator.cs" />
-    <Compile Include="GrammarDef\Grammar.cs" />
+    <Compile Include="Domain\Grammar.cs" />
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
-    <Compile Include="GrammarDef\Thing.cs" />
-    <Compile Include="GrammarDef\ThingType.cs" />
+    <Compile Include="Domain\Thing.cs" />
+    <Compile Include="Domain\ThingType.cs" />
     <Compile Include="GrammarGrammar\Lexer.cs" />
     <Compile Include="GrammarGrammar\NodeType.cs" />
     <Compile Include="GrammarGrammar\Parser.cs" />

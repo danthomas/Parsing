@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.CodeDom.Compiler;
-using System.Reflection;
-using Microsoft.CSharp;
 using NUnit.Framework;
+using Parsing.Core.Domain;
 using Parsing.Core.GrammarDef;
-using static System.String;
+using Text = Parsing.Core.Domain.Text;
 
 namespace Parsing.Core.Tests.GrammarDef
 {
@@ -20,11 +15,11 @@ namespace Parsing.Core.Tests.GrammarDef
         {
             var text = @"OneOf
 defs
-Statement : one | two | three
+  Statement : one | two | three
 keywords
-one : one
-two : two
-three : three";
+  one : one
+  two : two
+  three : three";
 
             Run(text, "one", "");
         }
@@ -38,16 +33,12 @@ three : three";
 
             var node = parser.Parse(grammarDef);
 
-            node = generator.Rejig(node);
+           var tree=  generator.GenerateNodeTree(node);
+            
+            var grammar =  generator.BuildGrammar(node);
 
-            string grammar = generator.GenerateGrammar(node);
-
-            var assembly = builder.Build(grammar);
-
-            Grammar xxx = (Grammar)Activator.CreateInstance(assembly.GetTypes()[0]);
-
-            string actual = GenerateAndBuildParser(xxx, input);
-
+            string actual = GenerateAndBuildParser(grammar, input);
+            
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -83,27 +74,19 @@ closeSquare: ""]""");
 
             var generator = new Generator();
             var builder = new Builder();
-
-            node = generator.Rejig(node);
-
+            
             string nodeTree = generator.GenerateNodeTree(node);
 
-            var grammar = generator.GenerateGrammar(node);
-
-            var assembly = builder.Build(grammar);
-
-            Grammar xxx = (Grammar) Activator.CreateInstance(assembly.GetType("Xxx.SqlGrammar"));
+            var grammar = generator.BuildGrammar(node);
             
-            string actual = GenerateAndBuildParser(xxx, "select abc def ghi");
+            string actual = GenerateAndBuildParser(grammar, "select abc def ghi");
         }
-
-
 
         [Test]
         public void ObjectRef()
         {
             var dot = new Token("dot", ".");
-            var text = new Core.GrammarDef.Text("Text", ".+");
+            var text = new Text("Text", ".+");
 
             var root = new Def("ObjectRef", text, new Optional(dot, text), new Optional(dot, text));
 
@@ -143,7 +126,7 @@ ObjectRef
         {
             var _as = new Token("as");
             var _space = new Token("WhiteSpace", " ");
-            var text = new Core.GrammarDef.Text("Text", ".+");
+            var text = new Text("Text", ".+");
 
             var root = new Def("Table", text, new Optional(_as), new Optional(text));
 
@@ -180,7 +163,7 @@ Table
         public void StarOrObjectRef()
         {
             var dot = new Token("dot", ".");
-            var text = new Core.GrammarDef.Text("Text", ".+");
+            var text = new Text("Text", ".+");
             var star = new Token("star", "*");
             var _space = new Token("whitespace", " ");
 

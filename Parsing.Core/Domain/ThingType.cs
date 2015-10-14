@@ -1,4 +1,4 @@
-namespace Parsing.Core.GrammarDef
+namespace Parsing.Core.Domain
 {
     public enum ThingType
     {

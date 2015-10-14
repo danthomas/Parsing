@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Parsing.Core;
+using Parsing.Core.Domain;
 using Parsing.Core.GrammarDef;
 using NodeType = Parsing.Core.GrammarGrammar.NodeType;
 using Parser = Parsing.Core.GrammarGrammar.Parser;
@@ -55,28 +56,28 @@ namespace Parsing.Designer
             {
                 node = parser.Parse(grammarText.Text);
 
-                node = generator.Rejig(node);
+                Grammar grammar = generator.BuildGrammar(node);
 
-                var generateGrammar = generator.GenerateGrammar(node);
-
-                genGrammar.Text = generateGrammar;
-
-                var assembly = builder.Build(generateGrammar);
-
-                Grammar grammar = (Grammar)Activator.CreateInstance(assembly.GetType("Xxx.SqlGrammar"));
-
-                genLexer.Text = generator.GenerateLexer(grammar);
-                genParser.Text = generator.GenerateParser(grammar);
-
-                assembly = builder.Build(genLexer.Text, genParser.Text);
-
-                var parserType = assembly.GetType("Xxx.Parser");
-                _parser = Activator.CreateInstance(parserType);
-                _parseMethod = parserType.GetMethod("Parse");
-
-                var walkerType = assembly.GetType("Xxx.Walker");
-                _walker = Activator.CreateInstance(walkerType);
-                _nodesToStringMethod = walkerType.GetMethod("NodesToString");
+                //var generateGrammar = generator.GenerateGrammar(node);
+                //
+                //genGrammar.Text = generateGrammar;
+                //
+                //var assembly = builder.Build(generateGrammar);
+                //
+                //Grammar grammar = (Grammar)Activator.CreateInstance(assembly.GetTypes()[0]);
+                //
+                //genLexer.Text = generator.GenerateLexer(grammar);
+                //genParser.Text = generator.GenerateParser(grammar);
+                //
+                //assembly = builder.Build(genLexer.Text, genParser.Text);
+                //
+                //var parserType = assembly.GetType("Xxx.Parser");
+                //_parser = Activator.CreateInstance(parserType);
+                //_parseMethod = parserType.GetMethod("Parse");
+                //
+                //var walkerType = assembly.GetType("Xxx.Walker");
+                //_walker = Activator.CreateInstance(walkerType);
+                //_nodesToStringMethod = walkerType.GetMethod("NodesToString");
 
             }
             catch (Exception exception)
