@@ -663,8 +663,41 @@ namespace Xxx
                             thing = thing.Children.First();
                         }
                     }
+                    
+                    List<Thing> things = new List<Thing>();
 
-                    thing.Children = new List<Thing>(names.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text).Select(x => new Text(x.NodeType.ToString(), x.Text)));
+                    foreach(var name in names.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text))
+                    {
+                        Thing childThing = null;
+
+                        var token = punctuation.SingleOrDefault(x => x.Name == name.Text);
+                        if (token != null)
+                        {
+                            things.Add(new Token(token.Name, token.Text));
+                        }
+                        else
+                        {
+                            token = keywords.SingleOrDefault(x => x.Name == name.Text);
+                            if (token != null)
+                            {
+                                things.Add(new Token(token.Name, token.Text));
+                            }
+                            else
+                            {
+                                var def2 = defs.SingleOrDefault(x => x.Name == name.Text);
+                                if (def2 != null)
+                                {
+                                    things.Add(def2);
+                                }
+                                else
+                                {
+                                    throw new Exception();
+                                }
+                            }
+                        }
+                    }
+
+                    thing.Children = things;
 
                     defs.Add(new Def(textNode.Text, thing));
                 }
