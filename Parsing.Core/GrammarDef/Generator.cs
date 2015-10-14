@@ -484,7 +484,7 @@ namespace Xxx
                 else if (child.ThingType == ThingType.ZeroOrMore)
                 {
                     stringBuilder.Append($@"
-            {indent}while(IsTokenType(TokenType.Number))
+            {indent}while(IsTokenType(TokenType.Text))
             {indent}{{");
 
                     GenerateParserDef(child, stringBuilder, level + 1);
@@ -686,14 +686,22 @@ namespace Xxx
                             }
                             else
                             {
-                                var def2 = defs.SingleOrDefault(x => x.Name == name.Text);
-                                if (def2 != null)
+                                token = texts.SingleOrDefault(x => x.Name == name.Text);
+                                if (token != null)
                                 {
-                                    things.Add(def2);
+                                    things.Add(new Token(token.Name, token.Text));
                                 }
                                 else
                                 {
-                                    throw new Exception();
+                                    var def2 = defs.SingleOrDefault(x => x.Name == name.Text);
+                                    if (def2 != null)
+                                    {
+                                        things.Add(def2);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception();
+                                    }
                                 }
                             }
                         }
