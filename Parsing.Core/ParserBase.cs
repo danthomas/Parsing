@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Parsing.Core
@@ -9,6 +10,7 @@ namespace Parsing.Core
         protected Token<T> _currentToken;
         private Token<T> _nextToken;
         private Token<T> _nextNextToken;
+        public string Tokens { get; set; } 
 
         protected ParserBase(LexerBase<T> lexer)
         {
@@ -17,11 +19,14 @@ namespace Parsing.Core
 
         public Node<N> Parse(string text)
         {
+            Tokens = "";
             _lexer.Init(text);
             _currentToken = _lexer.Next();
             _nextToken = _lexer.Next();
             _nextNextToken = _lexer.Next();
 
+            Tokens += Environment.NewLine + _currentToken.TokenType + " - " + _currentToken.Text;
+            
             return Root();
         }
 
@@ -30,6 +35,7 @@ namespace Parsing.Core
             _currentToken = _nextToken;
             _nextToken = _nextNextToken;
             _nextNextToken = _lexer.Next();
+            Tokens += Environment.NewLine + _currentToken.TokenType + " - " + _currentToken.Text;
         }
 
         public abstract Node<N> Root();

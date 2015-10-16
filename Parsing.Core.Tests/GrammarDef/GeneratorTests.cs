@@ -9,37 +9,143 @@ namespace Parsing.Core.Tests.GrammarDef
     [TestFixture]
     public class GeneratorTests
     {
+        /*
+Test
+defs
+  Statement : TextOrExpression*
+  TextOrExpression : Text | Expression
+  Expression : OpenCurly Text [If] CloseCurly
+  If : Question Text [Else]
+  Else : Colon Text    
+texts
+  Text : ".*"
+punctuation
+  OpenCurly : {
+  CloseCurly : }
+  Question : ?
+  Colon : ":"
+            */
 
         [Test]
-        public void OneOf()
+        public void Text()
         {
-            var text = @"OneOf
+            var text = @"Text
 defs
-  Statement : one | two | three
-keywords
-  one : one
-  two : two
-  three : three";
+  Statement : Text
+texts
+  Text : "".*""";
 
-            Run(text, "one", "");
+            Run(text, "one", @"
+Statement
+ Text - one");
         }
 
-        private void Run(string grammarDef, string input, string expected)
+        [Test]
+        public void TextText()
         {
-            var parser = new Core.GrammarGrammar.Parser();
+            var text = @"Text
+defs
+  Statement : Text Text
+texts
+  Text : "".*""
+punctuation
+  space : "" ""
+ignore
+  space";
 
-            var generator = new Generator();
-            var builder = new Builder();
+            Run(text, "one two", @"
+Statement
+ Text - one
+ Text - two");
+        }
 
-            var node = parser.Parse(grammarDef);
+        [Test]
+        public void TextOptionalText()
+        {
+            var text = @"Text
+defs
+  Statement : Text [Text]
+texts
+  Text : "".*""
+punctuation
+  space : "" ""
+ignore
+  space";
 
-           var tree=  generator.GenerateNodeTree(node);
-            
-            var grammar =  generator.BuildGrammar(node);
+            Run(text, "one", @"
+Statement
+ Text - one");
 
-            string actual = GenerateAndBuildParser(grammar, input);
-            
-            Assert.That(actual, Is.EqualTo(expected));
+            Run(text, "one two", @"
+Statement
+ Text - one
+ Text - two");
+        }
+
+        [Test]
+        public void ZeroOrMoreText()
+        {
+            var text = @"Text
+defs
+  Statement : Text*
+texts
+  Text : "".*""
+punctuation
+  space : "" ""
+ignore
+  space";
+
+            Run(text, "", @"
+Statement");
+
+            Run(text, "one two three", @"
+Statement
+ Text - one
+ Text - two
+ Text - three");
+        }
+
+        [Test]
+        public void OneOrMoreText()
+        {
+            var text = @"Text
+defs
+  Statement : Text+
+texts
+  Text : "".*""
+punctuation
+  space : "" ""
+ignore
+  space";
+
+            Run(text, "one two three", @"
+Statement
+ Text - one
+ Text - two
+ Text - three");
+        }
+
+
+        [Test]
+        public void Keywords()
+        {
+            var text = @"Text
+defs
+  Statement : one two three
+keywords
+    one : one
+    two : two
+    three : three
+punctuation
+  space : "" ""
+ignore
+  space";
+
+            Run(text, "one two three", @"
+Statement
+ One
+ Two
+ Three");
         }
 
 
@@ -83,6 +189,7 @@ closeSquare: ""]""");
         }
 
         [Test]
+        [Ignore]
         public void ObjectRef()
         {
             var dot = new Token("dot", ".");
@@ -122,6 +229,7 @@ ObjectRef
         }
 
         [Test]
+        [Ignore]
         public void Table()
         {
             var _as = new Token("as");
@@ -160,6 +268,7 @@ Table
         }
 
         [Test]
+        [Ignore]
         public void StarOrObjectRef()
         {
             var dot = new Token("dot", ".");
@@ -182,17 +291,27 @@ Table
             Assert.That(actual, Is.EqualTo(@""));
         }
 
-        private string GenerateAndBuildParser(Grammar grammar, string text)
+        private void Run(string grammarDef, string input, string expected)
         {
-            //Xxx.Parser parser = new Xxx.Parser();
-            //var node = parser.Parse(text);
-            //return new Xxx.Walker().NodesToString(node);
+            var parser = new Core.GrammarGrammar.Parser();
 
-            return Generated(grammar, text);
+            var generator = new Generator();
+            var builder = new Builder();
+
+            var node = parser.Parse(grammarDef);
+
+           var tree=  generator.GenerateNodeTree(node);
+            
+            var grammar =  generator.BuildGrammar(node);
+
+            string actual = GenerateAndBuildParser(grammar, input);
+            
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
-        private static string Generated(Grammar grammar, string text)
+        private string GenerateAndBuildParser(Grammar grammar, string text)
         {
+
             Generator generator = new Generator();
             Builder builder = new Builder();
             string lexerDef = generator.GenerateLexer(grammar);

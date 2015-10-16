@@ -303,10 +303,10 @@ namespace Xxx
             _texts = new Dictionary<string, TokenType>
             {{");
 
-            foreach (Thing text in texts.Where(x => !IsNullOrWhiteSpace(x.Text) && x.Text.Length > 1))
+            foreach (var text in texts.Where(x => !IsNullOrWhiteSpace(x.Text) && x.Text.Length > 1).Select(x => new { x.Text, Name = x.Name.ToIdentifier() }).Distinct())
             {
                 stringBuilder.Append($@"
-                {{ ""{text.Text}"", TokenType.{text.Name.ToIdentifier()} }},");
+                {{ ""{text.Text}"", TokenType.{text.Name} }},");
             }
 
             stringBuilder.Append($@"
@@ -348,16 +348,16 @@ namespace Xxx
         EndOfFile,
         String,");
 
-            foreach (Thing text in texts.Where(x => !IsNullOrWhiteSpace(x.Name)))
+            foreach (var text in texts.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name.ToIdentifier()).Distinct())
             {
                 stringBuilder.Append(@"
-        " + text.Name.ToIdentifier() + ",");
+        " + text + ",");
             }
 
-            foreach (Thing token in tokens.Where(x => !IsNullOrWhiteSpace(x.Name)))
+            foreach (var token in tokens.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name.ToIdentifier()).Distinct())
             {
                 stringBuilder.Append(@"
-        " + token.Name.ToIdentifier() + ",");
+        " + token + ",");
             }
 
             stringBuilder.Append(@"
@@ -403,7 +403,8 @@ namespace Xxx
                 stringBuilder.Append($@"
 
         public void {def.Name}(Node<NodeType> parent)
-        {{");
+        {{
+            var child = Add(parent, NodeType.{def.Name});");
 
                 GenerateParserDef(def, stringBuilder, 0);
 
@@ -417,22 +418,22 @@ namespace Xxx
     public enum NodeType
     {");
 
-            foreach (Thing def in defs.Where(x => !IsNullOrWhiteSpace(x.Name)))
+            foreach (var def in defs.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name).Distinct())
             {
                 stringBuilder.Append(@"
-        " + def.Name + ",");
+        " + def + ",");
             }
 
-            foreach (Thing text in texts.Where(x => !IsNullOrWhiteSpace(x.Name)))
+            foreach (var text in texts.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name.ToIdentifier()).Distinct())
             {
                 stringBuilder.Append(@"
-        " + text.Name.ToIdentifier() + ",");
+        " + text + ",");
             }
 
-            foreach (Thing token in tokens.Where(x => !IsNullOrWhiteSpace(x.Name)))
+            foreach (var token in tokens.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name.ToIdentifier()).Distinct())
             {
                 stringBuilder.Append(@"
-        " + token.Name.ToIdentifier() + ",");
+        " + token + ",");
             }
 
             stringBuilder.Append(@"
@@ -465,48 +466,110 @@ namespace Xxx
             return stringBuilder.ToString();
         }
 
-        private void GenerateParserDef(Thing def, StringBuilder stringBuilder, int level)
+        private void GenerateParserDef(Thing parent, StringBuilder stringBuilder, int level)
         {
             string indent = new string(' ', level * 4);
 
-            foreach (Thing child in def.Children)
+            if (level > 0 && new[] { ThingType.Token, ThingType.Text, ThingType.Def }.Contains(parent.ThingType))
             {
-                if (child.ThingType == ThingType.Text || child.ThingType == ThingType.Token)
+                if (parent.ThingType == ThingType.Text || parent.ThingType == ThingType.Token)
                 {
                     stringBuilder.Append($@"
-            {indent}Consume(parent, TokenType.{child.Name.ToIdentifier()}, NodeType.{child.Name.ToIdentifier()});");
+            {indent}Consume(child, TokenType.{parent.Name.ToIdentifier()}, NodeType.{parent.Name.ToIdentifier()});");
                 }
-                else if (child.ThingType == ThingType.Def)
+                else if (parent.ThingType == ThingType.Def)
                 {
                     stringBuilder.Append($@"
-            {indent}{child.Name}();");
+            {indent}{parent.Name}(child);");
                 }
-                else if (child.ThingType == ThingType.ZeroOrMore)
+
+            }
+            else
+            {
+                foreach (Thing child in parent.Children)
                 {
-                    stringBuilder.Append($@"
-            {indent}while(IsTokenType(TokenType.Text))
+                    var tokens = GetChildTokens(child);
+
+                    if (child.ThingType == ThingType.Text || child.ThingType == ThingType.Token)
+                    {
+                        stringBuilder.Append($@"
+            {indent}Consume(child, TokenType.{child.Name.ToIdentifier()}, NodeType.{child.Name.ToIdentifier()});");
+                    }
+                    else if (child.ThingType == ThingType.Def)
+                    {
+                        stringBuilder.Append($@"
+            {indent}{child.Name}(child);");
+                    }
+                    else if (child.ThingType == ThingType.ZeroOrMore)
+                    {
+                        stringBuilder.Append($@"
+            {indent}while (IsTokenType({tokens}))
             {indent}{{");
 
-                    GenerateParserDef(child, stringBuilder, level + 1);
+                        GenerateParserDef(child, stringBuilder, level + 1);
 
-                    stringBuilder.Append($@"
+                        stringBuilder.Append($@"
             {indent}}}");
+                    }
+                    else if (child.ThingType == ThingType.OneOrMore)
+                    {
+                        GenerateParserDef(child, stringBuilder, level);
+
+                        stringBuilder.Append($@"
+            {indent}while (IsTokenType({tokens}))
+            {indent}{{");
+
+                        GenerateParserDef(child, stringBuilder, level + 1);
+
+                        stringBuilder.Append($@"
+            {indent}}}");
+                    }
+                    else if (child.ThingType == ThingType.Optional)
+                    {
+                        stringBuilder.Append($@"
+            {indent}if (IsTokenType({tokens}))
+            {indent}{{");
+
+                        GenerateParserDef(child, stringBuilder, level + 1);
+
+                        stringBuilder.Append($@"
+            {indent}}}");
+                    }
+                    else if (child.ThingType == ThingType.OneOf)
+                    {
+                        string @else = "";
+                        foreach (var grandChild in child.Children)
+                        {
+                            tokens = GetChildTokens(grandChild);
+
+                            stringBuilder.Append($@"
+            {indent}{@else}if (IsTokenType({tokens}))
+            {indent}{{");
+
+                            GenerateParserDef(grandChild, stringBuilder, level + 1);
+
+                            stringBuilder.Append($@"
+            {indent}}}");
+
+                            @else = "else ";
+                        }
+                    }
                 }
             }
         }
 
-        private Thing GetFirstToken(Thing parent)
+        private string GetChildTokens(Thing parent)
         {
-            Thing ret = null;
+            List<Thing> ret = new List<Thing>();
             Walk(parent, child =>
             {
-                if (ret == null && (child.ThingType == ThingType.Token || child.ThingType == ThingType.Text))
+                if ((child.ThingType == ThingType.Token || child.ThingType == ThingType.Text))
                 {
-                    ret = child;
+                    ret.Add(child);
                 }
             });
 
-            return ret;
+            return String.Join(", ", ret.Take(1).Select(x => "TokenType." + x.Name.ToIdentifier()));
         }
 
         private List<List<Thing>> GetPaths(Thing parent)
@@ -617,9 +680,16 @@ namespace Xxx
             List<string> ignoreNames = GetIgnores(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Ignore));
             List<Def> defs = new List<Def>();
 
-            foreach (var def in parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Defs).Children)
+            List<Node<GrammarGrammar.NodeType>> reversed = parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Defs).Children;
+
+            reversed.Reverse();
+
+            foreach (var def in reversed)
             {
                 var textNode = def.Children.First(x => x.NodeType == GrammarGrammar.NodeType.Text);
+
+                var deff = new Def(textNode.Text);
+                defs.Add(deff);
 
                 foreach (var part in def.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Part))
                 {
@@ -628,18 +698,18 @@ namespace Xxx
 
                     var names = part.Children.Single(x => x.NodeType == GrammarGrammar.NodeType.Names);
 
-
-
-                    if (names.Children.Last().NodeType == GrammarGrammar.NodeType.Plus)
+                    if (names.Children.Last().NodeType == GrammarGrammar.NodeType.Plus 
+                        || part.Children.Last().NodeType == GrammarGrammar.NodeType.Plus)
                     {
                         thing = thing2 = new OneOrMore();
                     }
-                    else if (names.Children.Last().NodeType == GrammarGrammar.NodeType.Star)
+                    else if (names.Children.Last().NodeType == GrammarGrammar.NodeType.Star
+                        || part.Children.Last().NodeType == GrammarGrammar.NodeType.Star)
                     {
                         thing = thing2 = new ZeroOrMore();
                     }
 
-                    if (names.Children.First().NodeType == GrammarGrammar.NodeType.OpenSquare)
+                    if (part.Children.First().NodeType == GrammarGrammar.NodeType.OpenSquare)
                     {
                         if (thing == null)
                         {
@@ -648,11 +718,11 @@ namespace Xxx
                         else
                         {
                             thing2 = new Optional();
-                            thing.Children = new List<Thing>() {thing2};
+                            thing.Children = new List<Thing>() { thing2 };
                         }
                     }
 
-                    
+
                     if (names.Children.Any(x => x.NodeType == GrammarGrammar.NodeType.Pipe))
                     {
                         if (thing == null)
@@ -665,10 +735,10 @@ namespace Xxx
                             thing.Children = new List<Thing>() { thing2 };
                         }
                     }
-                    
+
                     List<Thing> things = new List<Thing>();
 
-                    foreach(var name in names.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text))
+                    foreach (var name in names.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text))
                     {
                         Thing childThing = null;
 
@@ -689,7 +759,7 @@ namespace Xxx
                                 token = texts.SingleOrDefault(x => x.Name == name.Text);
                                 if (token != null)
                                 {
-                                    things.Add(new Token(token.Name, token.Text));
+                                    things.Add(new Text(token.Name, token.Text));
                                 }
                                 else
                                 {
@@ -709,19 +779,24 @@ namespace Xxx
 
                     if (thing == null)
                     {
-                        defs.Add(new Def(textNode.Text, things.ToArray()));
+                        deff.Children.AddRange(things);
                     }
                     else
                     {
                         thing2.Children = things;
-                        defs.Add(new Def(textNode.Text, thing));
+                        deff.Children.Add(thing);
                     }
                 }
             }
 
-            grammar.Root = defs.First();
+            grammar.Root = defs.Last();
 
-            grammar.IgnoreTokens = new Token[0];
+            List<Token> ignoreTokens = new List<Token>();
+
+            ignoreTokens.AddRange(keywords.Where(x => ignoreNames.Contains(x.Name)));
+            ignoreTokens.AddRange(punctuation.Where(x => ignoreNames.Contains(x.Name)));
+
+            grammar.IgnoreTokens = ignoreTokens.ToArray();
 
             grammar.StringQuote = '\'';
             return grammar;
@@ -733,7 +808,7 @@ namespace Xxx
 
             if (parent != null)
             {
-                ignores.AddRange( parent.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text).Select(x => x.Text));
+                ignores.AddRange(parent.Children.Where(x => x.NodeType == GrammarGrammar.NodeType.Text).Select(x => x.Text));
             }
 
             return ignores;
@@ -742,7 +817,7 @@ namespace Xxx
         private List<Token> GetTokens(Node<GrammarGrammar.NodeType> parent)
         {
             List<Token> tokens = new List<Token>();
-            
+
             if (parent != null)
             {
                 foreach (var child in parent.Children)

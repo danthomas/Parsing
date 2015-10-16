@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Parsing.Core;
@@ -49,27 +51,21 @@ namespace Parsing.Designer
 
             Parser parser = new Parser();
             Generator generator = new Generator();
-            Builder builder = new Builder();
 
-            Node<NodeType> node = null;
+            Node<NodeType> node;
             try
             {
                 node = parser.Parse(grammarText.Text);
 
                 Grammar grammar = generator.BuildGrammar(node);
-                
+
+                RefreshGrammar(grammar);
+
                 genLexer.Text = generator.GenerateLexer(grammar);
                 genParser.Text = generator.GenerateParser(grammar);
-                
-                var assembly = builder.Build(genLexer.Text, genParser.Text);
-                
-                var parserType = assembly.GetType("Xxx.Parser");
-                _parser = Activator.CreateInstance(parserType);
-                _parseMethod = parserType.GetMethod("Parse");
-                
-                var walkerType = assembly.GetType("Xxx.Walker");
-                _walker = Activator.CreateInstance(walkerType);
-                _nodesToStringMethod = walkerType.GetMethod("NodesToString");
+
+
+                Compile();
 
             }
             catch (Exception exception)
@@ -79,16 +75,23 @@ namespace Parsing.Designer
 
                 MessageBox.Show(exception.Message);
             }
-
-            RefreshNodes(node);
         }
 
-        private void Parse()
+        private void Compile()
         {
+            Builder builder = new Builder();
+
             try
             {
-                var node = _parseMethod.Invoke(_parser, new object[] { input.Text });
-                output.Text = _nodesToStringMethod.Invoke(_walker, new object[] { node }).ToString();
+                var assembly = builder.Build(genLexer.Text, genParser.Text);
+
+                var parserType = assembly.GetType("Xxx.Parser");
+                _parser = Activator.CreateInstance(parserType);
+                _parseMethod = parserType.GetMethod("Parse");
+
+                var walkerType = assembly.GetType("Xxx.Walker");
+                _walker = Activator.CreateInstance(walkerType);
+                _nodesToStringMethod = walkerType.GetMethod("NodesToString");
             }
             catch (Exception exception)
             {
@@ -96,31 +99,69 @@ namespace Parsing.Designer
             }
         }
 
-        private void RefreshNodes(Node<NodeType> node)
+        private void Parse()
         {
-            nodes.Nodes.Clear();
-
-            if (node != null)
+            try
             {
-                var root = new NodeTreeNode(node);
+                var node = _parseMethod.Invoke(_parser, new object[] { input.Text });
 
-                nodes.Nodes.Add(root);
+                var tokens = _parser.GetType().GetProperty("Tokens").GetValue(_parser).ToString();
 
-                RefreshNodes(root);
-
-                nodes.ExpandAll();
+                output.Text = tokens + Environment.NewLine + "--------------------------------------------------"  + Environment.NewLine + _nodesToStringMethod.Invoke(_walker, new[] { node });
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
             }
         }
 
-        private void RefreshNodes(NodeTreeNode parentNodeTreeNode)
+        private void RefreshGrammar(Grammar grammar)
         {
-            foreach (var childNode in parentNodeTreeNode.Node.Children)
+            genGrammar.Text = grammar.Name;
+
+            var defs = GetThings(grammar.Root, ThingType.Def);
+
+            foreach(var def in defs)
             {
-                var childNodeTreeNode = new NodeTreeNode(childNode);
+                RefreshGrammar(def);
+            }
+        }
 
-                parentNodeTreeNode.Nodes.Add(childNodeTreeNode);
+        private void RefreshGrammar(Thing parent, int indent = 0)
+        {
+            genGrammar.Text += Environment.NewLine + new String(' ', indent * 4) + parent.ThingType + " - " + parent.Name + " - " + parent.Text;
+            
+            if (indent == 0 || parent.ThingType != ThingType.Def)
+            {
+                foreach (var child in parent.Children)
+                {
+                    RefreshGrammar(child, indent + 1);
+                }
+            }
+        }
 
-                RefreshNodes(childNodeTreeNode);
+        private List<Thing> GetThings(Thing parent, ThingType thingType)
+        {
+            List<Thing> things = new List<Thing>();
+
+            Walk(parent, thing =>
+            {
+                if (thing.ThingType == thingType
+                 && !things.Contains(thing))
+                {
+                    things.Add(thing);
+                }
+            });
+
+            return things;
+        }
+
+        private void Walk(Thing parent, Action<Thing> action)
+        {
+            action(parent);
+            foreach (Thing child in parent.Children)
+            {
+                Walk(child, action);
             }
         }
 
@@ -132,6 +173,11 @@ namespace Parsing.Designer
         private void testToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Parse();
+        }
+
+        private void parseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Compile();
         }
     }
 
