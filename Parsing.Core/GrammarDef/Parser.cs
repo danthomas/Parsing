@@ -1,7 +1,10 @@
-﻿namespace Parsing.Core.GrammarDef
+﻿using System.Collections.Generic;
+
+namespace Parsing.Core.GrammarDef
 {
     public class Parser : ParserBase<TokenType, NodeType>
     {
+        private List<string> _discard;
         /*
         Grammar : Rows
         Rows : Row [newLine Row]*
@@ -10,7 +13,10 @@
         */
         public Parser() : base(new Lexer())
         {
+            _discard = new List<string>();
         }
+
+        public override List<string> DiscardThings { get { return _discard;  } }
 
         public override Node<NodeType> Root()
         {

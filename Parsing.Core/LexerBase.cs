@@ -73,10 +73,13 @@ namespace Parsing.Core
                         }
                         else
                         {
-                            KeyValuePair<string, T> match = Texts.FirstOrDefault(x => new Regex(x.Key).IsMatch(text));
-                            if (match.Key != null)
+                            foreach (var text1 in Texts)
                             {
-                                ret = new Token<T>(match.Value, text);
+                                if (new Regex(text1.Key).IsMatch(text))
+                                {
+                                    ret = new Token<T>(text1.Value, text);
+                                    break;
+                                }
                             }
                         }
 

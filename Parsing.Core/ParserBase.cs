@@ -10,7 +10,8 @@ namespace Parsing.Core
         protected Token<T> _currentToken;
         private Token<T> _nextToken;
         private Token<T> _nextNextToken;
-        public string Tokens { get; set; } 
+        public string Tokens { get; set; }
+        public abstract List<string> DiscardThings { get; }
 
         protected ParserBase(LexerBase<T> lexer)
         {
@@ -26,7 +27,7 @@ namespace Parsing.Core
             _nextNextToken = _lexer.Next();
 
             Tokens += Environment.NewLine + _currentToken.TokenType + " - " + _currentToken.Text;
-            
+
             return Root();
         }
 
@@ -62,8 +63,12 @@ namespace Parsing.Core
         {
             if (tokenType.Equals(_currentToken.TokenType))
             {
-                var node = parent.AddNode(nodeType, _currentToken.Text);
+                var node = DiscardThings.Contains(tokenType.ToString())
+                    ? parent
+                    : parent.AddNode(nodeType, _currentToken.Text);
+
                 Next();
+
                 return node;
             }
 
@@ -83,7 +88,9 @@ namespace Parsing.Core
 
         protected Node<N> Add(Node<N> parent, N nodeType)
         {
-            return parent.AddNode(nodeType);
+            return DiscardThings.Contains(nodeType.ToString())
+                    ? parent
+                    : parent.AddNode(nodeType);
         }
     }
 }

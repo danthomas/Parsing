@@ -34,6 +34,7 @@ namespace Parsing.Core.GrammarGrammar
                 {"keywords", TokenType.Keywords },
                 {"punctuation", TokenType.Punctuation },
                 {"ignore", TokenType.Ignore },
+                {"discard", TokenType.Discard },
             };
 
             Texts = new Dictionary<string, TokenType>

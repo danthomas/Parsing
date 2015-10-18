@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
 using Parsing.Core;
 
 namespace Xxx
 {
     public class Parser : ParserBase<TokenType, NodeType>
     {
+        private List<string> _discard;
+
         public Parser() : base(new Lexer())
         {
+            _discard = new List<string>();
         }
 
+        public override List<string> DiscardThings { get { return _discard; } }
+        
         public override Node<NodeType> Root()
         {
             Node<NodeType> root = new Node<NodeType>(null, NodeType.Statement);

@@ -130,9 +130,13 @@ Statement
 
         public class Parser : ParserBase<TokenType, NodeType>
         {
+            private List<string> _discard;
+
             public Parser() : base(new Lexer())
             {
+                _discard = new List<string>();
             }
+            public override List<string> DiscardThings { get { return _discard; } }
 
             public override Node<NodeType> Root()
             {

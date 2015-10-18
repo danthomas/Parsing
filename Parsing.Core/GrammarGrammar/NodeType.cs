@@ -18,6 +18,7 @@ namespace Parsing.Core.GrammarGrammar
         Texts,
         Keywords,
         Punctuation,
-        Names
+        Names,
+        Discard
     }
 }

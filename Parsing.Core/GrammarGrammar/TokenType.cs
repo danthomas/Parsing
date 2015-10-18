@@ -18,6 +18,7 @@
         Defs,
         Keywords,
         Punctuation,
-        Texts
+        Texts,
+        Discard
     }
 }

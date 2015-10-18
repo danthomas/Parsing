@@ -1,13 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using Parsing.Core;
 
 namespace Sql
 {
     public class Parser : ParserBase<TokenType, NodeType>
     {
+        private List<string> _discardThings;
+
         public Parser() : base(new Lexer())
         {
+            _discardThings = new List<string>();
         }
+
+        public override List<string> DiscardThings { get { return _discardThings; } }
 
         public override Node<NodeType> Root()
         {

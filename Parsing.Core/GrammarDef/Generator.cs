@@ -374,20 +374,35 @@ namespace Xxx
             var defs = GetThings(grammar.Root, ThingType.Def);
             var tokens = GetThings(grammar.Root, ThingType.Token);
             var texts = GetThings(grammar.Root, ThingType.Text);
-
-
+            //tokens.AddRange(grammar.DiscardThings.Where(x => !tokens.Contains(x)));
 
             stringBuilder.Append(
                 $@"using System;
+using System.Collections.Generic;
 using Parsing.Core;
 
 namespace Xxx
 {{
     public class Parser : ParserBase<TokenType, NodeType>
     {{
+        private readonly List<string> _discardThings;
+
         public Parser() : base(new Lexer())
         {{
+            _discardThings = new List<string>
+            {{");
+
+            foreach (var text in grammar.DiscardThings)
+            {
+                stringBuilder.Append($@"
+                ""{text.ToIdentifier()}"",");
+            }
+
+            stringBuilder.Append($@"
+            }};
         }}
+
+        public override List<string> DiscardThings {{ get {{ return _discardThings; }} }}
 
         public override Node<NodeType> Root()
         {{
@@ -678,6 +693,8 @@ namespace Xxx
             List<Token> keywords = GetTokens(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Keywords));
             List<Token> texts = GetTokens(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Texts));
             List<string> ignoreNames = GetIgnores(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Ignore));
+            List<string> discardNames = GetIgnores(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Discard));
+
             List<Def> defs = new List<Def>();
 
             List<Node<GrammarGrammar.NodeType>> reversed = parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Defs).Children;
@@ -792,11 +809,17 @@ namespace Xxx
             grammar.Root = defs.Last();
 
             List<Token> ignoreTokens = new List<Token>();
+            List<string> discardThings = new List<string>();
 
             ignoreTokens.AddRange(keywords.Where(x => ignoreNames.Contains(x.Name)));
             ignoreTokens.AddRange(punctuation.Where(x => ignoreNames.Contains(x.Name)));
 
+            discardThings.AddRange(keywords.Where(x => discardNames.Contains(x.Name)).Select(x => x.Name));
+            discardThings.AddRange(punctuation.Where(x => discardNames.Contains(x.Name)).Select(x => x.Name));
+            discardThings.AddRange(defs.Where(x => discardNames.Contains(x.Name)).Select(x => x.Name));
+
             grammar.IgnoreTokens = ignoreTokens.ToArray();
+            grammar.DiscardThings = discardThings.ToArray();
 
             grammar.StringQuote = '\'';
             return grammar;

@@ -36,6 +36,12 @@ namespace Parsing.Designer
                 grammarText.Text = File.ReadAllText(@"c:\temp\grammar.txt");
                 Build();
             }
+
+            if (File.Exists(@"c:\temp\test.txt"))
+            {
+                input.Text = File.ReadAllText(@"c:\temp\test.txt");
+                Parse();
+            }
         }
 
         private void buildToolStripMenuItem_Click(object sender, EventArgs e)
@@ -107,7 +113,7 @@ namespace Parsing.Designer
 
                 var tokens = _parser.GetType().GetProperty("Tokens").GetValue(_parser).ToString();
 
-                output.Text = tokens + Environment.NewLine + "--------------------------------------------------"  + Environment.NewLine + _nodesToStringMethod.Invoke(_walker, new[] { node });
+                output.Text = tokens + Environment.NewLine + "--------------------------------------------------" + Environment.NewLine + _nodesToStringMethod.Invoke(_walker, new[] { node });
             }
             catch (Exception exception)
             {
@@ -121,7 +127,7 @@ namespace Parsing.Designer
 
             var defs = GetThings(grammar.Root, ThingType.Def);
 
-            foreach(var def in defs)
+            foreach (var def in defs)
             {
                 RefreshGrammar(def);
             }
@@ -130,7 +136,7 @@ namespace Parsing.Designer
         private void RefreshGrammar(Thing parent, int indent = 0)
         {
             genGrammar.Text += Environment.NewLine + new String(' ', indent * 4) + parent.ThingType + " - " + parent.Name + " - " + parent.Text;
-            
+
             if (indent == 0 || parent.ThingType != ThingType.Def)
             {
                 foreach (var child in parent.Children)
@@ -168,6 +174,7 @@ namespace Parsing.Designer
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             File.WriteAllText(@"c:\temp\grammar.txt", grammarText.Text);
+            File.WriteAllText(@"c:\temp\text.txt", input.Text);
         }
 
         private void testToolStripMenuItem_Click(object sender, EventArgs e)
@@ -178,6 +185,11 @@ namespace Parsing.Designer
         private void parseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Compile();
+        }
+
+        private void input_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

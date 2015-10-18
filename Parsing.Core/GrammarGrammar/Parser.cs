@@ -1,18 +1,22 @@
-﻿namespace Parsing.Core.GrammarGrammar
+﻿using System.Collections.Generic;
+
+namespace Parsing.Core.GrammarGrammar
 {
     /*
 
 Grammar
 Grammar : Text [Defs]
-Defs : newLine defs Def+ [Ignore]
+Defs : newLine defs Def+ [Ignore] [Discard]
 Def : newLine Text colon Part*
 Part : [openSquare] Names [closeSquare] [star | plus]
 Names : Options*
 Options : Name [pipe Name]*
 Name : Text  [star | plus]
 Ignore : newLine ignore Text+
+Discard : newLine discard Text+
 keywords
 ignore
+discard
 defs
 tokens
 punctuation
@@ -30,9 +34,14 @@ ignore : return
 
     public class Parser : ParserBase<TokenType, NodeType>
     {
+        private List<string> _discardThings;
+
         public Parser() : base(new Lexer())
         {
+            _discardThings = new List<string>();
         }
+
+        public override List<string> DiscardThings { get { return _discardThings; } }
 
         public override Node<NodeType> Root()
         {
@@ -66,6 +75,21 @@ ignore : return
             if (AreTokenTypes(TokenType.NewLine, TokenType.Ignore))
             {
                 Ignore(parent);
+            }
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Discard))
+            {
+                Discard(parent);
+            }
+        }
+
+        private void Discard(Node<NodeType> parent)
+        {
+            Consume(parent, TokenType.NewLine, NodeType.NewLine);
+            var discard = Consume(parent, TokenType.Discard, NodeType.Discard);
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Text))
+            {
+                Consume(discard, TokenType.NewLine, NodeType.NewLine);
+                Consume(discard, TokenType.Text, NodeType.Text);
             }
         }
 
