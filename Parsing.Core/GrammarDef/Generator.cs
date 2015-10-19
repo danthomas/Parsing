@@ -254,35 +254,29 @@ namespace Xxx
         public string GenerateLexer(Grammar grammar)
         {
             StringBuilder stringBuilder = new StringBuilder();
-
-            var defs = GetThings(grammar.Root, ThingType.Def);
-            var tokens = GetThings(grammar.Root, ThingType.Token);
-            tokens.AddRange(grammar.IgnoreTokens.Where(x => !tokens.Contains(x)));
-
-            var texts = GetThings(grammar.Root, ThingType.Text);
-
-            stringBuilder.Append(@"using System.Collections.Generic;
+            
+            stringBuilder.Append($@"using System.Collections.Generic;
 using Parsing.Core;
 
 namespace Xxx
-{
-    public class Lexer : LexerBase<TokenType>
-    {
+{{
+    public class {grammar.Name}Lexer : LexerBase<TokenType>
+    {{
         private readonly Dictionary<char, TokenType> _punctuation;
         private readonly Dictionary<string, TokenType> _keywords;
         private readonly Dictionary<string, TokenType> _texts;
         private readonly List<TokenType> _ignoreTokenTypes;
         private readonly char _stringQuote;
 
-        public Lexer()
-        {
+        public {grammar.Name}Lexer()
+        {{
             _punctuation = new Dictionary<char, TokenType>
-            {");
+            {{");
 
-            foreach (Thing token in tokens.Where(x => x.Text.Length == 1))
+            foreach (Token token in grammar.Punctuation)
             {
                 stringBuilder.Append($@"
-                {{ '{(token.Text == "\r" ? "\\r" : (token.Text == "\n" ? "\\n" : token.Text))}', TokenType.{token.Name.ToIdentifier()} }},");
+                {{ '{token.Text}', TokenType.{token.Name.ToIdentifier()} }},");
             }
 
             stringBuilder.Append($@"
@@ -291,7 +285,7 @@ namespace Xxx
             _keywords = new Dictionary<string, TokenType>
             {{");
 
-            foreach (Thing token in tokens.Where(x => !IsNullOrWhiteSpace(x.Text) && x.Text.Length > 1))
+            foreach (Token token in grammar.Keywords)
             {
                 stringBuilder.Append($@"
                 {{ ""{token.Text}"", TokenType.{token.Name.ToIdentifier()} }},");
@@ -303,10 +297,10 @@ namespace Xxx
             _texts = new Dictionary<string, TokenType>
             {{");
 
-            foreach (var text in texts.Where(x => !IsNullOrWhiteSpace(x.Text) && x.Text.Length > 1).Select(x => new { x.Text, Name = x.Name.ToIdentifier() }).Distinct())
+            foreach (Token text in grammar.Texts)
             {
                 stringBuilder.Append($@"
-                {{ ""{text.Text}"", TokenType.{text.Name} }},");
+                {{ ""^{text.Text}$"", TokenType.{text.Name} }},");
             }
 
             stringBuilder.Append($@"
@@ -348,16 +342,22 @@ namespace Xxx
         EndOfFile,
         String,");
 
-            foreach (var text in texts.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name.ToIdentifier()).Distinct())
+            foreach (var text in grammar.Punctuation)
             {
                 stringBuilder.Append(@"
-        " + text + ",");
+        " + text.Name.ToIdentifier() + ",");
             }
 
-            foreach (var token in tokens.Where(x => !IsNullOrWhiteSpace(x.Name)).Select(x => x.Name.ToIdentifier()).Distinct())
+            foreach (var token in grammar.Keywords)
             {
                 stringBuilder.Append(@"
-        " + token + ",");
+        " + token.Name.ToIdentifier() + ",");
+            }
+
+            foreach (var token in grammar.Texts)
+            {
+                stringBuilder.Append(@"
+        " + token.Name.ToIdentifier() + ",");
             }
 
             stringBuilder.Append(@"
@@ -383,11 +383,11 @@ using Parsing.Core;
 
 namespace Xxx
 {{
-    public class Parser : ParserBase<TokenType, NodeType>
+    public class {grammar.Name}Parser : ParserBase<TokenType, NodeType>
     {{
         private readonly List<string> _discardThings;
 
-        public Parser() : base(new Lexer())
+        public {grammar.Name}Parser() : base(new {grammar.Name}Lexer())
         {{
             _discardThings = new List<string>
             {{");
@@ -406,25 +406,31 @@ namespace Xxx
 
         public override Node<NodeType> Root()
         {{
-            Node<NodeType> root = new Node<NodeType>(null, NodeType.{grammar.Root.Name});
-
-            {grammar.Root.Name}(root);
-
-            return root;
+            return {grammar.Root.Name}(null);
         }}");
 
             foreach (Thing def in defs)
             {
+                string parentOrChild = grammar.DiscardThings.All(x => x != def.Name)
+                    ? "child" 
+                    : "parent";
+
                 stringBuilder.Append($@"
 
-        public void {def.Name}(Node<NodeType> parent)
-        {{
-            var child = Add(parent, NodeType.{def.Name});");
+        public Node<NodeType> {def.Name}(Node<NodeType> parent)
+        {{");
+                if (grammar.DiscardThings.All(x => x != def.Name))
+                {
+                    stringBuilder.Append($@"
+            var {parentOrChild} = Add(parent, NodeType.{def.Name});");
+                }
 
-                GenerateParserDef(def, stringBuilder, 0);
+                GenerateParserDef(def, parentOrChild, stringBuilder, 0);
 
-                stringBuilder.Append(@"
-        }");
+                stringBuilder.Append($@"
+
+            return {parentOrChild};
+        }}");
             }
 
             stringBuilder.Append(@"
@@ -481,7 +487,7 @@ namespace Xxx
             return stringBuilder.ToString();
         }
 
-        private void GenerateParserDef(Thing parent, StringBuilder stringBuilder, int level)
+        private void GenerateParserDef(Thing parent, string parentOrChild, StringBuilder stringBuilder, int level)
         {
             string indent = new string(' ', level * 4);
 
@@ -490,12 +496,12 @@ namespace Xxx
                 if (parent.ThingType == ThingType.Text || parent.ThingType == ThingType.Token)
                 {
                     stringBuilder.Append($@"
-            {indent}Consume(child, TokenType.{parent.Name.ToIdentifier()}, NodeType.{parent.Name.ToIdentifier()});");
+            {indent}Consume({parentOrChild}, TokenType.{parent.Name.ToIdentifier()}, NodeType.{parent.Name.ToIdentifier()});");
                 }
                 else if (parent.ThingType == ThingType.Def)
                 {
                     stringBuilder.Append($@"
-            {indent}{parent.Name}(child);");
+            {indent}{parent.Name}({parentOrChild});");
                 }
 
             }
@@ -508,12 +514,12 @@ namespace Xxx
                     if (child.ThingType == ThingType.Text || child.ThingType == ThingType.Token)
                     {
                         stringBuilder.Append($@"
-            {indent}Consume(child, TokenType.{child.Name.ToIdentifier()}, NodeType.{child.Name.ToIdentifier()});");
+            {indent}Consume({parentOrChild}, TokenType.{child.Name.ToIdentifier()}, NodeType.{child.Name.ToIdentifier()});");
                     }
                     else if (child.ThingType == ThingType.Def)
                     {
                         stringBuilder.Append($@"
-            {indent}{child.Name}(child);");
+            {indent}{child.Name}({parentOrChild});");
                     }
                     else if (child.ThingType == ThingType.ZeroOrMore)
                     {
@@ -521,20 +527,20 @@ namespace Xxx
             {indent}while (IsTokenType({tokens}))
             {indent}{{");
 
-                        GenerateParserDef(child, stringBuilder, level + 1);
+                        GenerateParserDef(child, parentOrChild, stringBuilder, level + 1);
 
                         stringBuilder.Append($@"
             {indent}}}");
                     }
                     else if (child.ThingType == ThingType.OneOrMore)
                     {
-                        GenerateParserDef(child, stringBuilder, level);
+                        GenerateParserDef(child, parentOrChild, stringBuilder, level);
 
                         stringBuilder.Append($@"
             {indent}while (IsTokenType({tokens}))
             {indent}{{");
 
-                        GenerateParserDef(child, stringBuilder, level + 1);
+                        GenerateParserDef(child, parentOrChild, stringBuilder, level + 1);
 
                         stringBuilder.Append($@"
             {indent}}}");
@@ -545,7 +551,7 @@ namespace Xxx
             {indent}if (IsTokenType({tokens}))
             {indent}{{");
 
-                        GenerateParserDef(child, stringBuilder, level + 1);
+                        GenerateParserDef(child, parentOrChild, stringBuilder, level + 1);
 
                         stringBuilder.Append($@"
             {indent}}}");
@@ -561,7 +567,7 @@ namespace Xxx
             {indent}{@else}if (IsTokenType({tokens}))
             {indent}{{");
 
-                            GenerateParserDef(grandChild, stringBuilder, level + 1);
+                            GenerateParserDef(grandChild, "child", stringBuilder, level + 1);
 
                             stringBuilder.Append($@"
             {indent}}}");
@@ -692,9 +698,14 @@ namespace Xxx
             List<Token> punctuation = GetTokens(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Punctuation));
             List<Token> keywords = GetTokens(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Keywords));
             List<Token> texts = GetTokens(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Texts));
+            
+            grammar.Punctuation = punctuation.Select(x => new Token(x.Name, x.Text)).ToList();
+            grammar.Keywords = keywords.Select(x => new Token(x.Name, x.Text)).ToList();
+            grammar.Texts = texts.Select(x => new Token(x.Name, x.Text)).ToList();
+
             List<string> ignoreNames = GetIgnores(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Ignore));
             List<string> discardNames = GetIgnores(parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Discard));
-
+            
             List<Def> defs = new List<Def>();
 
             List<Node<GrammarGrammar.NodeType>> reversed = parent.Children.FirstOrDefault(x => x.NodeType == GrammarGrammar.NodeType.Defs).Children;
@@ -759,24 +770,24 @@ namespace Xxx
                     {
                         Thing childThing = null;
 
-                        var token = punctuation.SingleOrDefault(x => x.Name == name.Text);
+                        var token = grammar.Punctuation.SingleOrDefault(x => x.Name == name.Text);
                         if (token != null)
                         {
-                            things.Add(new Token(token.Name, token.Text));
+                            things.Add(token);
                         }
                         else
                         {
-                            token = keywords.SingleOrDefault(x => x.Name == name.Text);
+                            token = grammar.Keywords.SingleOrDefault(x => x.Name == name.Text);
                             if (token != null)
                             {
-                                things.Add(new Token(token.Name, token.Text));
+                                things.Add(token);
                             }
                             else
                             {
-                                token = texts.SingleOrDefault(x => x.Name == name.Text);
+                                token = grammar.Texts.SingleOrDefault(x => x.Name == name.Text);
                                 if (token != null)
                                 {
-                                    things.Add(new Text(token.Name, token.Text));
+                                    things.Add(token);
                                 }
                                 else
                                 {
