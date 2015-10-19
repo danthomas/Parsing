@@ -279,10 +279,10 @@ namespace Xxx
             _punctuation = new Dictionary<char, TokenType>
             {");
 
-            foreach (Thing token in tokens.Where(x => x.Text.Length == 1))
+            foreach (Thing token in tokens.Where(x => x.Text.Length == 1 || (x.Text.Length == 2 && x.Text[0] == '\\')))
             {
                 stringBuilder.Append($@"
-                {{ '{(token.Text == "\r" ? "\\r" : (token.Text == "\n" ? "\\n" : token.Text))}', TokenType.{token.Name.ToIdentifier()} }},");
+                {{ '{token.Text}', TokenType.{token.Name.ToIdentifier()} }},");
             }
 
             stringBuilder.Append($@"
@@ -291,7 +291,7 @@ namespace Xxx
             _keywords = new Dictionary<string, TokenType>
             {{");
 
-            foreach (Thing token in tokens.Where(x => !IsNullOrWhiteSpace(x.Text) && x.Text.Length > 1))
+            foreach (Thing token in tokens.Where(x => !IsNullOrWhiteSpace(x.Text) && x.Text.Length > 1 && !(x.Text.Length == 2 && x.Text[0] == '\\')))
             {
                 stringBuilder.Append($@"
                 {{ ""{token.Text}"", TokenType.{token.Name.ToIdentifier()} }},");
@@ -406,24 +406,22 @@ namespace Xxx
 
         public override Node<NodeType> Root()
         {{
-            Node<NodeType> root = new Node<NodeType>(null, NodeType.{grammar.Root.Name});
-
-            {grammar.Root.Name}(root);
-
-            return root;
+            return {grammar.Root.Name}(null);
         }}");
 
             foreach (Thing def in defs)
             {
                 stringBuilder.Append($@"
 
-        public void {def.Name}(Node<NodeType> parent)
+        public Node<NodeType> {def.Name}(Node<NodeType> parent)
         {{
             var child = Add(parent, NodeType.{def.Name});");
 
                 GenerateParserDef(def, stringBuilder, 0);
 
                 stringBuilder.Append(@"
+
+            return child;
         }");
             }
 

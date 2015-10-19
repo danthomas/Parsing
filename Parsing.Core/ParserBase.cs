@@ -90,7 +90,9 @@ namespace Parsing.Core
         {
             return DiscardThings.Contains(nodeType.ToString())
                     ? parent
-                    : parent.AddNode(nodeType);
+                    : parent == null
+                        ? new Node<N>(null, nodeType)
+                        : parent.AddNode(nodeType);
         }
     }
 }
