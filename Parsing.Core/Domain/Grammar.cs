@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Parsing.Core.Domain
 {
     public class Grammar
@@ -7,6 +9,8 @@ namespace Parsing.Core.Domain
         public virtual char StringQuote { get; set; }
         public Token[] IgnoreTokens { get; set; }
         public string[] DiscardThings { get; set; }
-        public Def[] DiscardDefs { get; set; }
+        public List<Token> Punctuation { get; set; }
+        public List<Token> Keywords { get; set; }
+        public List<Token> Texts { get; set; }
     }
 }

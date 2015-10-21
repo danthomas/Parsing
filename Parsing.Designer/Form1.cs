@@ -1,15 +1,7 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Parsing.Core;
 using Parsing.Core.Domain;
@@ -26,6 +18,7 @@ namespace Parsing.Designer
         private MethodInfo _parseMethod;
         private object _walker;
         private MethodInfo _nodesToStringMethod;
+        private string _grammarName;
 
         public Form1()
         {
@@ -65,6 +58,8 @@ namespace Parsing.Designer
 
                 Grammar grammar = generator.BuildGrammar(node);
 
+                _grammarName = grammar.Name;
+
                 RefreshGrammar(grammar);
 
                 genLexer.Text = generator.GenerateLexer(grammar);
@@ -91,7 +86,7 @@ namespace Parsing.Designer
             {
                 var assembly = builder.Build(genLexer.Text, genParser.Text);
 
-                var parserType = assembly.GetType("Xxx.Parser");
+                var parserType = assembly.GetType($"Xxx.{_grammarName}Parser");
                 _parser = Activator.CreateInstance(parserType);
                 _parseMethod = parserType.GetMethod("Parse");
 
@@ -113,7 +108,7 @@ namespace Parsing.Designer
 
                 var tokens = _parser.GetType().GetProperty("Tokens").GetValue(_parser).ToString();
 
-                output.Text = tokens + Environment.NewLine + "--------------------------------------------------" + Environment.NewLine + _nodesToStringMethod.Invoke(_walker, new[] { node });
+                output.Text = _nodesToStringMethod.Invoke(_walker, new[] { node }).ToString();
             }
             catch (Exception exception)
             {
