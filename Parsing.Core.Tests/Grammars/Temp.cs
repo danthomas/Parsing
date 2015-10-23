@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿/*using NUnit.Framework;
 using Parsing.Core.Domain;
 using Parsing.Core.GrammarDef;
 
@@ -33,7 +33,7 @@ ignore
            string grammar = generator.GenerateGrammar(node);
            string lexerDef = generator.GenerateLexer(new OneOrMoreOptionalGrammar());
            string parserDef = generator.GenerateParser(new OneOrMoreOptionalGrammar());
-           */
+           #1#
         }
 
         public class OneOrMoreOptionalGrammar : Grammar
@@ -65,4 +65,4 @@ ignore
             public override char StringQuote { get { return '\''; } }
         }
     }
-}
+}*/

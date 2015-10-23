@@ -48,6 +48,7 @@
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="GrammarGrammar\ParserTests.cs" />
+    <Compile Include="Grammars\Grammar.cs" />
     <Compile Include="Grammars\OneOf.cs" />
     <Compile Include="Grammars\OneOrMore.cs" />
     <Compile Include="Grammars\OneOrMoreOptional.cs" />
