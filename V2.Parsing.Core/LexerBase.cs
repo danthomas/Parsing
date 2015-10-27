@@ -14,8 +14,7 @@ namespace V2.Parsing.Core
         private readonly char _endOfFile;
         private List<Token<T>> _buffer;
         private char _nextChar;
-
-
+        
         public LexerBase()
         {
             _endOfFile = (char)0;
@@ -31,7 +30,6 @@ namespace V2.Parsing.Core
         public void Init(string text)
         {
             _buffer = new List<Token<T>>();
-            _buffer.Add(new Token<T>(EndOfFile));
             _index = 0;
             _text = text;
             NextChar();
@@ -58,7 +56,10 @@ namespace V2.Parsing.Core
 
         public Token<T> Next()
         {
-            _buffer.RemoveAt(0);
+            if (_buffer.Count > 0)
+            {
+                _buffer.RemoveAt(0);
+            }
 
             if (_buffer.Count > 0)
             {
@@ -101,6 +102,7 @@ namespace V2.Parsing.Core
                 text += _currentChar.ToString();
 
                 NextChar();
+
                 PatternBase<T> match = Patterns.OfType<TokenPattern<T>>().SingleOrDefault(x => String.Equals(x.Pattern, text, CaseSensitive ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture));
 
                 if (match != null)
