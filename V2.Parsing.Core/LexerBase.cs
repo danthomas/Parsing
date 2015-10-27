@@ -103,25 +103,31 @@ namespace V2.Parsing.Core
 
                 NextChar();
 
-                PatternBase<T> match = Patterns.OfType<TokenPattern<T>>().SingleOrDefault(x => String.Equals(x.Pattern, text, CaseSensitive ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture));
+                PatternBase<T> tokenMatch = Patterns.OfType<TokenPattern<T>>().SingleOrDefault(x => String.Equals(x.Pattern, text, CaseSensitive ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture));
 
-                if (match != null)
+                if (tokenMatch != null)
                 {
-                    ret = new Token<T>(match.TokenType);
+                    ret = new Token<T>(tokenMatch.TokenType);
                     break;
                 }
 
-                match = Patterns.OfType<RegexPattern<T>>().FirstOrDefault(x => x.Regex.IsMatch(text));
+                
+                var regexMatch = Patterns.OfType<RegexPattern<T>>().FirstOrDefault(x => x.Regex.IsMatch(text));
 
-                if (_currentChar == _endOfFile
-                    || Patterns.OfType<TokenPattern<T>>().Where(x => x.Pattern.Length == 1).Any(x => String.Equals(x.Pattern, _currentChar.ToString())))
+                if (_currentChar == _endOfFile)
                 {
-                    if (match == null)
+                    if (regexMatch == null)
                     {
                         throw new Exception();
                     }
 
-                    ret = new Token<T>(match.TokenType, text);
+                    ret = new Token<T>(regexMatch.TokenType, text);
+                    break;
+                }
+
+                if (regexMatch != null && !regexMatch.Regex.IsMatch(text + _currentChar))
+                {
+                    ret = new Token<T>(regexMatch.TokenType, text);
                     break;
                 }
             }
