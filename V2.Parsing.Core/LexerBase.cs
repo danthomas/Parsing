@@ -14,7 +14,7 @@ namespace V2.Parsing.Core
         private readonly char _endOfFile;
         private List<Token<T>> _buffer;
         private char _nextChar;
-        
+
         public LexerBase()
         {
             _endOfFile = (char)0;
@@ -111,7 +111,7 @@ namespace V2.Parsing.Core
                     break;
                 }
 
-                match = Patterns.OfType<RegexPattern<T>>().FirstOrDefault(x => new Regex(x.Pattern).IsMatch(text));
+                match = Patterns.OfType<RegexPattern<T>>().FirstOrDefault(x => x.Regex.IsMatch(text));
 
                 if (_currentChar == _endOfFile
                     || Patterns.OfType<TokenPattern<T>>().Where(x => x.Pattern.Length == 1).Any(x => String.Equals(x.Pattern, _currentChar.ToString())))
@@ -166,10 +166,10 @@ namespace V2.Parsing.Core
     {
         public RegexPattern(T tokenType, string pattern) : base(tokenType)
         {
-            Pattern = pattern;
+            Regex = new Regex(pattern);
         }
 
-        public string Pattern { get; set; }
+        public Regex Regex { get; set; }
     }
 
     public class StringPattern<T> : PatternBase<T>
