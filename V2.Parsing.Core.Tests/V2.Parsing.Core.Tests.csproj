@@ -44,7 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LexerTests.cs" />
+    <Compile Include="Bases\LexerTestsBase.cs" />
+    <Compile Include="Grammar\LexerTests.cs" />
+    <Compile Include="Sql\LexerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
