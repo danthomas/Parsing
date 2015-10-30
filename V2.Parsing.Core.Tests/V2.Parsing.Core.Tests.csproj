@@ -45,7 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bases\LexerTestsBase.cs" />
-    <Compile Include="Grammar\LexerTests.cs" />
+    <Compile Include="Bases\TestBase.cs" />
+    <Compile Include="BuilderTests.cs" />
+    <Compile Include="GrammarDef\LexerTests.cs" />
+    <Compile Include="GrammarDef\ParserTests.cs" />
     <Compile Include="Sql\LexerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,0 +1,45 @@
+﻿grammar Grammar
+defs
+  Grammar : 'grammar' Identifier [Defs] [Patterns] [Ignores] [Discards]
+  Defs : return 'defs' Def+
+  Def : return Identifier colon Part+
+  Part : OptionalElements | Optional
+  Optional : openSquare Identifiers closeSquare [star | plus]
+  Identifiers : RequiredIdents | OptionalIdents
+  OptionalIdents : Identifier [pipe Identifier]*
+  RequiredIdents : Identifier Identifier+
+  OptionalElements : Element [pipe Element]*
+  RequiredElements : Element Element+
+  Element : Identifier [star | plus]
+  Patterns : return 'patterns' Pattern+
+  Pattern : return Identifier [colon Identifier]
+  Ignores : return 'ignore' Ignore+
+  Ignore : return Identifier
+  Discards : return 'discard' Discard+
+  Discard : return Identifier
+patterns
+  return : '\r'
+  newLine : '\n'
+  tab : '\t'
+  comma : ','
+  space : ' '
+  plus : '+'
+  star : '*'
+  colon : ':'
+  openSquare : '['
+  closeSquare : ']'
+  pipe : '|'
+  'grammar'
+  'defs'
+  'patterns'
+  'ignore'
+  'discard'
+  Identifier : '^[a-zA-Z_][a-zA-Z1-9_]*$'
+ignore
+  newLine
+  tab
+  space
+discard
+  return
+  OptionalIdents
+  RequiredIdents

@@ -25,6 +25,7 @@ namespace V2.Parsing.Core
         public T EndOfFile { get; set; }
 
         protected List<PatternBase<T>> Patterns { get; set; }
+
         protected List<T> Ignore { get; set; }
 
         public void Init(string text)
@@ -261,7 +262,7 @@ namespace V2.Parsing.Core
 
         public override bool IsMatch(string text, bool caseSensitive)
         {
-            return String.Equals(Pattern, text, caseSensitive ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
+            return String.Equals(Pattern, text, caseSensitive ?  StringComparison.CurrentCulture: StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

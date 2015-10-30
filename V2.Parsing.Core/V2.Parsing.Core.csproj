@@ -40,12 +40,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Grammar\GrammarLexer.cs" />
-    <Compile Include="Grammar\TokenType.cs" />
+    <Compile Include="Builder.cs" />
+    <Compile Include="Domain\Def.cs" />
+    <Compile Include="Domain\Discard.cs" />
+    <Compile Include="Domain\Thing.cs" />
+    <Compile Include="Domain\Grammar.cs" />
+    <Compile Include="GrammarDef\Lexer.cs" />
+    <Compile Include="GrammarDef\Parser.cs" />
+    <Compile Include="GrammarDef\NodeType.cs" />
+    <Compile Include="GrammarDef\TokenType.cs" />
+    <Compile Include="Domain\Ignore.cs" />
     <Compile Include="LexerBase.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="ParserBase.cs" />
+    <Compile Include="Domain\Pattern.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sql\SqlLexer.cs" />
     <Compile Include="Sql\TokenType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GrammarDef\Def.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

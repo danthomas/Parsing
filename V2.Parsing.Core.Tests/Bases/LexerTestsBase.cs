@@ -2,7 +2,7 @@
 
 namespace V2.Parsing.Core.Tests.Bases
 {
-    public abstract class LexerTestsBase<L, T> where L : new()
+    public abstract class LexerTestsBase<L, T> : TestBase where L : new()
     {
         public string Run(string text)
         {

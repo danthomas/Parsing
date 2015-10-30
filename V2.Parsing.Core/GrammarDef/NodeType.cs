@@ -1,0 +1,36 @@
+﻿namespace V2.Parsing.Core.GrammarDef
+{
+    public enum NodeType
+    {
+        Grammar,
+        Return,
+        NewLine,
+        Comma,
+        Space,
+        Star,
+        Identifier,
+        Defs,
+        Def,
+        Patterns,
+        Pattern,
+        Ignore,
+        Tab,
+        Colon,
+        OpenSquare,
+        CloseSquare,
+        Plus,
+        Pipe,
+        Root,
+        Part,
+        Discard,
+        Discards,
+        Ignores,
+        Identifiers,
+        Element,
+        RequiredElements,
+        Optional,
+        RequiredIdents,
+        OptionalIdents,
+        OptionalElements
+    }
+}
