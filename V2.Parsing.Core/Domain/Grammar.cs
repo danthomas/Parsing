@@ -9,6 +9,7 @@ namespace V2.Parsing.Core.Domain
         public List<Pattern> Patterns { get; set; }
         public List<Ignore> Ignores { get; set; }
         public List<Discard> Discards { get; set; }
+        public bool CaseSensitive { get; set; }
 
         public Grammar()
         {

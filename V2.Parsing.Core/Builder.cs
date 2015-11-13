@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using V2.Parsing.Core.Domain;
 using V2.Parsing.Core.GrammarDef;
 
@@ -13,7 +12,8 @@ namespace V2.Parsing.Core
         {
             Grammar grammar = new Grammar
             {
-                Name = root.Children.Single(x => x.NodeType == NodeType.Identifier).Text
+                Name = root.Children.Single(x => x.NodeType == NodeType.Identifier).Text,
+                CaseSensitive = root.Children.Any(x => x.NodeType == NodeType.CaseSensitive)
             };
 
             var patternsNode = root.Children.SingleOrDefault(x => x.NodeType == NodeType.Patterns);
@@ -194,6 +194,59 @@ namespace V2.Parsing.Core
             return optionalIdents.Select(x => elements.Single(y => y.Name == x.Text))
                 .Select(x => new Identifier { Thing = x })
                 .ToList();
+        }
+
+        public string ToLexer(Grammar grammar)
+        {
+            string ret =
+                $@"using System.Collections.Generic;
+using V2.Parsing.Core
+
+namespace {grammar.Name}
+{{
+    public class Lexer : LexerBase<TokenType>
+    {{
+        public Lexer()
+        {{
+            EndOfFile = TokenType.EndOfFile;
+
+            Patterns = new List<PatternBase<TokenType>>
+            {{
+                new TokenPattern<TokenType>(TokenType.Return, ""\r""),
+                new TokenPattern<TokenType>(TokenType.NewLine, ""\n""),
+                new TokenPattern<TokenType>(TokenType.Tab, ""\t""),
+                new TokenPattern<TokenType>(TokenType.Comma, "",""),
+                new TokenPattern<TokenType>(TokenType.Space, "" ""),
+                new TokenPattern<TokenType>(TokenType.Plus, ""+""),
+                new TokenPattern<TokenType>(TokenType.Star, ""*""),
+                new TokenPattern<TokenType>(TokenType.Colon, "":""),
+                new TokenPattern<TokenType>(TokenType.OpenSquare, ""[""),
+                new TokenPattern<TokenType>(TokenType.CloseSquare, ""]""),
+                new TokenPattern<TokenType>(TokenType.Pipe, ""|""),
+
+                new TokenPattern<TokenType>(TokenType.Grammar, ""grammar""),
+                new TokenPattern<TokenType>(TokenType.Defs, ""defs""),
+                new TokenPattern<TokenType>(TokenType.Patterns, ""patterns""),
+                new TokenPattern<TokenType>(TokenType.Ignore, ""ignore""),
+                new TokenPattern<TokenType>(TokenType.Discard, ""discard""),
+
+                new StringPattern<TokenType>(TokenType.Identifier, ""'"", ""'""),
+
+                new RegexPattern<TokenType>(TokenType.Identifier, ""^[a-zA-Z_][a-zA-Z1-9_]*$""),
+            }};
+
+        Ignore = new List<TokenType>
+            {{
+                TokenType.Return,
+                TokenType.Space,
+                TokenType.Tab,
+            }};
+
+    CaseSensitive = {(grammar.CaseSensitive ? "true" : "false")};
+        }}
+    }}
+}}";
+            return ret;
         }
     }
 }

@@ -31,6 +31,7 @@
         Optional,
         RequiredIdents,
         OptionalIdents,
-        OptionalElements
+        OptionalElements,
+        CaseSensitive
     }
 }

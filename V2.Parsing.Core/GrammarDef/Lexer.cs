@@ -27,6 +27,7 @@ namespace V2.Parsing.Core.GrammarDef
                 new TokenPattern<TokenType>(TokenType.Patterns, "patterns"),
                 new TokenPattern<TokenType>(TokenType.Ignore, "ignore"),
                 new TokenPattern<TokenType>(TokenType.Discard, "discard"),
+                new TokenPattern<TokenType>(TokenType.CaseSensitive, "caseSensitive"),
 
                 new StringPattern<TokenType>(TokenType.Identifier, "'", "'"),
 

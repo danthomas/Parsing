@@ -36,6 +36,11 @@ namespace V2.Parsing.Core
 
             stringBuilder.AppendLine($"grammar {MakeSafe(grammar.Name)}");
 
+            if (grammar.CaseSensitive)
+            {
+                stringBuilder.AppendLine("caseSensitive");
+            }
+
             if (grammar.Defs != null && grammar.Defs.Count > 0)
             {
                 stringBuilder.AppendLine("defs");
@@ -139,6 +144,7 @@ namespace V2.Parsing.Core
                 "patterns",
                 "ignore",
                 "discard",
+                "caseSensitive",
                 "\\r",
                 "\\n",
                 "\\t",

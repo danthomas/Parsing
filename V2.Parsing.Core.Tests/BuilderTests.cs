@@ -1,5 +1,4 @@
-﻿using System.IO;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using V2.Parsing.Core.GrammarDef;
 using V2.Parsing.Core.Tests.Bases;
 
@@ -25,7 +24,7 @@ patterns
 
             var root = parser.Parse(text);
             
-            string thing = utils.NodeToString(root);
+            utils.NodeToString(root);
 
             var builder = new Builder();
 
@@ -51,14 +50,16 @@ patterns
             var root = parser.Parse(text);
 
             var utils = new Utils();
-
-            string thing = utils.NodeToString(root);
-
+            
             var builder = new Builder();
 
             var grammar = builder.BuildGrammar(root);
             
             var actual = utils.GrammarToString(grammar);
+
+            Assert.That(actual, Is.EqualTo(text));
+
+            actual = builder.ToLexer(grammar);
         }
     }
 }

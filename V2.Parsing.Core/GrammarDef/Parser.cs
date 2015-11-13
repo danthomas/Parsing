@@ -27,22 +27,31 @@ namespace V2.Parsing.Core.GrammarDef
             var child = Consume(parent, TokenType.Grammar, NodeType.Grammar);
 
             Consume(child, TokenType.Identifier, NodeType.Identifier);
+            
+            if (AreTokenTypes(TokenType.NewLine, TokenType.CaseSensitive))
+            {
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
+                Consume(child, TokenType.CaseSensitive, NodeType.CaseSensitive);
+            }
 
             if (AreTokenTypes(TokenType.NewLine, TokenType.Defs))
             {
                 Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Defs(child);
             }
+
             if (AreTokenTypes(TokenType.NewLine, TokenType.Patterns))
             {
                 Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Patterns(child);
             }
+
             if (AreTokenTypes(TokenType.NewLine, TokenType.Ignore))
             {
                 Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Ignores(child);
             }
+
             if (AreTokenTypes(TokenType.NewLine, TokenType.Discard))
             {
                 Consume(child, TokenType.NewLine, NodeType.NewLine);

@@ -1,6 +1,7 @@
 ﻿grammar Grammar
+caseSensitive
 defs
-    Grammar : 'grammar' Identifier [Defs] [Patterns] [Ignores] [Discards]
+    Grammar : 'grammar' Identifier [return 'caseSensitive'] [Defs] [Patterns] [Ignores] [Discards]
     Defs : return 'defs' Def+
     Def : return Identifier colon Part+
     Part : OptionalElements | Optional
@@ -34,6 +35,7 @@ patterns
     'patterns'
     'ignore'
     'discard'
+    'caseSensitive'
     Identifier : '^[a-zA-Z_][a-zA-Z1-9_]*$'
 ignore
     newLine

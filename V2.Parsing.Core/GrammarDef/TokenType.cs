@@ -19,6 +19,7 @@ namespace V2.Parsing.Core.GrammarDef
         CloseSquare,
         Plus,
         Pipe,
-        Discard
+        Discard,
+        CaseSensitive
     }
 }
