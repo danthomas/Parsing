@@ -35,7 +35,7 @@ namespace V2.Parsing.Core.GrammarDef
 
             Ignore = new List<TokenType>
             {
-                TokenType.NewLine,
+                TokenType.Return,
                 TokenType.Space,
                 TokenType.Tab,
             };

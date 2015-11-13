@@ -60,14 +60,8 @@ namespace V2.Parsing.Core
 
                     foreach (var partNode in defNode.Children.Where(x => x.NodeType == NodeType.Part))
                     {
-                        Dictionary<Node<NodeType>, Thing> identifierThings = partNode.Children
-                            .Where(x => x.NodeType == NodeType.Identifier)
-                            .Select(x => new { Node = x, Element = elements.Single(y => y.Name == x.Text) })
-                            .ToDictionary(x => x.Node, x => x.Element);
-
                         Element element = null;
-
-
+                        
                         if (partNode.Children.Count == 1 && partNode.Children[0].NodeType == NodeType.Optional)
                         {
                             var optionalIdents = partNode.Children[0].Children.SingleOrDefault(x => x.NodeType == NodeType.OptionalIdents);
@@ -136,16 +130,28 @@ namespace V2.Parsing.Core
                             throw new Exception();
                         }
 
-
-                        if (partNode.Children.Any(x => x.NodeType == NodeType.Plus))
+                        if (partNode.Children.Count == 1 && partNode.Children[0].NodeType == NodeType.Optional)
                         {
-                            element = new OneOrMore { Element = element };
+                            if (partNode.Children[0].Children.Any(x => x.NodeType == NodeType.Plus))
+                            {
+                                element = new OneOrMore { Element = element };
+                            }
+                            else if (partNode.Children[0].Children.Any(x => x.NodeType == NodeType.Star))
+                            {
+                                element = new ZeroOrMore { Element = element };
+                            }
                         }
-                        else if (partNode.Children.Any(x => x.NodeType == NodeType.Star))
+                        else
                         {
-                            element = new ZeroOrMore { Element = element };
+                            if (partNode.Children.Any(x => x.NodeType == NodeType.Plus))
+                            {
+                                element = new OneOrMore {Element = element};
+                            }
+                            else if (partNode.Children.Any(x => x.NodeType == NodeType.Star))
+                            {
+                                element = new ZeroOrMore {Element = element};
+                            }
                         }
-
                         def.Elements.Add(element);
                     }
                 }
@@ -188,137 +194,6 @@ namespace V2.Parsing.Core
             return optionalIdents.Select(x => elements.Single(y => y.Name == x.Text))
                 .Select(x => new Identifier { Thing = x })
                 .ToList();
-        }
-
-        public string GrammarToString(Grammar grammar)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            stringBuilder.AppendLine($"grammar {MakeSafe(grammar.Name)}");
-
-            if (grammar.Defs != null && grammar.Defs.Count > 0)
-            {
-                stringBuilder.AppendLine("defs");
-
-                foreach (var def in grammar.Defs)
-                {
-                    stringBuilder.Append($"  {MakeSafe(def.Name)} :");
-
-                    foreach (var element in def.Elements)
-                    {
-                        stringBuilder.Append(" ");
-                        ElementToString(stringBuilder, element);
-                    }
-                    stringBuilder.AppendLine();
-                }
-            }
-
-            if (grammar.Patterns != null && grammar.Patterns.Count > 0)
-            {
-                stringBuilder.AppendLine("patterns");
-
-                foreach (var pattern in grammar.Patterns)
-                {
-                    stringBuilder.Append($"  {MakeSafe(pattern.Name)}");
-                    if (!String.IsNullOrWhiteSpace(pattern.Text))
-                    {
-                        stringBuilder.Append($" : {MakeSafe(pattern.Text)}");
-                    }
-                    stringBuilder.AppendLine();
-                }
-            }
-
-            if (grammar.Ignores != null && grammar.Ignores.Count > 0)
-            {
-                stringBuilder.AppendLine("ignore");
-
-                foreach (var ignore in grammar.Ignores)
-                {
-                    stringBuilder.AppendLine($"  {MakeSafe(ignore.Name)}");
-                }
-            }
-
-            if (grammar.Discards != null && grammar.Discards.Count > 0)
-            {
-                stringBuilder.AppendLine("discard");
-
-                foreach (var discard in grammar.Discards)
-                {
-                    stringBuilder.AppendLine($"  {MakeSafe(discard.Name)}");
-                }
-            }
-
-            return stringBuilder.ToString();
-        }
-
-        private void ElementToString(StringBuilder stringBuilder, Element element)
-        {
-            Identifier identifier = element as Identifier;
-            OneOf oneOf = element as OneOf;
-            AllOf allOf = element as AllOf;
-            Optional optional = element as Optional;
-            OneOrMore oneOrMore = element as OneOrMore;
-            ZeroOrMore zeroOrMore = element as ZeroOrMore;
-
-            if (identifier != null)
-            {
-                stringBuilder.Append(MakeSafe(identifier.Thing.Name));
-            }
-            else if (oneOf != null)
-            {
-                stringBuilder.Append(String.Join(" | ", oneOf.Identifiers.Select(x => MakeSafe(x.Thing.Name))));
-            }
-            else if (allOf != null)
-            {
-                stringBuilder.Append(String.Join(" ", allOf.Identifiers.Select(x => MakeSafe(x.Thing.Name))));
-            }
-            else if (optional != null)
-            {
-                stringBuilder.Append("[");
-                ElementToString(stringBuilder, optional.Element);
-                stringBuilder.Append("]");
-            }
-            else if (oneOrMore != null)
-            {
-                ElementToString(stringBuilder, oneOrMore.Element);
-                stringBuilder.Append("+");
-            }
-            else if (zeroOrMore != null)
-            {
-                ElementToString(stringBuilder, zeroOrMore.Element);
-                stringBuilder.Append("*");
-            }
-        }
-
-        private string MakeSafe(string text)
-        {
-            var tokens = new[]
-            {
-                "grammar",
-                "defs",
-                "patterns",
-                "ignore",
-                "discard",
-                "\\r",
-                "\\n",
-                "\\t",
-                " ",
-                ",",
-                "+",
-                "*",
-                ":",
-                "[",
-                "]",
-                "|"
-            };
-
-            if (tokens.Contains(text)
-                || tokens.Where(x => x.Length == 1).Any(text.Contains))
-            {
-                return $"'{text}'";
-            }
-
-            return text;
         }
     }
 }

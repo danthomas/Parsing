@@ -4,11 +4,11 @@ namespace V2.Parsing.Core.GrammarDef
 {
     public class Parser : ParserBase<TokenType, NodeType>
     {
-        public Parser(LexerBase<TokenType> lexer) : base(lexer)
+        public Parser() : base(new Lexer())
         {
             base.Discard = new List<string>
             {
-                "Return",
+                "NewLine",
                 "Pipe",
                 "Identifiers",
                 "OptionalElements",
@@ -28,24 +28,24 @@ namespace V2.Parsing.Core.GrammarDef
 
             Consume(child, TokenType.Identifier, NodeType.Identifier);
 
-            if (AreTokenTypes(TokenType.Return, TokenType.Defs))
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Defs))
             {
-                Consume(child, TokenType.Return, NodeType.Return);
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Defs(child);
             }
-            if (AreTokenTypes(TokenType.Return, TokenType.Patterns))
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Patterns))
             {
-                Consume(child, TokenType.Return, NodeType.Return);
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Patterns(child);
             }
-            if (AreTokenTypes(TokenType.Return, TokenType.Ignore))
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Ignore))
             {
-                Consume(child, TokenType.Return, NodeType.Return);
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Ignores(child);
             }
-            if (AreTokenTypes(TokenType.Return, TokenType.Discard))
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Discard))
             {
-                Consume(child, TokenType.Return, NodeType.Return);
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
                 Discards(child);
             }
 
@@ -56,7 +56,7 @@ namespace V2.Parsing.Core.GrammarDef
         {
             var child = Consume(parent, TokenType.Defs, NodeType.Defs);
 
-            while (AreTokenTypes(TokenType.Return, TokenType.Identifier, TokenType.Colon))
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier, TokenType.Colon))
             {
                 Def(child);
             }
@@ -67,7 +67,7 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Def(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Def);
-            Consume(child, TokenType.Return, NodeType.Return);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             Consume(child, TokenType.Colon, NodeType.Colon);
             Part(child);
@@ -140,7 +140,7 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> RequiredIdents(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.RequiredIdents);
-            
+
             Consume(child, TokenType.Identifier, NodeType.Identifier);
 
             do
@@ -161,7 +161,7 @@ namespace V2.Parsing.Core.GrammarDef
             {
                 Consume(child, TokenType.Pipe, NodeType.Pipe);
                 Consume(child, TokenType.Identifier, NodeType.Identifier);
-            } 
+            }
 
             return child;
         }
@@ -216,38 +216,10 @@ namespace V2.Parsing.Core.GrammarDef
             return child;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public Node<NodeType> Patterns(Node<NodeType> parent)
         {
             var child = Consume(parent, TokenType.Patterns, NodeType.Patterns);
-            while (AreTokenTypes(TokenType.Return, TokenType.Identifier))
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
             {
                 Pattern(child);
             }
@@ -257,7 +229,7 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Pattern(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Pattern);
-            Consume(child, TokenType.Return, NodeType.Return);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             if (IsTokenType(TokenType.Colon))
             {
@@ -270,7 +242,7 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Ignores(Node<NodeType> parent)
         {
             var child = Consume(parent, TokenType.Ignore, NodeType.Ignores);
-            while (AreTokenTypes(TokenType.Return, TokenType.Identifier))
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
             {
                 Ignore(child);
             }
@@ -280,7 +252,7 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Ignore(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Ignore);
-            Consume(child, TokenType.Return, NodeType.Return);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             return child;
         }
@@ -288,7 +260,7 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Discards(Node<NodeType> parent)
         {
             var child = Consume(parent, TokenType.Discard, NodeType.Discards);
-            while (AreTokenTypes(TokenType.Return, TokenType.Identifier))
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
             {
                 Discard(child);
             }
@@ -298,7 +270,7 @@ namespace V2.Parsing.Core.GrammarDef
         public new Node<NodeType> Discard(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Discard);
-            Consume(child, TokenType.Return, NodeType.Return);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             return child;
         }

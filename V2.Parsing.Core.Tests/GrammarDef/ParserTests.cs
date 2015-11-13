@@ -326,7 +326,7 @@ namespace V2.Parsing.Core.Tests.GrammarDef
 
         private void Run(string text, string expected)
         {
-            Parser parser = new Parser(new Lexer());
+            Parser parser = new Parser();
 
             var root = parser.Parse(text);
 

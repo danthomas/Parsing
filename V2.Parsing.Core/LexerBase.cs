@@ -32,7 +32,7 @@ namespace V2.Parsing.Core
         {
             _buffer = new List<Token<T>>();
             _index = 0;
-            _text = text;
+            _text = text.Replace("\n", "\r\n").Replace("\r\r\n", "\r\n");
             NextChar();
         }
 

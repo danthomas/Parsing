@@ -9,7 +9,7 @@ namespace V2.Parsing.Core.Tests.Bases
         {
             Type type = typeof (T);
             
-            using (Stream stream = type.Assembly.GetManifestResourceStream($"{type.Namespace}.Def.txt"))
+            using (Stream stream = type.Assembly.GetManifestResourceStream($"{type.Namespace}.Def.grm"))
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {

@@ -34,7 +34,7 @@ namespace V2.Parsing.Core
 
         public override string ToString()
         {
-            return NodeType + (String.IsNullOrWhiteSpace(Text) ? "" : " - " + Text);
+            return NodeType + (String.IsNullOrWhiteSpace(Text) && Text != " " ? "" : " - " + Text);
         }
 
         public Node<N> AddNode(Node<N> node)
