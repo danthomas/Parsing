@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-
 namespace V2.Parsing.Core.GrammarDef
 {
     public class Lexer : LexerBase<TokenType>

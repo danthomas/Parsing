@@ -32,19 +32,26 @@
             this.grammar = new System.Windows.Forms.RichTextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.nodes = new System.Windows.Forms.RichTextBox();
+            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.lexer = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.grammarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.parseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,7 +69,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(963, 424);
-            this.splitContainer1.SplitterDistance = 169;
+            this.splitContainer1.SplitterDistance = 164;
             this.splitContainer1.TabIndex = 0;
             // 
             // grammar
@@ -71,7 +78,7 @@
             this.grammar.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.grammar.Location = new System.Drawing.Point(0, 0);
             this.grammar.Name = "grammar";
-            this.grammar.Size = new System.Drawing.Size(169, 424);
+            this.grammar.Size = new System.Drawing.Size(164, 424);
             this.grammar.TabIndex = 0;
             this.grammar.Text = "";
             this.grammar.WordWrap = false;
@@ -85,8 +92,12 @@
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.Controls.Add(this.nodes);
-            this.splitContainer2.Size = new System.Drawing.Size(790, 424);
-            this.splitContainer2.SplitterDistance = 169;
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
+            this.splitContainer2.Size = new System.Drawing.Size(795, 424);
+            this.splitContainer2.SplitterDistance = 170;
             this.splitContainer2.TabIndex = 0;
             // 
             // nodes
@@ -95,10 +106,34 @@
             this.nodes.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nodes.Location = new System.Drawing.Point(0, 0);
             this.nodes.Name = "nodes";
-            this.nodes.Size = new System.Drawing.Size(169, 424);
+            this.nodes.Size = new System.Drawing.Size(170, 424);
             this.nodes.TabIndex = 1;
             this.nodes.Text = "";
             this.nodes.WordWrap = false;
+            // 
+            // splitContainer3
+            // 
+            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer3.Name = "splitContainer3";
+            // 
+            // splitContainer3.Panel1
+            // 
+            this.splitContainer3.Panel1.Controls.Add(this.lexer);
+            this.splitContainer3.Size = new System.Drawing.Size(621, 424);
+            this.splitContainer3.SplitterDistance = 134;
+            this.splitContainer3.TabIndex = 0;
+            // 
+            // lexer
+            // 
+            this.lexer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lexer.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lexer.Location = new System.Drawing.Point(0, 0);
+            this.lexer.Name = "lexer";
+            this.lexer.Size = new System.Drawing.Size(134, 424);
+            this.lexer.TabIndex = 2;
+            this.lexer.Text = "";
+            this.lexer.WordWrap = false;
             // 
             // menuStrip1
             // 
@@ -117,7 +152,8 @@
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.toolStripMenuItem1,
-            this.parseToolStripMenuItem});
+            this.parseToolStripMenuItem,
+            this.generateToolStripMenuItem});
             this.grammarToolStripMenuItem.Name = "grammarToolStripMenuItem";
             this.grammarToolStripMenuItem.Size = new System.Drawing.Size(83, 24);
             this.grammarToolStripMenuItem.Text = "Grammar";
@@ -150,6 +186,14 @@
             this.parseToolStripMenuItem.Text = "Parse";
             this.parseToolStripMenuItem.Click += new System.EventHandler(this.parseToolStripMenuItem_Click);
             // 
+            // generateToolStripMenuItem
+            // 
+            this.generateToolStripMenuItem.Name = "generateToolStripMenuItem";
+            this.generateToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.generateToolStripMenuItem.Size = new System.Drawing.Size(182, 26);
+            this.generateToolStripMenuItem.Text = "Generate";
+            this.generateToolStripMenuItem.Click += new System.EventHandler(this.generateToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -165,8 +209,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
+            this.splitContainer3.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -186,6 +234,9 @@
         private System.Windows.Forms.ToolStripMenuItem parseToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.RichTextBox nodes;
+        private System.Windows.Forms.ToolStripMenuItem generateToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitContainer3;
+        private System.Windows.Forms.RichTextBox lexer;
     }
 }
 

@@ -39,10 +39,11 @@ patterns
     Identifier : '^[a-zA-Z_][a-zA-Z1-9_]*$'
     Identifier : '`' '`'
 ignore
-    newLine
-    tab
-    space
-discard
     return
-    OptionalIdents
-    RequiredIdents
+    space
+    tab
+discard
+    newLine
+    pipe
+    Identifiers
+    OptionalElements

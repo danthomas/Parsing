@@ -24,7 +24,7 @@ patterns
             Parser parser = new Parser();
 
             var root = parser.Parse(text);
-            
+
             utils.NodeToString(root);
 
             var builder = new Builder();
@@ -51,18 +51,20 @@ patterns
             var root = parser.Parse(text);
 
             var utils = new Utils();
-            
+
             var builder = new Builder();
 
             var grammar = builder.BuildGrammar(root);
-            
+
             var actual = utils.GrammarToString(grammar);
 
             Assert.That(actual, Is.EqualTo(text));
 
-            actual = builder.ToLexer(grammar);
+            var lexer = builder.CreateParser(grammar);
 
-            File.WriteAllText(@"c:\temp\lexer.cs", actual);
+            builder.BuildLexer(grammar);
+
+            builder.BuildParser(grammar);
         }
     }
 }

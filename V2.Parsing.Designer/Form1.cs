@@ -56,6 +56,21 @@ namespace V2.Parsing.Designer
             
             nodes.Text = _utils.NodeToString(node);
         }
+
+        private void generateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var parser = new Parser();
+
+            Node<NodeType> root = parser.Parse(grammar.Text);
+
+            nodes.Text = _utils.NodeToString(root);
+
+            var builder = new Builder();
+
+            var grammar2 = builder.BuildGrammar(root);
+
+            lexer.Text = builder.BuildLexer(grammar2);
+        }
     }
 
     class Settings

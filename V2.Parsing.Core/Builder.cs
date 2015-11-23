@@ -1,6 +1,9 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Microsoft.CSharp;
 using V2.Parsing.Core.Domain;
 using V2.Parsing.Core.GrammarDef;
 
@@ -29,7 +32,7 @@ namespace V2.Parsing.Core
                     };
 
                     pattern.Texts = children.Skip(1).Select(x => x.Text).ToArray();
-                    
+
                     grammar.Patterns.Add(pattern);
                 }
             }
@@ -72,14 +75,14 @@ namespace V2.Parsing.Core
                             {
                                 subElement = new OneOf
                                 {
-                                    Identifiers = GetIdentifiers(optionalIdents.Children, elements)
+                                    Identifiers = GetIdentifiers(optionalIdents.Children)
                                 };
                             }
                             else if (requiredIdents != null)
                             {
                                 subElement = new AllOf
                                 {
-                                    Identifiers = GetIdentifiers(requiredIdents.Children, elements)
+                                    Identifiers = GetIdentifiers(requiredIdents.Children)
                                 };
                             }
                             else
@@ -188,13 +191,310 @@ namespace V2.Parsing.Core
             return grammar;
         }
 
-        private static List<Identifier> GetIdentifiers(List<Node<NodeType>> optionalIdents, List<Thing> elements)
+        private static List<Identifier> GetIdentifiers(List<Node<NodeType>> optionalIdents)
         {
             return optionalIdents.Select(x => new Identifier { Name = x.Text })
                 .ToList();
         }
 
-        public string ToLexer(Grammar grammar)
+        public string BuildParser(Grammar grammar)
+        {
+            string ret = $@"using System.Collections.Generic;
+using V2.Parsing.Core;
+
+namespace {grammar.Name}
+{{
+    public class Parser : ParserBase<TokenType, NodeType>
+    {{
+        public Parser() : base(new Lexer())
+        {{
+            base.Discard = new List<string>
+            {{
+                ""NewLine"",
+                ""Pipe"",
+                ""Identifiers"",
+                ""OptionalElements"",
+            }};
+        }}
+
+        public override Node<NodeType> Root()
+        {{
+            Node<NodeType> root = new Node<NodeType>(null, NodeType.Root);
+
+            return Grammar(root);
+        }}
+
+        public Node<NodeType> Grammar(Node<NodeType> parent)
+        {{
+            var child = Consume(parent, TokenType.Grammar, NodeType.Grammar);
+
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+            
+            if (AreTokenTypes(TokenType.NewLine, TokenType.CaseSensitive))
+            {{
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
+                Consume(child, TokenType.CaseSensitive, NodeType.CaseSensitive);
+            }}
+
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Defs))
+            {{
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
+                Defs(child);
+            }}
+
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Patterns))
+            {{
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
+                Patterns(child);
+            }}
+
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Ignore))
+            {{
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
+                Ignores(child);
+            }}
+
+            if (AreTokenTypes(TokenType.NewLine, TokenType.Discard))
+            {{
+                Consume(child, TokenType.NewLine, NodeType.NewLine);
+                Discards(child);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Defs(Node<NodeType> parent)
+        {{
+            var child = Consume(parent, TokenType.Defs, NodeType.Defs);
+
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier, TokenType.Colon))
+            {{
+                Def(child);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Def(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Def);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+            Consume(child, TokenType.Colon, NodeType.Colon);
+            Part(child);
+
+            while (IsTokenType(TokenType.OpenSquare, TokenType.Identifier))
+            {{
+                Part(child);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Part(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Part);
+
+            if (IsTokenType(TokenType.Identifier))
+            {{
+                OptionalElements(child);
+            }}
+            else if (IsTokenType(TokenType.OpenSquare))
+            {{
+                Optional(child);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Optional(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Optional);
+
+            Consume(child, TokenType.OpenSquare, NodeType.OpenSquare);
+
+            Identifiers(child);
+
+            Consume(child, TokenType.CloseSquare, NodeType.CloseSquare);
+
+            if (IsTokenType(TokenType.Plus, TokenType.Star))
+            {{
+                if (IsTokenType(TokenType.Plus))
+                {{
+                    Consume(child, TokenType.Plus, NodeType.Plus);
+                }}
+                else if (IsTokenType(TokenType.Star))
+                {{
+                    Consume(child, TokenType.Star, NodeType.Star);
+                }}
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Identifiers(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Identifiers);
+
+            if (AreTokenTypes(TokenType.Identifier, TokenType.Identifier))
+            {{
+                RequiredIdents(child);
+            }}
+            else if (AreTokenTypes(TokenType.Identifier))
+            {{
+                OptionalIdents(child);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> RequiredIdents(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.RequiredIdents);
+
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+
+            do
+            {{
+                Consume(child, TokenType.Identifier, NodeType.Identifier);
+            }} while (AreTokenTypes(TokenType.Identifier));
+
+            return child;
+        }}
+
+        public Node<NodeType> OptionalIdents(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.OptionalIdents);
+
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+
+            while (AreTokenTypes(TokenType.Pipe))
+            {{
+                Consume(child, TokenType.Pipe, NodeType.Pipe);
+                Consume(child, TokenType.Identifier, NodeType.Identifier);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> RequiredElements(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.RequiredElements);
+
+            Element(child);
+
+            do
+            {{
+                Element(child);
+            }} while (AreTokenTypes(TokenType.Identifier));
+
+            return child;
+        }}
+
+        public Node<NodeType> OptionalElements(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.OptionalElements);
+
+            Element(child);
+
+            while (AreTokenTypes(TokenType.Pipe, TokenType.Identifier))
+            {{
+                Consume(child, TokenType.Pipe, NodeType.Pipe);
+                Element(child);
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Element(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Element);
+
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+
+            if (IsTokenType(TokenType.Plus, TokenType.Star))
+            {{
+                if (IsTokenType(TokenType.Plus))
+                {{
+                    Consume(child, TokenType.Plus, NodeType.Plus);
+                }}
+                else if (IsTokenType(TokenType.Star))
+                {{
+                    Consume(child, TokenType.Star, NodeType.Star);
+                }}
+            }}
+
+            return child;
+        }}
+
+        public Node<NodeType> Patterns(Node<NodeType> parent)
+        {{
+            var child = Consume(parent, TokenType.Patterns, NodeType.Patterns);
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
+            {{
+                Pattern(child);
+            }}
+            return child;
+        }}
+
+        public Node<NodeType> Pattern(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Pattern);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+            if (IsTokenType(TokenType.Colon))
+            {{
+                Consume(child, TokenType.Colon, NodeType.Colon);
+                while (IsTokenType(TokenType.Identifier))
+                {{
+                    Consume(child, TokenType.Identifier, NodeType.Identifier);
+                }}
+            }}
+            return child;
+        }}
+
+        public Node<NodeType> Ignores(Node<NodeType> parent)
+        {{
+            var child = Consume(parent, TokenType.Ignore, NodeType.Ignores);
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
+            {{
+                Ignore(child);
+            }}
+            return child;
+        }}
+
+        public Node<NodeType> Ignore(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Ignore);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+            return child;
+        }}
+
+        public Node<NodeType> Discards(Node<NodeType> parent)
+        {{
+            var child = Consume(parent, TokenType.Discard, NodeType.Discards);
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
+            {{
+                Discard(child);
+            }}
+            return child;
+        }}
+
+        public new Node<NodeType> Discard(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.Discard);
+            Consume(child, TokenType.NewLine, NodeType.NewLine);
+            Consume(child, TokenType.Identifier, NodeType.Identifier);
+            return child;
+        }}
+    }}
+}}";
+
+            return ret;
+        }
+
+        public string BuildLexer(Grammar grammar)
         {
             string ret =
                 $@"using System.Collections.Generic;
@@ -202,14 +502,28 @@ using V2.Parsing.Core;
 
 namespace {grammar.Name}
 {{
-    public class Lexer : LexerBase<TokenType>
+
+    public enum TokenType
     {{
+        EndOfFile,";
+
+            foreach (var pattern in grammar.Patterns.Select(x => x.Name.ToIdentifier()).Distinct())
+            {
+                ret += $@"
+        {pattern},";
+            }
+
+            ret += @"
+    }
+
+    public class Lexer : LexerBase<TokenType>
+    {
         public Lexer()
-        {{
+        {
             EndOfFile = TokenType.EndOfFile;
 
             Patterns = new List<PatternBase<TokenType>>
-            {{";
+            {";
 
             foreach (var pattern in grammar.Patterns)
             {
@@ -222,7 +536,7 @@ namespace {grammar.Name}
                 else if (pattern.Texts.Length > 1)
                 {
                     patternType = "String";
-                } 
+                }
 
                 ret += $@"
                 new {patternType}Pattern<TokenType>(TokenType.{pattern.Name.ToIdentifier()}, ";
@@ -238,37 +552,20 @@ namespace {grammar.Name}
 
                 ret += "),";
             }
-            /*
-                new TokenPattern<TokenType>(TokenType.Return, ""\r""),
-                new TokenPattern<TokenType>(TokenType.NewLine, ""\n""),
-                new TokenPattern<TokenType>(TokenType.Tab, ""\t""),
-                new TokenPattern<TokenType>(TokenType.Comma, "",""),
-                new TokenPattern<TokenType>(TokenType.Space, "" ""),
-                new TokenPattern<TokenType>(TokenType.Plus, ""+""),
-                new TokenPattern<TokenType>(TokenType.Star, ""*""),
-                new TokenPattern<TokenType>(TokenType.Colon, "":""),
-                new TokenPattern<TokenType>(TokenType.OpenSquare, ""[""),
-                new TokenPattern<TokenType>(TokenType.CloseSquare, ""]""),
-                new TokenPattern<TokenType>(TokenType.Pipe, ""|""),
 
-                new TokenPattern<TokenType>(TokenType.Grammar, ""grammar""),
-                new TokenPattern<TokenType>(TokenType.Defs, ""defs""),
-                new TokenPattern<TokenType>(TokenType.Patterns, ""patterns""),
-                new TokenPattern<TokenType>(TokenType.Ignore, ""ignore""),
-                new TokenPattern<TokenType>(TokenType.Discard, ""discard""),
-
-                new StringPattern<TokenType>(TokenType.Identifier, ""'"", ""'""),
-
-                new RegexPattern<TokenType>(TokenType.Identifier, ""^[a-zA-Z_][a-zA-Z1-9_]*$""),
-                */
             ret += $@"
             }};
 
             Ignore = new List<TokenType>
-            {{
-                TokenType.Return,
-                TokenType.Space,
-                TokenType.Tab,
+            {{";
+
+            foreach (var v in grammar.Ignores)
+            {
+                ret += $@"
+                TokenType.{v.Name.ToIdentifier()},";
+            }
+
+            ret += $@"
             }};
 
             CaseSensitive = {(grammar.CaseSensitive ? "true" : "false")};
@@ -276,6 +573,39 @@ namespace {grammar.Name}
     }}
 }}";
             return ret;
+        }
+
+        public object CreateParser(Grammar grammar)
+        {
+            string lexer = BuildLexer(grammar);
+            string parser = BuildParser(grammar);
+
+            var assembly = Build(lexer, parser);
+
+            return Activator.CreateInstance(assembly.GetType($"{grammar.Name}.Parser"));
+        }
+
+        private Assembly Build(params string[] sources)
+        {
+            CodeDomProvider codeDomProvider = CSharpCodeProvider.CreateProvider("C#", new Dictionary<string, string>() { { "CompilerVersion", "v4.0" } });
+
+            CompilerParameters compilerParameters = new CompilerParameters { GenerateInMemory = true };
+            compilerParameters.ReferencedAssemblies.Add("System.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Data.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Core.dll");
+            compilerParameters.ReferencedAssemblies.Add("V2.Parsing.Core.dll");
+
+            compilerParameters.IncludeDebugInformation = false;
+
+            CompilerResults compilerResults = codeDomProvider.CompileAssemblyFromSource(compilerParameters, sources);
+
+            if (compilerResults.Errors.HasErrors)
+            {
+                var errors =
+                    compilerResults.Errors.Cast<CompilerError>().Select(item => item.Line + ": " + item.ErrorText).ToList();
+                throw new Exception(String.Join(Environment.NewLine, errors));
+            }
+            return compilerResults.CompiledAssembly;
         }
     }
 }
