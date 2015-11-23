@@ -65,9 +65,9 @@ namespace V2.Parsing.Core
                 foreach (var pattern in grammar.Patterns)
                 {
                     stringBuilder.Append($"    {MakeSafe(pattern.Name)}");
-                    if (!String.IsNullOrWhiteSpace(pattern.Text) || pattern.Text == " " )
+                    if (pattern.Texts.Length > 0)
                     {
-                        stringBuilder.Append($" : {MakeSafe(pattern.Text)}");
+                        stringBuilder.Append($" : {String.Join(" ", pattern.Texts.Select(MakeSafe))}");
                     }
                     stringBuilder.AppendLine();
                 }
@@ -107,15 +107,15 @@ namespace V2.Parsing.Core
 
             if (identifier != null)
             {
-                stringBuilder.Append(MakeSafe(identifier.Thing.Name));
+                stringBuilder.Append(MakeSafe(identifier.Name));
             }
             else if (oneOf != null)
             {
-                stringBuilder.Append(String.Join(" | ", oneOf.Identifiers.Select(x => MakeSafe(x.Thing.Name))));
+                stringBuilder.Append(String.Join(" | ", oneOf.Identifiers.Select(x => MakeSafe(x.Name))));
             }
             else if (allOf != null)
             {
-                stringBuilder.Append(String.Join(" ", allOf.Identifiers.Select(x => MakeSafe(x.Thing.Name))));
+                stringBuilder.Append(String.Join(" ", allOf.Identifiers.Select(x => MakeSafe(x.Name))));
             }
             else if (optional != null)
             {
@@ -155,7 +155,8 @@ namespace V2.Parsing.Core
                 ":",
                 "[",
                 "]",
-                "|"
+                "|",
+                "`"
             };
 
             if (tokens.Contains(text)

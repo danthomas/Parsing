@@ -27,10 +27,9 @@ namespace V2.Parsing.Core
                     {
                         Name = children[0].Text
                     };
-                    if (children.Length == 2)
-                    {
-                        pattern.Text = children[1].Text;
-                    }
+
+                    pattern.Texts = children.Skip(1).Select(x => x.Text).ToArray();
+                    
                     grammar.Patterns.Add(pattern);
                 }
             }
@@ -61,7 +60,7 @@ namespace V2.Parsing.Core
                     foreach (var partNode in defNode.Children.Where(x => x.NodeType == NodeType.Part))
                     {
                         Element element = null;
-                        
+
                         if (partNode.Children.Count == 1 && partNode.Children[0].NodeType == NodeType.Optional)
                         {
                             var optionalIdents = partNode.Children[0].Children.SingleOrDefault(x => x.NodeType == NodeType.OptionalIdents);
@@ -101,11 +100,11 @@ namespace V2.Parsing.Core
                             {
                                 Identifier identifier = new Identifier
                                 {
-                                    Thing = elements.Single(x => x.Name == elementNode.Children[0].Text)
+                                    Name = elementNode.Children[0].Text
                                 };
 
                                 element = identifier;
-                                
+
                                 if (elementNode.Children.Any(x => x.NodeType == NodeType.Plus))
                                 {
                                     element = new OneOrMore { Element = element };
@@ -145,11 +144,11 @@ namespace V2.Parsing.Core
                         {
                             if (partNode.Children.Any(x => x.NodeType == NodeType.Plus))
                             {
-                                element = new OneOrMore {Element = element};
+                                element = new OneOrMore { Element = element };
                             }
                             else if (partNode.Children.Any(x => x.NodeType == NodeType.Star))
                             {
-                                element = new ZeroOrMore {Element = element};
+                                element = new ZeroOrMore { Element = element };
                             }
                         }
                         def.Elements.Add(element);
@@ -191,8 +190,7 @@ namespace V2.Parsing.Core
 
         private static List<Identifier> GetIdentifiers(List<Node<NodeType>> optionalIdents, List<Thing> elements)
         {
-            return optionalIdents.Select(x => elements.Single(y => y.Name == x.Text))
-                .Select(x => new Identifier { Thing = x })
+            return optionalIdents.Select(x => new Identifier { Name = x.Text })
                 .ToList();
         }
 
@@ -200,7 +198,7 @@ namespace V2.Parsing.Core
         {
             string ret =
                 $@"using System.Collections.Generic;
-using V2.Parsing.Core
+using V2.Parsing.Core;
 
 namespace {grammar.Name}
 {{
@@ -211,7 +209,36 @@ namespace {grammar.Name}
             EndOfFile = TokenType.EndOfFile;
 
             Patterns = new List<PatternBase<TokenType>>
-            {{
+            {{";
+
+            foreach (var pattern in grammar.Patterns)
+            {
+                string patternType = "Token";
+
+                if (pattern.Texts.Length == 1 && pattern.Texts[0].StartsWith("^"))
+                {
+                    patternType = "Regex";
+                }
+                else if (pattern.Texts.Length > 1)
+                {
+                    patternType = "String";
+                } 
+
+                ret += $@"
+                new {patternType}Pattern<TokenType>(TokenType.{pattern.Name.ToIdentifier()}, ";
+
+                if (pattern.Texts.Length == 0)
+                {
+                    ret += $@"""{pattern.Name}""";
+                }
+                else
+                {
+                    ret += String.Join(", ", pattern.Texts.Select(x => $@"""{x.Replace("`", "'")}"""));
+                }
+
+                ret += "),";
+            }
+            /*
                 new TokenPattern<TokenType>(TokenType.Return, ""\r""),
                 new TokenPattern<TokenType>(TokenType.NewLine, ""\n""),
                 new TokenPattern<TokenType>(TokenType.Tab, ""\t""),
@@ -233,16 +260,18 @@ namespace {grammar.Name}
                 new StringPattern<TokenType>(TokenType.Identifier, ""'"", ""'""),
 
                 new RegexPattern<TokenType>(TokenType.Identifier, ""^[a-zA-Z_][a-zA-Z1-9_]*$""),
+                */
+            ret += $@"
             }};
 
-        Ignore = new List<TokenType>
+            Ignore = new List<TokenType>
             {{
                 TokenType.Return,
                 TokenType.Space,
                 TokenType.Tab,
             }};
 
-    CaseSensitive = {(grammar.CaseSensitive ? "true" : "false")};
+            CaseSensitive = {(grammar.CaseSensitive ? "true" : "false")};
         }}
     }}
 }}";

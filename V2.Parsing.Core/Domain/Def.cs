@@ -14,7 +14,7 @@ namespace V2.Parsing.Core.Domain
 
     public class Identifier : Element
     {
-        public Thing Thing { get; set; }
+        public string Name { get; set; }
     }
 
     public class Optional : Element

@@ -45,6 +45,7 @@
     <Compile Include="Domain\Discard.cs" />
     <Compile Include="Domain\Thing.cs" />
     <Compile Include="Domain\Grammar.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GrammarDef\Lexer.cs" />
     <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="GrammarDef\NodeType.cs" />

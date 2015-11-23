@@ -243,7 +243,10 @@ namespace V2.Parsing.Core.GrammarDef
             if (IsTokenType(TokenType.Colon))
             {
                 Consume(child, TokenType.Colon, NodeType.Colon);
-                Consume(child, TokenType.Identifier, NodeType.Identifier);
+                while (IsTokenType(TokenType.Identifier))
+                {
+                    Consume(child, TokenType.Identifier, NodeType.Identifier);
+                }
             }
             return child;
         }

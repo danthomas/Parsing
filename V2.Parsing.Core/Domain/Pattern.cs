@@ -2,6 +2,6 @@
 {
     public class Pattern : Thing
     {
-        public string Text { get; set; }
+        public string[] Texts { get; set; }
     }
 }

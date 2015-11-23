@@ -13,7 +13,7 @@ defs
     RequiredElements : Element Element+
     Element : Identifier [star | plus]
     Patterns : return 'patterns' Pattern+
-    Pattern : return Identifier [colon Identifier]
+    Pattern : return Identifier [colon Identifier] [Identifier]
     Ignores : return 'ignore' Ignore+
     Ignore : return Identifier
     Discards : return 'discard' Discard+
@@ -37,6 +37,7 @@ patterns
     'discard'
     'caseSensitive'
     Identifier : '^[a-zA-Z_][a-zA-Z1-9_]*$'
+    Identifier : '`' '`'
 ignore
     newLine
     tab

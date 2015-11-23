@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.IO;
+using NUnit.Framework;
 using V2.Parsing.Core.GrammarDef;
 using V2.Parsing.Core.Tests.Bases;
 
@@ -60,6 +61,8 @@ patterns
             Assert.That(actual, Is.EqualTo(text));
 
             actual = builder.ToLexer(grammar);
+
+            File.WriteAllText(@"c:\temp\lexer.cs", actual);
         }
     }
 }
