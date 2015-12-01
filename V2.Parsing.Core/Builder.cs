@@ -197,6 +197,35 @@ namespace V2.Parsing.Core
                 .ToList();
         }
 
+        public string BuildNodeType(Grammar grammar)
+        {
+            string ret = $@"using System.Collections.Generic;
+using V2.Parsing.Core;
+
+namespace {grammar.Name}
+{{
+
+    public enum NodeType
+    {{
+        Root,";
+
+            var names = grammar.Defs.Select(x => x.Name).ToList();
+            names.AddRange(grammar.Patterns
+                .Select(x => x.Name.ToIdentifier()));
+
+            foreach (var name in names.Distinct())
+            {
+                ret += $@"
+        {name},";
+            }
+
+            ret += @"
+    }
+}";
+
+            return ret;
+        }
+
         public string BuildParser(Grammar grammar)
         {
             string ret = $@"using System.Collections.Generic;
@@ -209,11 +238,15 @@ namespace {grammar.Name}
         public Parser() : base(new Lexer())
         {{
             base.Discard = new List<string>
-            {{
-                ""NewLine"",
-                ""Pipe"",
-                ""Identifiers"",
-                ""OptionalElements"",
+            {{";
+
+            foreach(var discard in grammar.Discards)
+            {
+                ret += $@"
+                ""{discard.Name}"",";
+            }
+
+            ret += $@"
             }};
         }}
 
@@ -221,7 +254,7 @@ namespace {grammar.Name}
         {{
             Node<NodeType> root = new Node<NodeType>(null, NodeType.Root);
 
-            return Grammar(root);
+            return {grammar.Defs.First().Name}(root);
         }}
 
         public Node<NodeType> Grammar(Node<NodeType> parent)
@@ -494,7 +527,7 @@ namespace {grammar.Name}
             return ret;
         }
 
-        public string BuildLexer(Grammar grammar)
+        public string BuildTokenType(Grammar grammar)
         {
             string ret =
                 $@"using System.Collections.Generic;
@@ -515,15 +548,26 @@ namespace {grammar.Name}
 
             ret += @"
     }
+}";
+            return ret;
+        }
 
-    public class Lexer : LexerBase<TokenType>
-    {
-        public Lexer()
+        public string BuildLexer(Grammar grammar)
         {
+            string ret =
+                $@"using System.Collections.Generic;
+using V2.Parsing.Core;
+
+namespace {grammar.Name}
+{{
+    public class Lexer : LexerBase<TokenType>
+    {{
+        public Lexer()
+        {{
             EndOfFile = TokenType.EndOfFile;
 
             Patterns = new List<PatternBase<TokenType>>
-            {";
+            {{";
 
             foreach (var pattern in grammar.Patterns)
             {
@@ -577,17 +621,19 @@ namespace {grammar.Name}
 
         public object CreateParser(Grammar grammar)
         {
+            string tokenType = BuildTokenType(grammar);
             string lexer = BuildLexer(grammar);
+            string nodeType = BuildNodeType(grammar);
             string parser = BuildParser(grammar);
 
-            var assembly = Build(lexer, parser);
+            var assembly = Build(tokenType, lexer, nodeType, parser);
 
             return Activator.CreateInstance(assembly.GetType($"{grammar.Name}.Parser"));
         }
 
         private Assembly Build(params string[] sources)
         {
-            CodeDomProvider codeDomProvider = CSharpCodeProvider.CreateProvider("C#", new Dictionary<string, string>() { { "CompilerVersion", "v4.0" } });
+            CodeDomProvider codeDomProvider = CodeDomProvider.CreateProvider("C#", new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
 
             CompilerParameters compilerParameters = new CompilerParameters { GenerateInMemory = true };
             compilerParameters.ReferencedAssemblies.Add("System.dll");

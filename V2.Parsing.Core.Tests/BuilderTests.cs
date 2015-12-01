@@ -1,6 +1,4 @@
-﻿using System.IO;
-using NUnit.Framework;
-using V2.Parsing.Core.GrammarDef;
+﻿using NUnit.Framework;
 using V2.Parsing.Core.Tests.Bases;
 
 namespace V2.Parsing.Core.Tests
@@ -21,7 +19,7 @@ patterns
 ";
             var utils = new Utils();
 
-            Parser parser = new Parser();
+            Core.GrammarDef.Parser parser = new Core.GrammarDef.Parser();
 
             var root = parser.Parse(text);
 
@@ -31,11 +29,6 @@ patterns
 
             var grammar = builder.BuildGrammar(root);
 
-            //grammar.Defs[1].Elements[1] = new Domain.ZeroOrMore
-            //{
-            //    Element = grammar.Defs[1].Elements[1]
-            //};
-
             var actual = utils.GrammarToString(grammar);
 
             Assert.That(actual, Is.EqualTo(text));
@@ -44,11 +37,11 @@ patterns
         [Test]
         public void BuildGrammer()
         {
-            var text = GetDef<Parser>();
+            var text = GetDef<Core.GrammarDef.Parser>();
 
-            Parser parser = new Parser();
+            Core.GrammarDef.Parser parser = new Core.GrammarDef.Parser();
 
-            var root = parser.Parse(text);
+            Node<Core.GrammarDef.NodeType> root = parser.Parse(text);
 
             var utils = new Utils();
 
@@ -60,11 +53,9 @@ patterns
 
             Assert.That(actual, Is.EqualTo(text));
 
-            var lexer = builder.CreateParser(grammar);
+            var parser2 = builder.CreateParser(grammar);
 
-            builder.BuildLexer(grammar);
-
-            builder.BuildParser(grammar);
+            var root2 = parser2.GetType().GetMethod("Parse").Invoke(parser2, new object[] { text });
         }
     }
 }
