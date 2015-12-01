@@ -3,7 +3,6 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.CSharp;
 using V2.Parsing.Core.Domain;
 using V2.Parsing.Core.GrammarDef;
 
@@ -23,7 +22,7 @@ namespace V2.Parsing.Core
 
             if (patternsNode != null)
             {
-                foreach (var patternNode in patternsNode.Children.Where(x => x.NodeType == NodeType.Pattern))
+                foreach (var patternNode in patternsNode.Children.Where(x => x.NodeType == NodeType.Pattern && x.Children.Count > 0))
                 {
                     var children = patternNode.Children.Where(x => x.NodeType == NodeType.Identifier).ToArray();
                     var pattern = new Pattern
@@ -41,7 +40,7 @@ namespace V2.Parsing.Core
 
             if (defsNode != null)
             {
-                foreach (var defNode in defsNode.Children.Where(x => x.NodeType == NodeType.Def))
+                foreach (var defNode in defsNode.Children.Where(x => x.NodeType == NodeType.Def && x.Children.Count > 0))
                 {
                     var children = defNode.Children.Where(x => x.NodeType == NodeType.Identifier).ToArray();
                     var def = new Def
@@ -163,7 +162,7 @@ namespace V2.Parsing.Core
 
             if (ignoresNode != null)
             {
-                foreach (var ignoreNode in ignoresNode.Children.Where(x => x.NodeType == NodeType.Ignore))
+                foreach (var ignoreNode in ignoresNode.Children.Where(x => x.NodeType == NodeType.Ignore && x.Children.Count > 0))
                 {
                     var ignore = new Ignore
                     {
@@ -178,7 +177,7 @@ namespace V2.Parsing.Core
 
             if (discardsNode != null)
             {
-                foreach (var discardNode in discardsNode.Children.Where(x => x.NodeType == NodeType.Discard))
+                foreach (var discardNode in discardsNode.Children.Where(x => x.NodeType == NodeType.Discard && x.Children.Count > 0))
                 {
                     var discard = new Discard
                     {
@@ -240,7 +239,7 @@ namespace {grammar.Name}
             base.Discard = new List<string>
             {{";
 
-            foreach(var discard in grammar.Discards)
+            foreach (var discard in grammar.Discards)
             {
                 ret += $@"
                 ""{discard.Name}"",";
@@ -521,6 +520,56 @@ namespace {grammar.Name}
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             return child;
         }}
+    }}
+}}";
+
+            return ret;
+        }
+
+        public string BuildParser2(Grammar grammar)
+        {
+            string ret = $@"using System.Collections.Generic;
+using V2.Parsing.Core;
+
+namespace {grammar.Name}
+{{
+    public class Parser : ParserBase<TokenType, NodeType>
+    {{
+        public Parser() : base(new Lexer())
+        {{
+            base.Discard = new List<string>
+            {{";
+
+            foreach (var discard in grammar.Discards)
+            {
+                ret += $@"
+                ""{discard.Name.ToIdentifier()}"",";
+            }
+
+            ret += $@"
+            }};
+        }}
+
+        public override Node<NodeType> Root()
+        {{
+            Node<NodeType> root = new Node<NodeType>(null, NodeType.Root);
+
+            return {grammar.Defs.First().Name}(root);
+        }}";
+
+            foreach (var def in grammar.Defs)
+            {
+                ret += $@"
+
+        public Node<NodeType> {def.Name}(Node<NodeType> parent)
+        {{
+            var child = Add(parent, NodeType.{def.Name});";
+
+                ret += $@"
+        }}";
+            }
+
+            ret += $@"
     }}
 }}";
 

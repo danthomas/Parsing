@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.IO;
+using NUnit.Framework;
 using V2.Parsing.Core.Tests.Bases;
 
 namespace V2.Parsing.Core.Tests
@@ -35,7 +36,7 @@ patterns
         }
 
         [Test]
-        public void BuildGrammer()
+        public void BuildGrammar()
         {
             var text = GetDef<Core.GrammarDef.Parser>();
 
@@ -49,13 +50,17 @@ patterns
 
             var grammar = builder.BuildGrammar(root);
 
+            File.WriteAllText(@"C:\temp\node.txt", utils.NodeToString(root));
+
             var actual = utils.GrammarToString(grammar);
 
             Assert.That(actual, Is.EqualTo(text));
+            
+            File.WriteAllText(@"C:\temp\parser.cs", builder.BuildParser2(grammar));
 
-            var parser2 = builder.CreateParser(grammar);
-
-            var root2 = parser2.GetType().GetMethod("Parse").Invoke(parser2, new object[] { text });
+            //var parser2 = builder.CreateParser(grammar);
+            //
+            //var root2 = parser2.GetType().GetMethod("Parse").Invoke(parser2, new object[] { text });
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿grammar Grammar
 caseSensitive
 defs
-    Grammar : 'grammar' Identifier [return 'caseSensitive'] [Defs] [Patterns] [Ignores] [Discards]
-    Defs : return 'defs' Def+
-    Def : return Identifier colon Part+
+    Grammar : 'grammar' Identifier [newLine 'caseSensitive'] [Defs] [Patterns] [Ignores] [Discards]
+    Defs : newLine 'defs' Def+
+    Def : newLine Identifier colon Part+
     Part : OptionalElements | Optional
     Optional : openSquare Identifiers closeSquare [star | plus]
     Identifiers : RequiredIdents | OptionalIdents
@@ -12,12 +12,12 @@ defs
     OptionalElements : Element [pipe Element]*
     RequiredElements : Element Element+
     Element : Identifier [star | plus]
-    Patterns : return 'patterns' Pattern+
-    Pattern : return Identifier [colon Identifier] [Identifier]
-    Ignores : return 'ignore' Ignore+
-    Ignore : return Identifier
-    Discards : return 'discard' Discard+
-    Discard : return Identifier
+    Patterns : newLine 'patterns' Pattern+
+    Pattern : newLine Identifier [colon Identifier] [Identifier]
+    Ignores : newLine 'ignore' Ignore+
+    Ignore : newLine Identifier
+    Discards : newLine 'discard' Discard+
+    Discard : newLine Identifier
 patterns
     return : '\r'
     newLine : '\n'
