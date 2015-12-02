@@ -43,8 +43,6 @@ ignore
     space
     tab
 discard
-    newLine
-    pipe
     Identifiers
     OptionalElements
     openSquare

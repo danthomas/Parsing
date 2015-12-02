@@ -74,7 +74,7 @@ namespace V2.Parsing.Core
                             {
                                 subElement = new OneOf
                                 {
-                                    Identifiers = GetIdentifiers(grammar, optionalIdents.Children)
+                                    Identifiers = GetIdentifiers(grammar, optionalIdents.Children.Where(x => x.NodeType != NodeType.Pipe).ToList())
                                 };
                             }
                             else if (requiredIdents != null)
@@ -600,7 +600,7 @@ namespace {grammar.Name}
                     {
                         ret += $@"
 
-            if(AreTokenTypes())
+            if({TokenTypes(def, element)})
             {{";
 
                         BuildParser2(grammar, optional.Element, ref ret);
@@ -613,7 +613,7 @@ namespace {grammar.Name}
                     {
                         ret += $@"
 
-            while (AreTokenTypes())
+            while ({TokenTypes(def, element)})
             {{";
                         BuildParser2(grammar, zeroOrMore.Element, ref ret);
 
@@ -630,7 +630,7 @@ namespace {grammar.Name}
                         BuildParser2(grammar, oneOrMore.Element, ref ret);
 
                         ret += $@"
-            }} while (AreTokenTypes());";
+            }} while ({TokenTypes(def, element)});";
 
                     }
                     else if (oneOf != null)
@@ -641,7 +641,7 @@ namespace {grammar.Name}
                         foreach (var identifier in oneOf.Identifiers)
                         {
                             ret += $@"
-            {(first ? "" : "else ")}if (IsTokenType())
+            {(first ? "" : "else ")}if ({TokenTypes(def, element)})
             {{
                 {identifier.Name}(child);
             }}";
@@ -666,6 +666,11 @@ namespace {grammar.Name}
 }}";
 
             return ret;
+        }
+
+        private string TokenTypes(Def def, Element element)
+        {
+            return "AreTokenTypes(xxx)";
         }
 
         private void BuildParser2(Grammar grammar, Element element, ref string ret)
@@ -897,8 +902,8 @@ namespace {grammar.Name}
             {
                 ignores.Children = ignores
                     .Children
-                    .Where(x => x.Children.Count == 1)
-                    .Select(x => x.Children[0])
+                    .Where(x => x.Children.Count == 2)
+                    .Select(x => x.Children[1])
                     .ToList();
             }
 
@@ -908,8 +913,8 @@ namespace {grammar.Name}
             {
                 discards.Children = discards
                     .Children
-                    .Where(x => x.Children.Count == 1)
-                    .Select(x => x.Children[0])
+                    .Where(x => x.Children.Count == 2)
+                    .Select(x => x.Children[1])
                     .ToList();
             }
         }

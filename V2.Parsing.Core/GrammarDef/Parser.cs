@@ -8,8 +8,6 @@ namespace V2.Parsing.Core.GrammarDef
         {
             base.Discard = new List<string>
             {
-                "NewLine",
-                "Pipe",
                 "Identifiers",
                 "OptionalElements",
                 "OpenSquare",
