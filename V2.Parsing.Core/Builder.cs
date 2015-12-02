@@ -74,14 +74,14 @@ namespace V2.Parsing.Core
                             {
                                 subElement = new OneOf
                                 {
-                                    Identifiers = GetIdentifiers(optionalIdents.Children)
+                                    Identifiers = GetIdentifiers(grammar, optionalIdents.Children)
                                 };
                             }
                             else if (requiredIdents != null)
                             {
                                 subElement = new AllOf
                                 {
-                                    Identifiers = GetIdentifiers(requiredIdents.Children)
+                                    Identifiers = GetIdentifiers(grammar, requiredIdents.Children)
                                 };
                             }
                             else
@@ -100,11 +100,22 @@ namespace V2.Parsing.Core
 
                             foreach (var elementNode in partNode.Children.Where(x => x.NodeType == NodeType.Element))
                             {
-                                Identifier identifier = new Identifier
-                                {
-                                    Name = elementNode.Children[0].Text
-                                };
+                                Identifier identifier = null;
 
+                                if (grammar.Patterns.Any(x => x.Name == elementNode.Children[0].Text))
+                                {
+                                    identifier = new PatternIdentifier
+                                    {
+                                        Name = elementNode.Children[0].Text
+                                    };
+                                }
+                                else
+                                {
+                                    identifier = new PatternIdentifier
+                                    {
+                                        Name = elementNode.Children[0].Text
+                                    };
+                                }
                                 element = identifier;
 
                                 if (elementNode.Children.Any(x => x.NodeType == NodeType.Plus))
@@ -162,13 +173,12 @@ namespace V2.Parsing.Core
 
             if (ignoresNode != null)
             {
-                foreach (var ignoreNode in ignoresNode.Children.Where(x => x.NodeType == NodeType.Ignore && x.Children.Count > 0))
+                foreach (var ignoreNode in ignoresNode.Children)
                 {
-                    var ignore = new Ignore
+                    grammar.Ignores.Add(new Ignore
                     {
-                        Name = ignoreNode.Children[0].Text
-                    };
-                    grammar.Ignores.Add(ignore);
+                        Name = ignoreNode.Text
+                    });
                 }
             }
 
@@ -177,22 +187,23 @@ namespace V2.Parsing.Core
 
             if (discardsNode != null)
             {
-                foreach (var discardNode in discardsNode.Children.Where(x => x.NodeType == NodeType.Discard && x.Children.Count > 0))
+                foreach (var discardNode in discardsNode.Children)
                 {
-                    var discard = new Discard
+                    grammar.Discards.Add(new Discard
                     {
-                        Name = discardNode.Children[0].Text
-                    };
-                    grammar.Discards.Add(discard);
+                        Name = discardNode.Text
+                    });
                 }
             }
 
             return grammar;
         }
 
-        private static List<Identifier> GetIdentifiers(List<Node<NodeType>> optionalIdents)
+        private List<Identifier> GetIdentifiers(Grammar grammar, List<Node<NodeType>> optionalIdents)
         {
-            return optionalIdents.Select(x => new Identifier { Name = x.Text })
+            return optionalIdents.Select(x => grammar.Patterns.Any(y => y.Name == x.Text)
+                ? (Identifier)new PatternIdentifier { Name = x.Text }
+                : (Identifier)new DefIdentifier { Name = x.Text })
                 .ToList();
         }
 
@@ -563,9 +574,56 @@ namespace {grammar.Name}
 
         public Node<NodeType> {def.Name}(Node<NodeType> parent)
         {{
-            var child = Add(parent, NodeType.{def.Name});";
+            var child = Add(parent, NodeType.{def.Name});
+";
+
+                foreach (var element in def.Elements)
+                {
+                    PatternIdentifier patternIdentifier = element as PatternIdentifier;
+                    DefIdentifier defIdentifier = element as DefIdentifier;
+                    Optional optional = element as Optional;
+                    OneOrMore oneOrMore = element as OneOrMore;
+
+                    if (patternIdentifier != null)
+                    {
+                        ret += $@"
+            Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+                    }
+                    else if (defIdentifier != null)
+                    {
+                        ret += $@"
+            {defIdentifier.Name.ToIdentifier()}(child);";
+                    }
+                    else if (optional != null)
+                    {
+                        ret += $@"
+
+            if(AreTokenTypes())
+            {{";
+
+                        BuildParser2(grammar, optional.Element, ref ret);
+
+                        ret += $@"
+            }}";
+
+                    }
+                    else if (oneOrMore != null)
+                    {
+                        ret += $@"
+
+            do
+            {{";
+                        BuildParser2(grammar, oneOrMore.Element, ref ret);
+
+                        ret += $@"
+            }} while (AreTokenTypes());";
+
+                    }
+                }
 
                 ret += $@"
+
+            return child;
         }}";
             }
 
@@ -574,6 +632,84 @@ namespace {grammar.Name}
 }}";
 
             return ret;
+        }
+
+        private void BuildParser2(Grammar grammar, Element element, ref string ret)
+        {
+            AllOf allOf = element as AllOf;
+            OneOf oneOf = element as OneOf;
+
+            PatternIdentifier patternIdentifier = element as PatternIdentifier;
+            DefIdentifier defIdentifier = element as DefIdentifier;
+
+            //if (patternIdentifier != null)
+            //{
+            //    ret += $@"
+            //    Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+            //}
+            //else if (defIdentifier != null)
+            //{
+            //    ret += $@"
+            //    {defIdentifier.Name}(child);";
+            //}
+
+            if (oneOf != null)
+            {
+                if (oneOf.Identifiers.Count == 1)
+                {
+                    patternIdentifier = oneOf.Identifiers[0] as PatternIdentifier;
+                    defIdentifier = oneOf.Identifiers[0] as DefIdentifier;
+
+                    if (patternIdentifier != null)
+                    {
+                        ret += $@"
+                Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+                    }
+                    else if (defIdentifier != null)
+                    {
+                        ret += $@"
+                {defIdentifier.Name}(child);";
+                    }
+                }
+                else
+                {
+                    /*foreach (var identifier in oneOf.Identifiers)
+                    {
+                        patternIdentifier = identifier as PatternIdentifier;
+
+                        if (patternIdentifier != null)
+                        {
+                            ret += $@"
+                Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+                        }
+                        else
+                        {
+                            ret += $@"
+                {identifier.Name}(child);";
+                        }
+                    }*/
+                }
+            }
+            else if (allOf != null)
+            {
+                foreach (var identifier in allOf.Identifiers)
+                {
+                    patternIdentifier = identifier as PatternIdentifier;
+
+                    if (patternIdentifier != null)
+                    {
+                        ret += $@"
+                Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+                    }
+                    else
+                    {
+                        ret += $@"
+                {identifier.Name}(child);";
+                    }
+                }
+            }
+
+
         }
 
         public string BuildTokenType(Grammar grammar)
@@ -701,6 +837,31 @@ namespace {grammar.Name}
                 throw new Exception(String.Join(Environment.NewLine, errors));
             }
             return compilerResults.CompiledAssembly;
+        }
+
+        public void PreProcess(Node<NodeType> root)
+        {
+            var ignores = root.Children.SingleOrDefault(x => x.NodeType == NodeType.Ignores);
+
+            if (ignores != null)
+            {
+                ignores.Children = ignores
+                    .Children
+                    .Where(x => x.Children.Count == 1)
+                    .Select(x => x.Children[0])
+                    .ToList();
+            }
+
+            var discards = root.Children.SingleOrDefault(x => x.NodeType == NodeType.Discards);
+
+            if (discards != null)
+            {
+                discards.Children = discards
+                    .Children
+                    .Where(x => x.Children.Count == 1)
+                    .Select(x => x.Children[0])
+                    .ToList();
+            }
         }
     }
 }

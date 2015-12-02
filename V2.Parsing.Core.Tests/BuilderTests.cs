@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using NUnit.Framework;
+using V2.Parsing.Core.Domain;
 using V2.Parsing.Core.Tests.Bases;
 
 namespace V2.Parsing.Core.Tests
@@ -38,19 +39,21 @@ patterns
         [Test]
         public void BuildGrammar()
         {
+            var utils = new Utils();
+
+            var builder = new Builder();
+
             var text = GetDef<Core.GrammarDef.Parser>();
 
             Core.GrammarDef.Parser parser = new Core.GrammarDef.Parser();
 
             Node<Core.GrammarDef.NodeType> root = parser.Parse(text);
 
-            var utils = new Utils();
-
-            var builder = new Builder();
-
-            var grammar = builder.BuildGrammar(root);
+            builder.PreProcess(root);
 
             File.WriteAllText(@"C:\temp\node.txt", utils.NodeToString(root));
+
+            Grammar grammar = builder.BuildGrammar(root);
 
             var actual = utils.GrammarToString(grammar);
 

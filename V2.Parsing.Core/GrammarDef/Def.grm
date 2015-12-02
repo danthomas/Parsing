@@ -47,3 +47,5 @@ discard
     pipe
     Identifiers
     OptionalElements
+    openSquare
+    closeSquare

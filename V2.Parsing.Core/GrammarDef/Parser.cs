@@ -12,6 +12,8 @@ namespace V2.Parsing.Core.GrammarDef
                 "Pipe",
                 "Identifiers",
                 "OptionalElements",
+                "OpenSquare",
+                "CloseSquare",
             };
         }
 
@@ -24,10 +26,11 @@ namespace V2.Parsing.Core.GrammarDef
 
         public Node<NodeType> Grammar(Node<NodeType> parent)
         {
-            var child = Consume(parent, TokenType.Grammar, NodeType.Grammar);
+            var child = Add(parent, NodeType.Grammar);
 
+            Consume(child, TokenType.Grammar, NodeType.Grammar);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
-            
+
             if (AreTokenTypes(TokenType.NewLine, TokenType.CaseSensitive))
             {
                 Consume(child, TokenType.NewLine, NodeType.NewLine);
@@ -60,13 +63,14 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Defs(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Defs);
+
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Defs, NodeType.Defs);
 
-            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier, TokenType.Colon))
+            do
             {
                 Def(child);
-            }
+            } while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier, TokenType.Colon));
 
             return child;
         }
@@ -74,15 +78,15 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Def(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Def);
+
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             Consume(child, TokenType.Colon, NodeType.Colon);
-            Part(child);
 
-            while (IsTokenType(TokenType.OpenSquare, TokenType.Identifier))
+            do
             {
                 Part(child);
-            }
+            } while (IsTokenType(TokenType.OpenSquare, TokenType.Identifier));
 
             return child;
         }
@@ -226,20 +230,23 @@ namespace V2.Parsing.Core.GrammarDef
         public Node<NodeType> Patterns(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Patterns);
-            
+
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Patterns, NodeType.Patterns);
 
-            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
+            do
             {
                 Pattern(child);
             }
+            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier));
+
             return child;
         }
 
         public Node<NodeType> Pattern(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Pattern);
+
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
             if (IsTokenType(TokenType.Colon))
@@ -260,18 +267,21 @@ namespace V2.Parsing.Core.GrammarDef
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Ignore, NodeType.Ignore);
 
-            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
+            do
             {
                 Ignore(child);
-            }
+            } while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier));
+
             return child;
         }
 
         public Node<NodeType> Ignore(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Ignore);
+
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
+
             return child;
         }
 
@@ -286,14 +296,17 @@ namespace V2.Parsing.Core.GrammarDef
             {
                 Discard(child);
             }
+
             return child;
         }
 
         public Node<NodeType> Discard(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Discard);
+
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
+
             return child;
         }
     }
