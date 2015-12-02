@@ -31,7 +31,7 @@ patterns
 
             var grammar = builder.BuildGrammar(root);
 
-            var actual = utils.GrammarToString(grammar);
+            var actual = utils.GrammarToDefString(grammar);
 
             Assert.That(actual, Is.EqualTo(text));
         }
@@ -55,10 +55,10 @@ patterns
 
             Grammar grammar = builder.BuildGrammar(root);
 
-            var actual = utils.GrammarToString(grammar);
+            var actual = utils.GrammarToDefString(grammar);
 
             Assert.That(actual, Is.EqualTo(text));
-            
+
             File.WriteAllText(@"C:\temp\parser.cs", builder.BuildParser2(grammar));
 
             //var parser2 = builder.CreateParser(grammar);

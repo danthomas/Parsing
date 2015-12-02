@@ -111,7 +111,7 @@ namespace V2.Parsing.Core
                                 }
                                 else
                                 {
-                                    identifier = new PatternIdentifier
+                                    identifier = new DefIdentifier
                                     {
                                         Name = elementNode.Children[0].Text
                                     };
@@ -583,6 +583,8 @@ namespace {grammar.Name}
                     DefIdentifier defIdentifier = element as DefIdentifier;
                     Optional optional = element as Optional;
                     OneOrMore oneOrMore = element as OneOrMore;
+                    ZeroOrMore zeroOrMore = element as ZeroOrMore;
+                    OneOf oneOf = element as OneOf;
 
                     if (patternIdentifier != null)
                     {
@@ -607,6 +609,18 @@ namespace {grammar.Name}
             }}";
 
                     }
+                    else if (zeroOrMore != null)
+                    {
+                        ret += $@"
+
+            while (AreTokenTypes())
+            {{";
+                        BuildParser2(grammar, zeroOrMore.Element, ref ret);
+
+                        ret += $@"
+            }}";
+
+                    }
                     else if (oneOrMore != null)
                     {
                         ret += $@"
@@ -618,6 +632,26 @@ namespace {grammar.Name}
                         ret += $@"
             }} while (AreTokenTypes());";
 
+                    }
+                    else if (oneOf != null)
+                    {
+                        ret += $@"
+";
+                        bool first = true;
+                        foreach (var identifier in oneOf.Identifiers)
+                        {
+                            ret += $@"
+            {(first ? "" : "else ")}if (IsTokenType())
+            {{
+                {identifier.Name}(child);
+            }}";
+
+                            first = false;
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception();
                     }
                 }
 
@@ -636,24 +670,23 @@ namespace {grammar.Name}
 
         private void BuildParser2(Grammar grammar, Element element, ref string ret)
         {
-            AllOf allOf = element as AllOf;
-            OneOf oneOf = element as OneOf;
-
             PatternIdentifier patternIdentifier = element as PatternIdentifier;
             DefIdentifier defIdentifier = element as DefIdentifier;
+            AllOf allOf = element as AllOf;
+            OneOf oneOf = element as OneOf;
+            Optional optional = element as Optional;
 
-            //if (patternIdentifier != null)
-            //{
-            //    ret += $@"
-            //    Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
-            //}
-            //else if (defIdentifier != null)
-            //{
-            //    ret += $@"
-            //    {defIdentifier.Name}(child);";
-            //}
-
-            if (oneOf != null)
+            if (patternIdentifier != null)
+            {
+                ret += $@"
+                Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+            }
+            else if (defIdentifier != null)
+            {
+                ret += $@"
+                {defIdentifier.Name}(child);";
+            }
+            else if (oneOf != null)
             {
                 if (oneOf.Identifiers.Count == 1)
                 {
@@ -673,21 +706,32 @@ namespace {grammar.Name}
                 }
                 else
                 {
-                    /*foreach (var identifier in oneOf.Identifiers)
+                    bool first = true;
+
+                    foreach (var identifier in oneOf.Identifiers)
                     {
                         patternIdentifier = identifier as PatternIdentifier;
+
+                        ret += $@"
+                {(first ? "" : "else ")}if (IsTokenType())
+                {{";
 
                         if (patternIdentifier != null)
                         {
                             ret += $@"
-                Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
+                    Consume(child, TokenType.{patternIdentifier.Name.ToIdentifier()}, NodeType.{patternIdentifier.Name.ToIdentifier()});";
                         }
                         else
                         {
                             ret += $@"
-                {identifier.Name}(child);";
+                    {identifier.Name}(child);";
                         }
-                    }*/
+                        
+                        ret += $@"
+                }}";
+
+                        first = false;
+                    }
                 }
             }
             else if (allOf != null)
@@ -708,8 +752,14 @@ namespace {grammar.Name}
                     }
                 }
             }
-
-
+            else if (optional != null)
+            {
+                BuildParser2(grammar, optional.Element, ref ret);
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
 
         public string BuildTokenType(Grammar grammar)

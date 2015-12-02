@@ -30,7 +30,7 @@ namespace V2.Parsing.Core
             }
         }
 
-        public string GrammarToString(Grammar grammar)
+        public string GrammarToDefString(Grammar grammar)
         {
             StringBuilder stringBuilder = new StringBuilder();
 

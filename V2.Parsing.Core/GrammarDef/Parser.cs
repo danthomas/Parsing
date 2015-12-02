@@ -112,20 +112,18 @@ namespace V2.Parsing.Core.GrammarDef
             var child = Add(parent, NodeType.Optional);
 
             Consume(child, TokenType.OpenSquare, NodeType.OpenSquare);
-
             Identifiers(child);
-
             Consume(child, TokenType.CloseSquare, NodeType.CloseSquare);
 
             if (IsTokenType(TokenType.Plus, TokenType.Star))
             {
-                if (IsTokenType(TokenType.Plus))
-                {
-                    Consume(child, TokenType.Plus, NodeType.Plus);
-                }
-                else if (IsTokenType(TokenType.Star))
+                if (IsTokenType(TokenType.Star))
                 {
                     Consume(child, TokenType.Star, NodeType.Star);
+                }
+                else if (IsTokenType(TokenType.Plus))
+                {
+                    Consume(child, TokenType.Plus, NodeType.Plus);
                 }
             }
 
@@ -214,13 +212,13 @@ namespace V2.Parsing.Core.GrammarDef
 
             if (IsTokenType(TokenType.Plus, TokenType.Star))
             {
-                if (IsTokenType(TokenType.Plus))
-                {
-                    Consume(child, TokenType.Plus, NodeType.Plus);
-                }
-                else if (IsTokenType(TokenType.Star))
+                if (IsTokenType(TokenType.Star))
                 {
                     Consume(child, TokenType.Star, NodeType.Star);
+                }
+                else if (IsTokenType(TokenType.Plus))
+                {
+                    Consume(child, TokenType.Plus, NodeType.Plus);
                 }
             }
 
@@ -252,11 +250,14 @@ namespace V2.Parsing.Core.GrammarDef
             if (IsTokenType(TokenType.Colon))
             {
                 Consume(child, TokenType.Colon, NodeType.Colon);
-                while (IsTokenType(TokenType.Identifier))
-                {
-                    Consume(child, TokenType.Identifier, NodeType.Identifier);
-                }
+                Consume(child, TokenType.Identifier, NodeType.Identifier);
             }
+
+            if (IsTokenType(TokenType.Identifier))
+            {
+                Consume(child, TokenType.Identifier, NodeType.Identifier);
+            }
+
             return child;
         }
 
@@ -292,10 +293,10 @@ namespace V2.Parsing.Core.GrammarDef
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Discard, NodeType.Discard);
 
-            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier))
+            do
             {
                 Discard(child);
-            }
+            } while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier));
 
             return child;
         }
