@@ -65,5 +65,32 @@ patterns
             //
             //var root2 = parser2.GetType().GetMethod("Parse").Invoke(parser2, new object[] { text });
         }
+
+        [Test]
+        public void BuildParser()
+        {
+            var builder = new Builder();
+
+            var text = @"grammar Tester
+defs
+    Main : Things
+    Things : newLine things Thing+
+    Thing : newLine Identifier colon Identifier+
+patterns
+    newLine : '\n'
+    colon : ':'
+    things
+    Identifier : '^[a-zA-Z_][a-zA-Z1-9_]*$'";
+
+            Core.GrammarDef.Parser parser = new Core.GrammarDef.Parser();
+
+            Node<Core.GrammarDef.NodeType> root = parser.Parse(text);
+
+            builder.PreProcess(root);
+
+            Grammar grammar = builder.BuildGrammar(root);
+
+            var parserDef = builder.BuildParser2(grammar);
+        }
     }
 }

@@ -600,7 +600,7 @@ namespace {grammar.Name}
                     {
                         ret += $@"
 
-            if({TokenTypes(def, element)})
+            if ({GetAreTokenTypes(grammar, def.Elements, element)})
             {{";
 
                         BuildParser2(grammar, optional.Element, ref ret);
@@ -613,7 +613,7 @@ namespace {grammar.Name}
                     {
                         ret += $@"
 
-            while ({TokenTypes(def, element)})
+            while ({GetAreTokenTypes(grammar, def.Elements, element)})
             {{";
                         BuildParser2(grammar, zeroOrMore.Element, ref ret);
 
@@ -630,7 +630,7 @@ namespace {grammar.Name}
                         BuildParser2(grammar, oneOrMore.Element, ref ret);
 
                         ret += $@"
-            }} while ({TokenTypes(def, element)});";
+            }} while ({GetAreTokenTypes(grammar, def.Elements, element)});";
 
                     }
                     else if (oneOf != null)
@@ -640,11 +640,23 @@ namespace {grammar.Name}
                         bool first = true;
                         foreach (var identifier in oneOf.Identifiers)
                         {
-                            ret += $@"
-            {(first ? "" : "else ")}if ({TokenTypes(def, element)})
+                            if (identifier is PatternIdentifier)
+                            {
+                                ret += $@"
+            {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, oneOf.Identifiers.Cast<Element>().ToList(), identifier)})
+            {{
+                Consume(child, TokenType.{identifier.Name.ToIdentifier()}, NodeType.{identifier.Name.ToIdentifier()});
+            }}";
+                            }
+                            else
+                            {
+                                ret += $@"
+            {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, oneOf.Identifiers.Cast<Element>().ToList(), identifier)})
             {{
                 {identifier.Name}(child);
             }}";
+
+                            }
 
                             first = false;
                         }
@@ -668,9 +680,101 @@ namespace {grammar.Name}
             return ret;
         }
 
-        private string TokenTypes(Def def, Element element)
+        private string GetAreTokenTypes(Grammar grammar, List<Element> elements, Element element)
         {
-            return "AreTokenTypes(xxx)";
+            List<string> tokenTypes = GetTokenTypes(grammar, element);
+            List<List<string>> otherTokenTypes = new List<List<string>>();
+
+            foreach (var element2 in elements.Where(x => x != element
+            && !(x is PatternIdentifier)))
+            {
+                otherTokenTypes.Add(GetTokenTypes(grammar, element2));
+            }
+
+            string[] names = { };
+
+            if (otherTokenTypes.Count == 0)
+            {
+                names = new[] {tokenTypes[0]};
+            }
+            else
+            {
+                for (int i = 0; i < tokenTypes.Count; ++i)
+                {
+                    names = tokenTypes.Take(i + 1).ToArray();
+
+                    var tokenTypesString = String.Join(".", names);
+
+                    if (otherTokenTypes.All(x => String.Join(".", x.Take(i + 1)) != tokenTypesString))
+                    {
+                        break;
+                    }
+                }
+            }
+            return $"AreTokenTypes({ String.Join(", ", names.Select(x => $"TokenType.{x.ToIdentifier()}")) })";
+        }
+
+        private List<string> GetTokenTypes(Grammar grammar, Element element)
+        {
+            List<string> tokenTypes = new List<string>();
+            GetTokenTypes(grammar, element, ref tokenTypes);
+            return tokenTypes;
+        }
+
+        private void GetTokenTypes(Grammar grammar, Element element, ref List<string> tokenTypes)
+        {
+            PatternIdentifier patternIdentifier = element as PatternIdentifier;
+            DefIdentifier defIdentifier = element as DefIdentifier;
+            AllOf allOf = element as AllOf;
+            OneOf oneOf = element as OneOf;
+            OneOrMore oneOrMore = element as OneOrMore;
+            ZeroOrMore zeroOrMore = element as ZeroOrMore;
+            Optional optional = element as Optional;
+
+
+            if (patternIdentifier != null)
+            {
+                tokenTypes.Add(patternIdentifier.Name.ToIdentifier());
+            }
+            else if (defIdentifier != null)
+            {
+                Def def = grammar.Defs.Single(x => x.Name == defIdentifier.Name);
+
+                foreach (var element1 in def.Elements)
+                {
+                    GetTokenTypes(grammar, element1, ref tokenTypes);
+                }
+            }
+            else if (allOf != null)
+            {
+                foreach (var identifier in allOf.Identifiers)
+                {
+                    GetTokenTypes(grammar, identifier, ref tokenTypes);
+                }
+            }
+            else if (oneOf != null)
+            {
+                foreach (var identifier in oneOf.Identifiers)
+                {
+                    GetTokenTypes(grammar, identifier, ref tokenTypes);
+                }
+            }
+            else if (optional != null)
+            {
+                GetTokenTypes(grammar, optional.Element, ref tokenTypes);
+            }
+            else if (oneOrMore != null)
+            {
+                GetTokenTypes(grammar, oneOrMore.Element, ref tokenTypes);
+            }
+            else if (zeroOrMore != null)
+            {
+                GetTokenTypes(grammar, zeroOrMore.Element, ref tokenTypes);
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
 
         private void BuildParser2(Grammar grammar, Element element, ref string ret)
@@ -731,7 +835,7 @@ namespace {grammar.Name}
                             ret += $@"
                     {identifier.Name}(child);";
                         }
-                        
+
                         ret += $@"
                 }}";
 
