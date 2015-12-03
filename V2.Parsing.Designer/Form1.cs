@@ -68,13 +68,13 @@ namespace V2.Parsing.Designer
             builder.PreProcess(root);
 
             nodes.Text = _utils.NodeToString(root);
-
-
+            
             var grammar = builder.BuildGrammar(root);
 
             RefreshGrammarTree(grammar);
 
             lexerDef.Text = builder.BuildLexer(grammar);
+            parserDef.Text = builder.BuildParser2(grammar);
         }
 
         private void RefreshGrammarTree(Grammar grammar)
