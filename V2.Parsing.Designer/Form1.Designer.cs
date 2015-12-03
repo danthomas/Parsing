@@ -37,7 +37,11 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.grammarTree = new System.Windows.Forms.TreeView();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.tabControl2 = new System.Windows.Forms.TabControl();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
             this.lexerDef = new System.Windows.Forms.RichTextBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.parserDef = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.grammarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,10 +49,8 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.parseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabControl2 = new System.Windows.Forms.TabControl();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.parserDef = new System.Windows.Forms.RichTextBox();
+            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.tokenTypePaths = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -63,10 +65,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
+            this.splitContainer4.Panel1.SuspendLayout();
+            this.splitContainer4.Panel2.SuspendLayout();
+            this.splitContainer4.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -155,7 +161,7 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.grammarTree);
+            this.tabPage2.Controls.Add(this.splitContainer4);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
@@ -167,10 +173,11 @@
             // grammarTree
             // 
             this.grammarTree.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grammarTree.Location = new System.Drawing.Point(3, 3);
+            this.grammarTree.Location = new System.Drawing.Point(0, 0);
             this.grammarTree.Name = "grammarTree";
-            this.grammarTree.Size = new System.Drawing.Size(249, 603);
+            this.grammarTree.Size = new System.Drawing.Size(249, 454);
             this.grammarTree.TabIndex = 4;
+            this.grammarTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.grammarTree_AfterSelect);
             // 
             // splitContainer3
             // 
@@ -187,6 +194,28 @@
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
             // 
+            // tabControl2
+            // 
+            this.tabControl2.Controls.Add(this.tabPage3);
+            this.tabControl2.Controls.Add(this.tabPage4);
+            this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl2.Location = new System.Drawing.Point(0, 0);
+            this.tabControl2.Name = "tabControl2";
+            this.tabControl2.SelectedIndex = 0;
+            this.tabControl2.Size = new System.Drawing.Size(714, 635);
+            this.tabControl2.TabIndex = 3;
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.lexerDef);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(706, 609);
+            this.tabPage3.TabIndex = 0;
+            this.tabPage3.Text = "tabPage3";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
             // lexerDef
             // 
             this.lexerDef.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -198,6 +227,29 @@
             this.lexerDef.TabIndex = 2;
             this.lexerDef.Text = "";
             this.lexerDef.WordWrap = false;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.parserDef);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(706, 609);
+            this.tabPage4.TabIndex = 1;
+            this.tabPage4.Text = "tabPage4";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // parserDef
+            // 
+            this.parserDef.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.parserDef.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.parserDef.Location = new System.Drawing.Point(3, 3);
+            this.parserDef.Margin = new System.Windows.Forms.Padding(2);
+            this.parserDef.Name = "parserDef";
+            this.parserDef.Size = new System.Drawing.Size(700, 603);
+            this.parserDef.TabIndex = 3;
+            this.parserDef.Text = "";
+            this.parserDef.WordWrap = false;
             // 
             // menuStrip1
             // 
@@ -259,50 +311,35 @@
             this.generateToolStripMenuItem.Text = "Generate";
             this.generateToolStripMenuItem.Click += new System.EventHandler(this.generateToolStripMenuItem_Click);
             // 
-            // tabControl2
+            // splitContainer4
             // 
-            this.tabControl2.Controls.Add(this.tabPage3);
-            this.tabControl2.Controls.Add(this.tabPage4);
-            this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl2.Location = new System.Drawing.Point(0, 0);
-            this.tabControl2.Name = "tabControl2";
-            this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(714, 635);
-            this.tabControl2.TabIndex = 3;
+            this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer4.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer4.Name = "splitContainer4";
+            this.splitContainer4.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // tabPage3
+            // splitContainer4.Panel1
             // 
-            this.tabPage3.Controls.Add(this.lexerDef);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(706, 609);
-            this.tabPage3.TabIndex = 0;
-            this.tabPage3.Text = "tabPage3";
-            this.tabPage3.UseVisualStyleBackColor = true;
+            this.splitContainer4.Panel1.Controls.Add(this.grammarTree);
             // 
-            // tabPage4
+            // splitContainer4.Panel2
             // 
-            this.tabPage4.Controls.Add(this.parserDef);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(706, 609);
-            this.tabPage4.TabIndex = 1;
-            this.tabPage4.Text = "tabPage4";
-            this.tabPage4.UseVisualStyleBackColor = true;
+            this.splitContainer4.Panel2.Controls.Add(this.tokenTypePaths);
+            this.splitContainer4.Size = new System.Drawing.Size(249, 603);
+            this.splitContainer4.SplitterDistance = 454;
+            this.splitContainer4.TabIndex = 5;
             // 
-            // parserDef
+            // tokenTypePaths
             // 
-            this.parserDef.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.parserDef.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.parserDef.Location = new System.Drawing.Point(3, 3);
-            this.parserDef.Margin = new System.Windows.Forms.Padding(2);
-            this.parserDef.Name = "parserDef";
-            this.parserDef.Size = new System.Drawing.Size(700, 603);
-            this.parserDef.TabIndex = 3;
-            this.parserDef.Text = "";
-            this.parserDef.WordWrap = false;
+            this.tokenTypePaths.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tokenTypePaths.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tokenTypePaths.Location = new System.Drawing.Point(0, 0);
+            this.tokenTypePaths.Margin = new System.Windows.Forms.Padding(2);
+            this.tokenTypePaths.Name = "tokenTypePaths";
+            this.tokenTypePaths.Size = new System.Drawing.Size(249, 145);
+            this.tokenTypePaths.TabIndex = 1;
+            this.tokenTypePaths.Text = "";
+            this.tokenTypePaths.WordWrap = false;
             // 
             // Form1
             // 
@@ -329,11 +366,15 @@
             this.splitContainer3.Panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.tabControl2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.splitContainer4.Panel1.ResumeLayout(false);
+            this.splitContainer4.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
+            this.splitContainer4.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -362,6 +403,8 @@
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.RichTextBox parserDef;
+        private System.Windows.Forms.SplitContainer splitContainer4;
+        private System.Windows.Forms.RichTextBox tokenTypePaths;
     }
 }
 

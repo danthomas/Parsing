@@ -68,7 +68,7 @@ namespace V2.Parsing.Designer
             builder.PreProcess(root);
 
             nodes.Text = _utils.NodeToString(root);
-            
+
             var grammar = builder.BuildGrammar(root);
 
             RefreshGrammarTree(grammar);
@@ -92,66 +92,170 @@ namespace V2.Parsing.Designer
 
         private void AddDefNodes(Grammar grammar, TreeNode parentNode)
         {
-            foreach(Def def in grammar.Defs)
+            foreach (Def def in grammar.Defs)
             {
                 TreeNode defNode = new TreeNode(def.Name);
                 parentNode.Nodes.Add(defNode);
 
-                AddElements(def.Elements, defNode);
+                AddElements(grammar, def.Elements, defNode);
             }
         }
 
-        private void AddElements(List<Element> elements, TreeNode parentNode)
+        private void AddElements(Grammar grammar, List<Element> elements, TreeNode parentNode)
         {
             foreach (Element element in elements)
             {
+                var patternIdentifier = element as PatternIdentifier;
+                var defIdentifier = element as DefIdentifier;
+                var oneOf = element as OneOf;
+                var allOf = element as AllOf;
+                var optional = element as Optional;
+                var oneOrMore = element as OneOrMore;
+                var zeroOrMore = element as ZeroOrMore;
 
-                if (element is Identifier)
+                TreeNode childNode;
+
+                if (patternIdentifier != null)
                 {
-                    TreeNode identifierNode = new TreeNode(((Identifier)element).Name);
-                    parentNode.Nodes.Add(identifierNode);
+                    childNode = new PatternIdentifierTreeNode(patternIdentifier);
                 }
-                else if (element is OneOf)
+                else if (defIdentifier != null)
                 {
-                    OneOf oneOf = element as OneOf;
-                    
-                    TreeNode elementNode = new TreeNode(element.GetType().Name);
-                    parentNode.Nodes.Add(elementNode);
-                    AddElements(oneOf.Identifiers.Cast<Element>().ToList(), elementNode);
+                    childNode = new DefIdentifierTreeNode(defIdentifier);
+
+                    AddElements(grammar, grammar.Defs.Single(x => x.Name == ((Identifier)element).Name).Elements, childNode);
                 }
-                else if (element is AllOf)
+                else if (oneOf != null)
                 {
-                    AllOf oneOf = element as AllOf;
-                    
-                    TreeNode elementNode = new TreeNode("*" + element.GetType().Name);
-                    parentNode.Nodes.Add(elementNode);
-                    AddElements(oneOf.Identifiers.Cast<Element>().ToList(), elementNode);
+                    childNode = new OneOfTreeNode(oneOf);
+                    AddElements(grammar, oneOf.Identifiers.Cast<Element>().ToList(), childNode);
                 }
-                else if (element is Optional)
+                else if (allOf != null)
                 {
-                    Optional optional = element as Optional;
-                    
-                    TreeNode elementNode = new TreeNode("*" + element.GetType().Name);
-                    parentNode.Nodes.Add(elementNode);
-                    AddElements(new List<Element> { optional.Element }, elementNode);
+                    childNode = new AllOfTreeNode(allOf);
+                    AddElements(grammar, allOf.Identifiers.Cast<Element>().ToList(), childNode);
                 }
-                else if (element is OneOrMore)
+                else if (optional!=null)
                 {
-                    OneOrMore oneOrMore = element as OneOrMore;
-                    
-                    TreeNode elementNode = new TreeNode("*" + element.GetType().Name);
-                    parentNode.Nodes.Add(elementNode);
-                    AddElements(new List<Element> { oneOrMore.Element }, elementNode);
+                    childNode = new OptionalTreeNode(optional);
+                    AddElements(grammar, new List<Element> { optional.Element }, childNode);
                 }
-                else if (element is ZeroOrMore)
+                else if (oneOrMore!= null)
                 {
-                    ZeroOrMore zeroOrMore = element as ZeroOrMore;
-                    
-                    TreeNode elementNode = new TreeNode("*" + element.GetType().Name);
-                    parentNode.Nodes.Add(elementNode);
-                    AddElements(new List<Element> { zeroOrMore.Element }, elementNode);
+                    childNode = new OneOrMoreTreeNode(oneOrMore);
+                    AddElements(grammar, new List<Element> { oneOrMore.Element }, childNode);
                 }
+                else if (zeroOrMore!= null)
+                {
+                    childNode = new ZeroOrMoreTreeNode(zeroOrMore);
+                    AddElements(grammar, new List<Element> { zeroOrMore.Element }, childNode);
+                }
+                else
+                {
+                    throw new Exception();
+                }
+
+                parentNode.Nodes.Add(childNode);
             }
+        }
+
+        private void grammarTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            tokenTypePaths.Lines = GetTokenPaths(e.Node).ToArray();
+        }
+
+        private List<string> GetTokenPaths(TreeNode node)
+        {
+            //foreach(TreeNode childNode in node.Nodes)
+            //{
+            //    PatternIdentifierTreeNode patternIdentifierTreeNode = childNode as PatternIdentifierTreeNode;
+            //
+            //    if (patternIdentifierTreeNode!= null)
+            //    {
+            //        
+            //    }
+            //}
+
+            return new List<string>() {"sdffsa", "sfsf"};
+        }
+    }
+
+    class PatternIdentifierTreeNode : TreeNode
+    {
+        public PatternIdentifier PatternIdentifier { get; set; }
+
+        public PatternIdentifierTreeNode(PatternIdentifier patternIdentifier)
+        {
+            PatternIdentifier = patternIdentifier;
+            Text = patternIdentifier.Name;
+            ForeColor = Color.Blue;
+        }
+    }
+
+    class DefIdentifierTreeNode : TreeNode
+    {
+        public DefIdentifier DefIdentifier { get; set; }
+
+        public DefIdentifierTreeNode(DefIdentifier defIdentifier)
+        {
+            DefIdentifier = defIdentifier;
+            Text = defIdentifier.Name;
+            ForeColor = Color.Red;
+        }
+    }
+
+    class OneOfTreeNode : TreeNode
+    {
+        public OneOf OneOf { get; set; }
+
+        public OneOfTreeNode(OneOf oneOf)
+        {
+            OneOf = oneOf;
+            Text = "One Of";
+        }
+    }
+
+    class AllOfTreeNode : TreeNode
+    {
+        public AllOf AllOf { get; set; }
+
+        public AllOfTreeNode(AllOf allOf)
+        {
+            AllOf = allOf;
+            Text = "All Of";
+        }
+    }
+
+    class OptionalTreeNode : TreeNode
+    {
+        public Optional Optional { get; set; }
+
+        public OptionalTreeNode(Optional optional)
+        {
+            Optional = optional;
+            Text = "Optional";
+        }
+    }
+
+    class OneOrMoreTreeNode : TreeNode
+    {
+        public OneOrMore OneOrMore { get; set; }
+
+        public OneOrMoreTreeNode(OneOrMore oneOrMore)
+        {
+            OneOrMore = oneOrMore;
+            Text = "One or More";
+        }
+    }
+
+    class ZeroOrMoreTreeNode : TreeNode
+    {
+        public ZeroOrMore ZeroOrMore { get; set; }
+
+        public ZeroOrMoreTreeNode(ZeroOrMore zeroOrMore)
+        {
+            ZeroOrMore = zeroOrMore;
+            Text = "Zero or More";
         }
     }
 
