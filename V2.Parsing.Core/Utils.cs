@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 using V2.Parsing.Core.Domain;
 using V2.Parsing.Core.GrammarDef;
@@ -20,7 +19,7 @@ namespace V2.Parsing.Core
 
         private void NodeToString(ref string ret, Node<NodeType> node, int indent)
         {
-            ret += new String(' ', 4 + indent);
+            ret += new String(' ', 4 * indent);
             ret += node.ToString();
             ret += Environment.NewLine;
 

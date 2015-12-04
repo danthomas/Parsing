@@ -102,6 +102,7 @@ namespace V2.Parsing.Core
                                         Name = elementNode.Children[0].Text
                                     };
                                 }
+
                                 element = identifier;
 
                                 if (elementNode.Children.Any(x => x.NodeType == NodeType.Plus))
@@ -121,7 +122,6 @@ namespace V2.Parsing.Core
                                 element = new OneOf(identifiers);
                             }
                         }
-
 
                         if (element == null)
                         {
@@ -150,6 +150,7 @@ namespace V2.Parsing.Core
                                 element = new ZeroOrMore(element);
                             }
                         }
+
                         def.Elements.Add(element);
                     }
                 }
@@ -181,7 +182,6 @@ namespace V2.Parsing.Core
                     });
                 }
             }
-
 
             SetParents(grammar);
 
@@ -732,13 +732,16 @@ namespace {grammar.Name}
 
         private void GetOthers(Element element, List<Element> others)
         {
-            Element parent = element;
+            Element parent = element.Parent;
 
             while (parent != null)
             {
-                if (parent is Optional)
+                if (parent is Optional || parent is Def)
                 {
-
+                    foreach (var child in parent.Elements.Where(x => x != element))
+                    {
+                        others.Add(child);
+                    }
                 }
                 parent = parent.Parent;
             }

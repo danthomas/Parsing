@@ -68,7 +68,7 @@ namespace V2.Parsing.Core.GrammarDef
             do
             {
                 Def(child);
-            } while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier, TokenType.Colon));
+            } while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier));
 
             return child;
         }
@@ -84,7 +84,7 @@ namespace V2.Parsing.Core.GrammarDef
             do
             {
                 Part(child);
-            } while (IsTokenType(TokenType.OpenSquare, TokenType.Identifier));
+            } while (IsTokenType(TokenType.Identifier, TokenType.OpenSquare));
 
             return child;
         }
