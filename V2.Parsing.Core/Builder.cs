@@ -196,7 +196,46 @@ namespace V2.Parsing.Core
                 }
             }
 
+
+            SetParents(grammar);
+
             return grammar;
+        }
+
+        private void SetParents(Grammar grammar)
+        {
+            foreach(Def def in grammar.Defs)
+            {
+                SetParents(def);
+            }
+        }
+
+        private void SetParents(Def def)
+        {
+            foreach (var element in def.Elements)
+            {
+                SetParents(element);
+            }
+        }
+
+        private void SetParents(Element element)
+        {
+           ElementWithSingleChild elementWithSingleChild = element as ElementWithSingleChild;
+           ElementWithMultipleChildren elementWithMultipleChildren = element as ElementWithMultipleChildren;
+
+            if (elementWithSingleChild != null)
+            {
+                elementWithSingleChild.Element.Parent = elementWithSingleChild;
+                SetParents(elementWithSingleChild.Element);
+            }
+            else if (elementWithMultipleChildren != null)
+            {
+                foreach (var child in elementWithMultipleChildren.Identifiers)
+                {
+                    child.Parent = elementWithMultipleChildren;
+                    SetParents(child);
+                }
+            }
         }
 
         private List<Identifier> GetIdentifiers(Grammar grammar, List<Node<NodeType>> optionalIdents)
@@ -600,7 +639,7 @@ namespace {grammar.Name}
                     {
                         ret += $@"
 
-            if ({GetAreTokenTypes(grammar, def.Elements, element)})
+            if ({GetAreTokenTypes(grammar, element)})
             {{";
 
                         BuildParser2(grammar, optional.Element, ref ret);
@@ -613,7 +652,7 @@ namespace {grammar.Name}
                     {
                         ret += $@"
 
-            while ({GetAreTokenTypes(grammar, def.Elements, element)})
+            while ({GetAreTokenTypes(grammar, element)})
             {{";
                         BuildParser2(grammar, zeroOrMore.Element, ref ret);
 
@@ -630,7 +669,7 @@ namespace {grammar.Name}
                         BuildParser2(grammar, oneOrMore.Element, ref ret);
 
                         ret += $@"
-            }} while ({GetAreTokenTypes(grammar, def.Elements, element)});";
+            }} while ({GetAreTokenTypes(grammar, element)});";
 
                     }
                     else if (oneOf != null)
@@ -643,7 +682,7 @@ namespace {grammar.Name}
                             if (identifier is PatternIdentifier)
                             {
                                 ret += $@"
-            {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, oneOf.Identifiers.Cast<Element>().ToList(), identifier)})
+            {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, identifier)})
             {{
                 Consume(child, TokenType.{identifier.Name.ToIdentifier()}, NodeType.{identifier.Name.ToIdentifier()});
             }}";
@@ -651,7 +690,7 @@ namespace {grammar.Name}
                             else
                             {
                                 ret += $@"
-            {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, oneOf.Identifiers.Cast<Element>().ToList(), identifier)})
+            {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, identifier)})
             {{
                 {identifier.Name}(child);
             }}";
@@ -680,13 +719,14 @@ namespace {grammar.Name}
             return ret;
         }
 
-        private string GetAreTokenTypes(Grammar grammar, List<Element> elements, Element element)
+        private string GetAreTokenTypes(Grammar grammar, Element element)
         {
             List<string> tokenTypes = GetTokenTypes(grammar, element);
             List<List<string>> otherTokenTypes = new List<List<string>>();
+            
+            var others = GetOthers(element);
 
-            foreach (var element2 in elements.Where(x => x != element
-            && !(x is PatternIdentifier)))
+            foreach (var element2 in others)
             {
                 otherTokenTypes.Add(GetTokenTypes(grammar, element2));
             }
@@ -712,6 +752,19 @@ namespace {grammar.Name}
                 }
             }
             return $"AreTokenTypes({ String.Join(", ", names.Select(x => $"TokenType.{x.ToIdentifier()}")) })";
+        }
+
+        private List<Element> GetOthers( Element element)
+        {
+            List<Element> others = new List<Element>();
+
+            GetOthers(element, others);
+
+            return others;
+        }
+
+        private void GetOthers(Element element, List<Element> others)
+        {
         }
 
         private List<string> GetTokenTypes(Grammar grammar, Element element)

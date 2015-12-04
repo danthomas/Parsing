@@ -79,6 +79,9 @@ namespace V2.Parsing.Designer
 
         private void RefreshGrammarTree(Grammar grammar)
         {
+            try
+            {
+
             grammarTree.Nodes.Clear();
 
             TreeNode treeNode = new TreeNode(grammar.Name);
@@ -88,6 +91,11 @@ namespace V2.Parsing.Designer
             AddDefNodes(grammar, treeNode);
 
             grammarTree.ExpandAll();
+            }
+            catch (Exception)
+            {
+                
+            }
         }
 
         private void AddDefNodes(Grammar grammar, TreeNode parentNode)
@@ -164,17 +172,55 @@ namespace V2.Parsing.Designer
             tokenTypePaths.Lines = GetTokenPaths(e.Node).ToArray();
         }
 
+
         private List<string> GetTokenPaths(TreeNode node)
         {
-            //foreach(TreeNode childNode in node.Nodes)
-            //{
-            //    PatternIdentifierTreeNode patternIdentifierTreeNode = childNode as PatternIdentifierTreeNode;
-            //
-            //    if (patternIdentifierTreeNode!= null)
-            //    {
-            //        
-            //    }
-            //}
+            Stack<string> stack = new Stack<string>();
+
+            return GetTokenPaths(node, stack);
+        }
+
+        private List<string> GetTokenPaths(TreeNode node, Stack<string> stack)
+        {
+            foreach(TreeNode childNode in node.Nodes)
+            {
+                PatternIdentifierTreeNode patternIdentifierTreeNode = childNode as PatternIdentifierTreeNode;
+                DefIdentifierTreeNode defIdentifierTreeNode = childNode as DefIdentifierTreeNode;
+                OneOfTreeNode oneOfTreeNode = childNode as OneOfTreeNode;
+                AllOfTreeNode allOfTreeNode = childNode as AllOfTreeNode;
+                OptionalTreeNode optionalTreeNode = childNode as OptionalTreeNode;
+                OneOrMoreTreeNode oneOrMoreTreeNode = childNode as OneOrMoreTreeNode;
+                ZeroOrMoreTreeNode zeroOrMoreTreeNode = childNode as ZeroOrMoreTreeNode;
+            
+                if (patternIdentifierTreeNode!= null)
+                {
+                    
+                }
+                else if (defIdentifierTreeNode != null)
+                {
+                    
+                }
+                else if (oneOfTreeNode != null)
+                {
+                    
+                }
+                else if (allOfTreeNode != null)
+                {
+                    
+                }
+                else if (optionalTreeNode != null)
+                {
+                    
+                }
+                else if (oneOrMoreTreeNode != null)
+                {
+                    
+                }
+                else if (zeroOrMoreTreeNode != null)
+                {
+                    
+                }
+            }
 
             return new List<string>() {"sdffsa", "sfsf"};
         }

@@ -23,32 +23,38 @@ namespace V2.Parsing.Core.Domain
     public class DefIdentifier : Identifier
     { }
 
-    public class Optional : Element
+    public class Optional : ElementWithSingleChild
+    {
+    }
+
+    public class OneOf : ElementWithMultipleChildren
+    {
+    }
+
+    public class AllOf : ElementWithMultipleChildren
+    {
+    }
+
+    public class OneOrMore : ElementWithSingleChild
+    {
+    }
+
+    public class ZeroOrMore : ElementWithSingleChild
+    {
+    }
+
+    public abstract class ElementWithSingleChild : Element
     {
         public Element Element { get; set; }
     }
 
-    public class OneOf : Element
+    public abstract class ElementWithMultipleChildren : Element
     {
         public List<Identifier> Identifiers { get; set; }
-    }
-
-    public class AllOf : Element
-    {
-        public List<Identifier> Identifiers { get; set; }
-    }
-
-    public class OneOrMore : Element
-    {
-        public Element Element { get; set; }
-    }
-
-    public class ZeroOrMore : Element
-    {
-        public Element Element { get; set; }
     }
 
     public abstract class Element
     {
+        public Element Parent { get; set; }
     }
 }
