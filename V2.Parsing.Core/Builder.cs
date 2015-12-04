@@ -27,10 +27,9 @@ namespace V2.Parsing.Core
                     var children = patternNode.Children.Where(x => x.NodeType == NodeType.Identifier).ToArray();
                     var pattern = new Pattern
                     {
-                        Name = children[0].Text
+                        Name = children[0].Text,
+                        Texts = children.Skip(1).Select(x => x.Text).ToArray()
                     };
-
-                    pattern.Texts = children.Skip(1).Select(x => x.Text).ToArray();
 
                     grammar.Patterns.Add(pattern);
                 }
@@ -50,10 +49,6 @@ namespace V2.Parsing.Core
                     grammar.Defs.Add(def);
                 }
 
-                List<Element> elements = new List<Element>();
-
-                elements.AddRange(grammar.Patterns);
-                elements.AddRange(grammar.Defs);
 
                 foreach (var defNode in defsNode.Children.Where(x => x.NodeType == NodeType.Def))
                 {
@@ -83,10 +78,7 @@ namespace V2.Parsing.Core
                                 throw new Exception();
                             }
 
-                            element = new Optional
-                            {
-                                Element = subElement
-                            };
+                            element = new Optional(subElement);
                         }
                         else
                         {
@@ -94,7 +86,7 @@ namespace V2.Parsing.Core
 
                             foreach (var elementNode in partNode.Children.Where(x => x.NodeType == NodeType.Element))
                             {
-                                Identifier identifier = null;
+                                Element identifier;
 
                                 if (grammar.Patterns.Any(x => x.Name == elementNode.Children[0].Text))
                                 {
@@ -114,11 +106,11 @@ namespace V2.Parsing.Core
 
                                 if (elementNode.Children.Any(x => x.NodeType == NodeType.Plus))
                                 {
-                                    element = new OneOrMore { Element = element };
+                                    element = new OneOrMore (element);
                                 }
                                 else if (elementNode.Children.Any(x => x.NodeType == NodeType.Star))
                                 {
-                                    element = new ZeroOrMore { Element = element };
+                                    element = new ZeroOrMore(element);
                                 }
 
                                 identifiers.Add(identifier);
@@ -140,22 +132,22 @@ namespace V2.Parsing.Core
                         {
                             if (partNode.Children[0].Children.Any(x => x.NodeType == NodeType.Plus))
                             {
-                                element = new OneOrMore { Element = element };
+                                element = new OneOrMore(element);
                             }
                             else if (partNode.Children[0].Children.Any(x => x.NodeType == NodeType.Star))
                             {
-                                element = new ZeroOrMore { Element = element };
+                                element = new ZeroOrMore(element);
                             }
                         }
                         else
                         {
                             if (partNode.Children.Any(x => x.NodeType == NodeType.Plus))
                             {
-                                element = new OneOrMore { Element = element };
+                                element = new OneOrMore(element);
                             }
                             else if (partNode.Children.Any(x => x.NodeType == NodeType.Star))
                             {
-                                element = new ZeroOrMore { Element = element };
+                                element = new ZeroOrMore(element);
                             }
                         }
                         def.Elements.Add(element);
@@ -206,29 +198,18 @@ namespace V2.Parsing.Core
 
         private void SetParents(Element element)
         {
-            ElementWithSingleChild elementWithSingleChild = element as ElementWithSingleChild;
-            ElementWithMultipleChildren elementWithMultipleChildren = element as ElementWithMultipleChildren;
-
-            if (elementWithSingleChild != null)
+            foreach (var child in element.Elements)
             {
-                elementWithSingleChild.Element.Parent = elementWithSingleChild;
-                SetParents(elementWithSingleChild.Element);
-            }
-            else if (elementWithMultipleChildren != null)
-            {
-                foreach (var child in elementWithMultipleChildren.Elements)
-                {
-                    child.Parent = elementWithMultipleChildren;
-                    SetParents(child);
-                }
+                child.Parent = element;
+                SetParents(child);
             }
         }
 
         private List<Element> GetIdentifiers(Grammar grammar, List<Node<NodeType>> optionalIdents)
         {
             return optionalIdents.Select(x => grammar.Patterns.Any(y => y.Name == x.Text)
-                ? (Element)new PatternIdentifier { Name = x.Text }
-                : (Element)new DefIdentifier { Name = x.Text })
+                ? new PatternIdentifier { Name = x.Text } as Element
+                : new DefIdentifier { Name = x.Text })
                 .ToList();
         }
 
@@ -751,16 +732,16 @@ namespace {grammar.Name}
 
         private void GetOthers(Element element, List<Element> others)
         {
-            do
+            Element parent = element;
+
+            while (parent != null)
             {
-                Element parent = element.Parent;
-
-                if(parent is Optional)
+                if (parent is Optional)
                 {
-                    
-                }
 
-            } while (element.Parent != null);
+                }
+                parent = parent.Parent;
+            }
         }
 
         private List<string> GetTokenTypes(Grammar grammar, Element element)

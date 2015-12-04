@@ -98,16 +98,21 @@ namespace V2.Parsing.Core
 
         private void ElementToString(StringBuilder stringBuilder, Element element)
         {
-            Identifier identifier = element as Identifier;
+            Element patternIdentifier = element as PatternIdentifier;
+            Element defIdentifier = element as DefIdentifier;
             OneOf oneOf = element as OneOf;
             AllOf allOf = element as AllOf;
             Optional optional = element as Optional;
             OneOrMore oneOrMore = element as OneOrMore;
             ZeroOrMore zeroOrMore = element as ZeroOrMore;
 
-            if (identifier != null)
+            if (patternIdentifier != null)
             {
-                stringBuilder.Append(MakeSafe(identifier.Name));
+                stringBuilder.Append(MakeSafe(patternIdentifier.Name));
+            }
+            else if (defIdentifier != null)
+            {
+                stringBuilder.Append(MakeSafe(defIdentifier.Name));
             }
             else if (oneOf != null)
             {

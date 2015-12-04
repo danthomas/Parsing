@@ -1,37 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 namespace V2.Parsing.Core.Domain
 {
-    public class Def : ElementWithMultipleChildren
+    public class Def : Element
     {
-        public Def()  : base(new List<Element>())
+        public Def() : base(new List<Element>())
         {
         }
     }
 
-    public abstract class Identifier : Element
-    {
-    }
-
-    public class PatternIdentifier : Identifier
+    public class PatternIdentifier : Element
     { }
 
-    public class DefIdentifier : Identifier
+    public class DefIdentifier : Element
     { }
 
     public class Optional : ElementWithSingleChild
     {
-    }
-
-    public class OneOf : ElementWithMultipleChildren
-    {
-        public OneOf(List<Element> elements) : base(elements)
+        public Optional(Element element) : base(element)
         {
-            
         }
     }
 
-    public class AllOf : ElementWithMultipleChildren
+    public class OneOf : Element
+    {
+        public OneOf(List<Element> elements) : base(elements)
+        {
+        }
+    }
+
+    public class AllOf : Element
     {
         public AllOf(List<Element> elements) : base(elements)
         {
@@ -40,30 +39,55 @@ namespace V2.Parsing.Core.Domain
 
     public class OneOrMore : ElementWithSingleChild
     {
+        public OneOrMore(Element element) : base(element)
+        {
+        }
     }
 
     public class ZeroOrMore : ElementWithSingleChild
     {
+        public ZeroOrMore(Element element) : base(element)
+        {
+        }
     }
 
     public abstract class ElementWithSingleChild : Element
     {
-        public Element Element { get; set; }
-    }
-
-    public abstract class ElementWithMultipleChildren : Element
-    {
-        protected ElementWithMultipleChildren(List<Element> elements)
+        protected ElementWithSingleChild(Element element)
         {
-            Elements = elements;
+            Element = element;
         }
 
-        public List<Element> Elements { get; private set; }
+        public Element Element
+        {
+            get
+            {
+                return Elements.SingleOrDefault();
+            }
+            set
+            {
+                Elements = new List<Element> { value };
+            }
+        }
+
     }
 
     public abstract class Element
     {
+        protected Element(List<Element> elements)
+        {
+            Elements = elements;
+        }
+
+        protected Element()
+        {
+            Elements = new List<Element>();
+        }
+
         public string Name { get; set; }
+
         public Element Parent { get; set; }
+
+        public List<Element> Elements { get; set; }
     }
 }

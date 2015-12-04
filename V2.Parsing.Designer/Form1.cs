@@ -127,7 +127,7 @@ namespace V2.Parsing.Designer
                 {
                     childNode = new DefIdentifierTreeNode(defIdentifier);
 
-                    AddElements(grammar, grammar.Defs.Single(x => x.Name == ((Identifier)element).Name).Elements, childNode);
+                    AddElements(grammar, grammar.Defs.Single(x => x.Name == (element).Name).Elements, childNode);
                 }
                 else if (oneOf != null)
                 {
