@@ -855,7 +855,7 @@ namespace {grammar.Name}
                         patternIdentifier = identifier as PatternIdentifier;
 
                         ret += $@"
-                {(first ? "" : "else ")}if (IsTokenType())
+                {(first ? "" : "else ")}if ({GetAreTokenTypes(grammar, identifier)})
                 {{";
 
                         if (patternIdentifier != null)

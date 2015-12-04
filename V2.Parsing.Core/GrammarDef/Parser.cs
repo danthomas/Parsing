@@ -93,11 +93,11 @@ namespace V2.Parsing.Core.GrammarDef
         {
             var child = Add(parent, NodeType.Part);
 
-            if (IsTokenType(TokenType.Identifier))
+            if (AreTokenTypes(TokenType.Identifier))
             {
                 OptionalElements(child);
             }
-            else if (IsTokenType(TokenType.OpenSquare))
+            else if (AreTokenTypes(TokenType.OpenSquare))
             {
                 Optional(child);
             }
@@ -115,11 +115,11 @@ namespace V2.Parsing.Core.GrammarDef
 
             if (IsTokenType(TokenType.Plus, TokenType.Star))
             {
-                if (IsTokenType(TokenType.Star))
+                if (AreTokenTypes(TokenType.Star))
                 {
                     Consume(child, TokenType.Star, NodeType.Star);
                 }
-                else if (IsTokenType(TokenType.Plus))
+                else if (AreTokenTypes(TokenType.Plus))
                 {
                     Consume(child, TokenType.Plus, NodeType.Plus);
                 }
@@ -210,11 +210,11 @@ namespace V2.Parsing.Core.GrammarDef
 
             if (IsTokenType(TokenType.Plus, TokenType.Star))
             {
-                if (IsTokenType(TokenType.Star))
+                if (AreTokenTypes(TokenType.Star))
                 {
                     Consume(child, TokenType.Star, NodeType.Star);
                 }
-                else if (IsTokenType(TokenType.Plus))
+                else if (AreTokenTypes(TokenType.Plus))
                 {
                     Consume(child, TokenType.Plus, NodeType.Plus);
                 }
@@ -245,13 +245,13 @@ namespace V2.Parsing.Core.GrammarDef
 
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
-            if (IsTokenType(TokenType.Colon))
+            if (AreTokenTypes(TokenType.Colon))
             {
                 Consume(child, TokenType.Colon, NodeType.Colon);
                 Consume(child, TokenType.Identifier, NodeType.Identifier);
             }
 
-            if (IsTokenType(TokenType.Identifier))
+            if (AreTokenTypes(TokenType.Identifier))
             {
                 Consume(child, TokenType.Identifier, NodeType.Identifier);
             }
