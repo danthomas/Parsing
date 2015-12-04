@@ -179,7 +179,7 @@ namespace V2.Parsing.Core.GrammarDef
 
             Element(child);
 
-            while (AreTokenTypes(TokenType.Pipe, TokenType.Identifier))
+            while (AreTokenTypes(TokenType.Pipe))
             {
                 Consume(child, TokenType.Pipe, NodeType.Pipe);
                 Element(child);
@@ -233,8 +233,7 @@ namespace V2.Parsing.Core.GrammarDef
             do
             {
                 Pattern(child);
-            }
-            while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier));
+            } while (AreTokenTypes(TokenType.NewLine, TokenType.Identifier));
 
             return child;
         }
@@ -245,6 +244,7 @@ namespace V2.Parsing.Core.GrammarDef
 
             Consume(child, TokenType.NewLine, NodeType.NewLine);
             Consume(child, TokenType.Identifier, NodeType.Identifier);
+
             if (AreTokenTypes(TokenType.Colon))
             {
                 Consume(child, TokenType.Colon, NodeType.Colon);
