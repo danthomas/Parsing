@@ -2,19 +2,15 @@
 
 namespace V2.Parsing.Core.Domain
 {
-    public class Def : Thing
+    public class Def : ElementWithMultipleChildren
     {
-        public List<Element> Elements { get; set; }
-
-        public Def()
+        public Def()  : base(new List<Element>())
         {
-            Elements = new List<Element>();
         }
     }
 
     public abstract class Identifier : Element
     {
-        public string Name { get; set; }
     }
 
     public class PatternIdentifier : Identifier
@@ -29,10 +25,17 @@ namespace V2.Parsing.Core.Domain
 
     public class OneOf : ElementWithMultipleChildren
     {
+        public OneOf(List<Element> elements) : base(elements)
+        {
+            
+        }
     }
 
     public class AllOf : ElementWithMultipleChildren
     {
+        public AllOf(List<Element> elements) : base(elements)
+        {
+        }
     }
 
     public class OneOrMore : ElementWithSingleChild
@@ -50,11 +53,17 @@ namespace V2.Parsing.Core.Domain
 
     public abstract class ElementWithMultipleChildren : Element
     {
-        public List<Identifier> Identifiers { get; set; }
+        protected ElementWithMultipleChildren(List<Element> elements)
+        {
+            Elements = elements;
+        }
+
+        public List<Element> Elements { get; private set; }
     }
 
     public abstract class Element
     {
+        public string Name { get; set; }
         public Element Parent { get; set; }
     }
 }

@@ -43,7 +43,6 @@
     <Compile Include="Builder.cs" />
     <Compile Include="Domain\Def.cs" />
     <Compile Include="Domain\Discard.cs" />
-    <Compile Include="Domain\Thing.cs" />
     <Compile Include="Domain\Grammar.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GrammarDef\Lexer.cs" />

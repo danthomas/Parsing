@@ -50,7 +50,7 @@ namespace V2.Parsing.Core
                     grammar.Defs.Add(def);
                 }
 
-                List<Thing> elements = new List<Thing>();
+                List<Element> elements = new List<Element>();
 
                 elements.AddRange(grammar.Patterns);
                 elements.AddRange(grammar.Defs);
@@ -72,17 +72,11 @@ namespace V2.Parsing.Core
 
                             if (optionalIdents != null)
                             {
-                                subElement = new OneOf
-                                {
-                                    Identifiers = GetIdentifiers(grammar, optionalIdents.Children.Where(x => x.NodeType != NodeType.Pipe).ToList())
-                                };
+                                subElement = new OneOf(GetIdentifiers(grammar, optionalIdents.Children.Where(x => x.NodeType != NodeType.Pipe).ToList()));
                             }
                             else if (requiredIdents != null)
                             {
-                                subElement = new AllOf
-                                {
-                                    Identifiers = GetIdentifiers(grammar, requiredIdents.Children)
-                                };
+                                subElement = new AllOf(GetIdentifiers(grammar, requiredIdents.Children));
                             }
                             else
                             {
@@ -96,7 +90,7 @@ namespace V2.Parsing.Core
                         }
                         else
                         {
-                            List<Identifier> identifiers = new List<Identifier>();
+                            List<Element> identifiers = new List<Element>();
 
                             foreach (var elementNode in partNode.Children.Where(x => x.NodeType == NodeType.Element))
                             {
@@ -132,7 +126,7 @@ namespace V2.Parsing.Core
 
                             if (identifiers.Count > 1)
                             {
-                                element = new OneOf { Identifiers = identifiers };
+                                element = new OneOf(identifiers);
                             }
                         }
 
@@ -204,24 +198,16 @@ namespace V2.Parsing.Core
 
         private void SetParents(Grammar grammar)
         {
-            foreach(Def def in grammar.Defs)
+            foreach (Def def in grammar.Defs)
             {
                 SetParents(def);
             }
         }
 
-        private void SetParents(Def def)
-        {
-            foreach (var element in def.Elements)
-            {
-                SetParents(element);
-            }
-        }
-
         private void SetParents(Element element)
         {
-           ElementWithSingleChild elementWithSingleChild = element as ElementWithSingleChild;
-           ElementWithMultipleChildren elementWithMultipleChildren = element as ElementWithMultipleChildren;
+            ElementWithSingleChild elementWithSingleChild = element as ElementWithSingleChild;
+            ElementWithMultipleChildren elementWithMultipleChildren = element as ElementWithMultipleChildren;
 
             if (elementWithSingleChild != null)
             {
@@ -230,7 +216,7 @@ namespace V2.Parsing.Core
             }
             else if (elementWithMultipleChildren != null)
             {
-                foreach (var child in elementWithMultipleChildren.Identifiers)
+                foreach (var child in elementWithMultipleChildren.Elements)
                 {
                     child.Parent = elementWithMultipleChildren;
                     SetParents(child);
@@ -238,11 +224,11 @@ namespace V2.Parsing.Core
             }
         }
 
-        private List<Identifier> GetIdentifiers(Grammar grammar, List<Node<NodeType>> optionalIdents)
+        private List<Element> GetIdentifiers(Grammar grammar, List<Node<NodeType>> optionalIdents)
         {
             return optionalIdents.Select(x => grammar.Patterns.Any(y => y.Name == x.Text)
-                ? (Identifier)new PatternIdentifier { Name = x.Text }
-                : (Identifier)new DefIdentifier { Name = x.Text })
+                ? (Element)new PatternIdentifier { Name = x.Text }
+                : (Element)new DefIdentifier { Name = x.Text })
                 .ToList();
         }
 
@@ -677,7 +663,7 @@ namespace {grammar.Name}
                         ret += $@"
 ";
                         bool first = true;
-                        foreach (var identifier in oneOf.Identifiers)
+                        foreach (var identifier in oneOf.Elements)
                         {
                             if (identifier is PatternIdentifier)
                             {
@@ -723,7 +709,7 @@ namespace {grammar.Name}
         {
             List<string> tokenTypes = GetTokenTypes(grammar, element);
             List<List<string>> otherTokenTypes = new List<List<string>>();
-            
+
             var others = GetOthers(element);
 
             foreach (var element2 in others)
@@ -735,7 +721,7 @@ namespace {grammar.Name}
 
             if (otherTokenTypes.Count == 0)
             {
-                names = new[] {tokenTypes[0]};
+                names = new[] { tokenTypes[0] };
             }
             else
             {
@@ -754,7 +740,7 @@ namespace {grammar.Name}
             return $"AreTokenTypes({ String.Join(", ", names.Select(x => $"TokenType.{x.ToIdentifier()}")) })";
         }
 
-        private List<Element> GetOthers( Element element)
+        private List<Element> GetOthers(Element element)
         {
             List<Element> others = new List<Element>();
 
@@ -765,6 +751,16 @@ namespace {grammar.Name}
 
         private void GetOthers(Element element, List<Element> others)
         {
+            do
+            {
+                Element parent = element.Parent;
+
+                if(parent is Optional)
+                {
+                    
+                }
+
+            } while (element.Parent != null);
         }
 
         private List<string> GetTokenTypes(Grammar grammar, Element element)
@@ -800,14 +796,14 @@ namespace {grammar.Name}
             }
             else if (allOf != null)
             {
-                foreach (var identifier in allOf.Identifiers)
+                foreach (var identifier in allOf.Elements)
                 {
                     GetTokenTypes(grammar, identifier, ref tokenTypes);
                 }
             }
             else if (oneOf != null)
             {
-                foreach (var identifier in oneOf.Identifiers)
+                foreach (var identifier in oneOf.Elements)
                 {
                     GetTokenTypes(grammar, identifier, ref tokenTypes);
                 }
@@ -850,10 +846,10 @@ namespace {grammar.Name}
             }
             else if (oneOf != null)
             {
-                if (oneOf.Identifiers.Count == 1)
+                if (oneOf.Elements.Count == 1)
                 {
-                    patternIdentifier = oneOf.Identifiers[0] as PatternIdentifier;
-                    defIdentifier = oneOf.Identifiers[0] as DefIdentifier;
+                    patternIdentifier = oneOf.Elements[0] as PatternIdentifier;
+                    defIdentifier = oneOf.Elements[0] as DefIdentifier;
 
                     if (patternIdentifier != null)
                     {
@@ -870,7 +866,7 @@ namespace {grammar.Name}
                 {
                     bool first = true;
 
-                    foreach (var identifier in oneOf.Identifiers)
+                    foreach (var identifier in oneOf.Elements)
                     {
                         patternIdentifier = identifier as PatternIdentifier;
 
@@ -898,7 +894,7 @@ namespace {grammar.Name}
             }
             else if (allOf != null)
             {
-                foreach (var identifier in allOf.Identifiers)
+                foreach (var identifier in allOf.Elements)
                 {
                     patternIdentifier = identifier as PatternIdentifier;
 

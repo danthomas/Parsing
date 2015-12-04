@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using V2.Parsing.Core;
 using V2.Parsing.Core.Domain;
@@ -17,7 +13,7 @@ namespace V2.Parsing.Designer
     public partial class Form1 : Form
     {
         private string _filePath;
-        private Utils _utils;
+        private readonly Utils _utils;
 
         public Form1()
         {
@@ -82,19 +78,19 @@ namespace V2.Parsing.Designer
             try
             {
 
-            grammarTree.Nodes.Clear();
+                grammarTree.Nodes.Clear();
 
-            TreeNode treeNode = new TreeNode(grammar.Name);
+                TreeNode treeNode = new TreeNode(grammar.Name);
 
-            grammarTree.Nodes.Add(treeNode);
+                grammarTree.Nodes.Add(treeNode);
 
-            AddDefNodes(grammar, treeNode);
+                AddDefNodes(grammar, treeNode);
 
-            grammarTree.ExpandAll();
+                grammarTree.ExpandAll();
             }
             catch (Exception)
             {
-                
+
             }
         }
 
@@ -136,24 +132,24 @@ namespace V2.Parsing.Designer
                 else if (oneOf != null)
                 {
                     childNode = new OneOfTreeNode(oneOf);
-                    AddElements(grammar, oneOf.Identifiers.Cast<Element>().ToList(), childNode);
+                    AddElements(grammar, oneOf.Elements.ToList(), childNode);
                 }
                 else if (allOf != null)
                 {
                     childNode = new AllOfTreeNode(allOf);
-                    AddElements(grammar, allOf.Identifiers.Cast<Element>().ToList(), childNode);
+                    AddElements(grammar, allOf.Elements.ToList(), childNode);
                 }
-                else if (optional!=null)
+                else if (optional != null)
                 {
                     childNode = new OptionalTreeNode(optional);
                     AddElements(grammar, new List<Element> { optional.Element }, childNode);
                 }
-                else if (oneOrMore!= null)
+                else if (oneOrMore != null)
                 {
                     childNode = new OneOrMoreTreeNode(oneOrMore);
                     AddElements(grammar, new List<Element> { oneOrMore.Element }, childNode);
                 }
-                else if (zeroOrMore!= null)
+                else if (zeroOrMore != null)
                 {
                     childNode = new ZeroOrMoreTreeNode(zeroOrMore);
                     AddElements(grammar, new List<Element> { zeroOrMore.Element }, childNode);
@@ -182,7 +178,7 @@ namespace V2.Parsing.Designer
 
         private List<string> GetTokenPaths(TreeNode node, Stack<string> stack)
         {
-            foreach(TreeNode childNode in node.Nodes)
+            foreach (TreeNode childNode in node.Nodes)
             {
                 PatternIdentifierTreeNode patternIdentifierTreeNode = childNode as PatternIdentifierTreeNode;
                 DefIdentifierTreeNode defIdentifierTreeNode = childNode as DefIdentifierTreeNode;
@@ -191,38 +187,38 @@ namespace V2.Parsing.Designer
                 OptionalTreeNode optionalTreeNode = childNode as OptionalTreeNode;
                 OneOrMoreTreeNode oneOrMoreTreeNode = childNode as OneOrMoreTreeNode;
                 ZeroOrMoreTreeNode zeroOrMoreTreeNode = childNode as ZeroOrMoreTreeNode;
-            
-                if (patternIdentifierTreeNode!= null)
+
+                if (patternIdentifierTreeNode != null)
                 {
-                    
+
                 }
                 else if (defIdentifierTreeNode != null)
                 {
-                    
+
                 }
                 else if (oneOfTreeNode != null)
                 {
-                    
+
                 }
                 else if (allOfTreeNode != null)
                 {
-                    
+
                 }
                 else if (optionalTreeNode != null)
                 {
-                    
+
                 }
                 else if (oneOrMoreTreeNode != null)
                 {
-                    
+
                 }
                 else if (zeroOrMoreTreeNode != null)
                 {
-                    
+
                 }
             }
 
-            return new List<string>() {"sdffsa", "sfsf"};
+            return new List<string>() { "sdffsa", "sfsf" };
         }
     }
 

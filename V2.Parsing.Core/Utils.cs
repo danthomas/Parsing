@@ -111,11 +111,11 @@ namespace V2.Parsing.Core
             }
             else if (oneOf != null)
             {
-                stringBuilder.Append(String.Join(" | ", oneOf.Identifiers.Select(x => MakeSafe(x.Name))));
+                stringBuilder.Append(String.Join(" | ", oneOf.Elements.Select(x => MakeSafe(x.Name))));
             }
             else if (allOf != null)
             {
-                stringBuilder.Append(String.Join(" ", allOf.Identifiers.Select(x => MakeSafe(x.Name))));
+                stringBuilder.Append(String.Join(" ", allOf.Elements.Select(x => MakeSafe(x.Name))));
             }
             else if (optional != null)
             {
