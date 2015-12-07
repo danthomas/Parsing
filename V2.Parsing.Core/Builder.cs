@@ -215,12 +215,8 @@ namespace V2.Parsing.Core
 
         public string BuildNodeType(Grammar grammar)
         {
-            string ret = $@"using System.Collections.Generic;
-using V2.Parsing.Core;
-
-namespace {grammar.Name}
+            string ret = $@"namespace {grammar.Name}
 {{
-
     public enum NodeType
     {{
         Root,";
@@ -758,13 +754,12 @@ namespace {grammar.Name}
         {
             PatternIdentifier patternIdentifier = element as PatternIdentifier;
             DefIdentifier defIdentifier = element as DefIdentifier;
-            AllOf allOf = element as AllOf;
-            OneOf oneOf = element as OneOf;
-            OneOrMore oneOrMore = element as OneOrMore;
-            ZeroOrMore zeroOrMore = element as ZeroOrMore;
-            Optional optional = element as Optional;
-
-
+            //AllOf allOf = element as AllOf;
+            //OneOf oneOf = element as OneOf;
+            //OneOrMore oneOrMore = element as OneOrMore;
+            //ZeroOrMore zeroOrMore = element as ZeroOrMore;
+            //Optional optional = element as Optional;
+            
             if (patternIdentifier != null)
             {
                 tokenTypes.Add(patternIdentifier.Name.ToIdentifier());
@@ -778,35 +773,12 @@ namespace {grammar.Name}
                     GetTokenTypes(grammar, element1, ref tokenTypes);
                 }
             }
-            else if (allOf != null)
-            {
-                foreach (var identifier in allOf.Elements)
-                {
-                    GetTokenTypes(grammar, identifier, ref tokenTypes);
-                }
-            }
-            else if (oneOf != null)
-            {
-                foreach (var identifier in oneOf.Elements)
-                {
-                    GetTokenTypes(grammar, identifier, ref tokenTypes);
-                }
-            }
-            else if (optional != null)
-            {
-                GetTokenTypes(grammar, optional.Element, ref tokenTypes);
-            }
-            else if (oneOrMore != null)
-            {
-                GetTokenTypes(grammar, oneOrMore.Element, ref tokenTypes);
-            }
-            else if (zeroOrMore != null)
-            {
-                GetTokenTypes(grammar, zeroOrMore.Element, ref tokenTypes);
-            }
             else
             {
-                throw new Exception();
+                foreach (var identifier in element.Elements)
+                {
+                    GetTokenTypes(grammar, identifier, ref tokenTypes);
+                }
             }
         }
 
@@ -906,13 +878,8 @@ namespace {grammar.Name}
 
         public string BuildTokenType(Grammar grammar)
         {
-            string ret =
-                $@"using System.Collections.Generic;
-using V2.Parsing.Core;
-
-namespace {grammar.Name}
+            string ret = $@"namespace {grammar.Name}
 {{
-
     public enum TokenType
     {{
         EndOfFile,";

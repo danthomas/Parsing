@@ -33,6 +33,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V2.Parsing.Core.Tests", "V2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V2.Parsing.Designer", "V2.Parsing.Designer\V2.Parsing.Designer.csproj", "{FA13BBD0-18CA-40FC-AB41-A418150AEB1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V2.TitleBuilder", "V2.TitleBuilder\V2.TitleBuilder.csproj", "{33EB61BB-401F-4B13-AA10-3BE6E31643EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V2.TitleBuilder.Tests", "V2.TitleBuilder.Tests\V2.TitleBuilder.Tests.csproj", "{E092BE4F-9646-494A-898C-87663AE2D8B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +103,14 @@ Global
 		{FA13BBD0-18CA-40FC-AB41-A418150AEB1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA13BBD0-18CA-40FC-AB41-A418150AEB1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA13BBD0-18CA-40FC-AB41-A418150AEB1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33EB61BB-401F-4B13-AA10-3BE6E31643EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33EB61BB-401F-4B13-AA10-3BE6E31643EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33EB61BB-401F-4B13-AA10-3BE6E31643EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33EB61BB-401F-4B13-AA10-3BE6E31643EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E092BE4F-9646-494A-898C-87663AE2D8B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E092BE4F-9646-494A-898C-87663AE2D8B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E092BE4F-9646-494A-898C-87663AE2D8B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E092BE4F-9646-494A-898C-87663AE2D8B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
