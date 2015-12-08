@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace V3.Parsing.Core
+﻿namespace V3.Parsing.Core
 {
     public abstract class ParserBase<N>
     {
@@ -28,11 +26,14 @@ namespace V3.Parsing.Core
             return node;
         }
 
-        protected void Consume(Node<N> parent, N nodeType)
+        protected void Consume(Node<N> parent, N nodeType, bool add = true)
         {
             var nextNode = _lexer.Next(nodeType);
 
-            parent.Nodes.Add(nextNode);
+            if (add)
+            {
+                parent.Nodes.Add(nextNode);
+            }
         }
 
         protected bool AreNodeTypes(params N[] nodeTypes)
