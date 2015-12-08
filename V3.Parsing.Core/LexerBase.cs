@@ -47,8 +47,8 @@ namespace V3.Parsing.Core
                         return false;
                     }
 
-                    _buffer.Add(nextNode);
                     _index += nextNode.Text.Length;
+                    _buffer.Add(nextNode);
                 }
                 i++;
             }
@@ -79,7 +79,6 @@ namespace V3.Parsing.Core
             _index += nextNode.Text.Length;
 
             return nextNode;
-
         }
 
         private List<Node<N>> NextNodes()
@@ -100,7 +99,7 @@ namespace V3.Parsing.Core
                 {
                     foreach (var match in matches)
                     {
-                        var index = nextNodes.FindIndex(x => x.NodeType.Equals( match.NodeType));
+                        var index = nextNodes.FindIndex(x => x.NodeType.Equals(match.NodeType));
 
                         if (index >= 0)
                         {

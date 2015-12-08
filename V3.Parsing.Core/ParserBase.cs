@@ -26,14 +26,11 @@
             return node;
         }
 
-        protected void Consume(Node<N> parent, N nodeType, bool add = true)
+        protected void Consume(N nodeType, Node<N> parent = null)
         {
             var nextNode = _lexer.Next(nodeType);
 
-            if (add)
-            {
-                parent.Nodes.Add(nextNode);
-            }
+            parent?.Nodes.Add(nextNode);
         }
 
         protected bool AreNodeTypes(params N[] nodeTypes)

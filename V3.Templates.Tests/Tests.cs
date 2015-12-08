@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using V3.Parsing.Core;
 
@@ -8,51 +10,62 @@ namespace V3.Templates.Tests
     public class Tests
     {
         [Test]
+        public void XXX()
+        {
+
+            bool asfas = new Regex(@"^[\ \t]+$").IsMatch(" \t");
+
+            Parse("{  abc  }", @"
+Expr
+    SubExpr
+        Identifier : abc");
+        }
+
+        [Test]
         public void Complex()
         {
-            Parse("{abc=def|ghi|jkl?{ab=cd?de$fg}:{hi=jk?lm$:no$pq}}", @"
-Expr : 
-    SubExpr : 
+            Parse("xxx {  abc  =def|ghi|jkl?{ab=cd?de$fg}:{hi=jk?lm$:no$pq}} yyy", @"
+Expr
+    Text : xxx 
+    SubExpr
         Identifier : abc
-        Equals : =
-        Values : 
+        Values
             Value : def
             Value : ghi
             Value : jkl
-        Then : 
-            SubExpr : 
+        Then
+            SubExpr
                 Identifier : ab
-                Equals : =
-                Values : 
+                Values
                     Value : cd
-                Then : 
+                Then
                     Value : de
                     Dollar : $
                     Value : fg
-            Else : 
-                SubExpr : 
+            Else
+                SubExpr
                     Identifier : hi
-                    Equals : =
-                    Values : 
+                    Values
                         Value : jk
-                    Then : 
+                    Then
                         Value : lm
                         Dollar : $
-                        Else : 
+                        Else
                             Value : no
                             Dollar : $
-                            Value : pq");
+                            Value : pq
+    Text :  yyy");
         }
         
         [Test]
         public void AttrThenSubExp()
         {
             Parse("{abc?{def}}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Then : 
-            SubExpr : 
+        Then
+            SubExpr
                 Identifier : def");
         }
 
@@ -61,7 +74,7 @@ Expr :
         public void SimpleText()
         {
             Parse("abc", @"
-Expr : 
+Expr
     Text : abc");
         }
 
@@ -69,11 +82,10 @@ Expr :
         public void AttrEqualsValue()
         {
             Parse("{abc=def ghi}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Equals : =
-        Values : 
+        Values
             Value : def ghi");
         }
 
@@ -81,11 +93,10 @@ Expr :
         public void AttrEqualsMultiValue()
         {
             Parse("{abc=def|ghi|jkl}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Equals : =
-        Values : 
+        Values
             Value : def
             Value : ghi
             Value : jkl");
@@ -95,10 +106,10 @@ Expr :
         public void AttrThenValue()
         {
             Parse("{abc?def ghi}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Then : 
+        Then
             Value : def ghi");
         }
 
@@ -106,12 +117,12 @@ Expr :
         public void AttrThenValueElseValue()
         {
             Parse("{abc?def def:ghi ghi}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Then : 
+        Then
             Value : def def
-            Else : 
+            Else
                 Value : ghi ghi");
         }
 
@@ -119,10 +130,10 @@ Expr :
         public void AttrThenDollarValue()
         {
             Parse("{abc?$def}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Then : 
+        Then
             Dollar : $
             Value : def");
         }
@@ -131,10 +142,10 @@ Expr :
         public void AttrThenValueDollar()
         {
             Parse("{abc?def$}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Then : 
+        Then
             Value : def
             Dollar : $");
         }
@@ -143,10 +154,10 @@ Expr :
         public void AttrThenValueDollarValue()
         {
             Parse("{abc?def$ghi}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Then : 
+        Then
             Value : def
             Dollar : $
             Value : ghi");
@@ -156,17 +167,16 @@ Expr :
         public void AttrEqualsValueThenValueElseValue()
         {
             Parse("{abc=abc def?def$def:ghi$ghi}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc
-        Equals : =
-        Values : 
+        Values
             Value : abc def
-        Then : 
+        Then
             Value : def
             Dollar : $
             Value : def
-            Else : 
+            Else
                 Value : ghi
                 Dollar : $
                 Value : ghi");
@@ -176,8 +186,8 @@ Expr :
         public void SimpleSubExpr()
         {
             Parse("{abc}", @"
-Expr : 
-    SubExpr : 
+Expr
+    SubExpr
         Identifier : abc");
         }
 
@@ -185,7 +195,7 @@ Expr :
         public void TextWithWhiteSpace()
         {
             Parse("abc def", @"
-Expr : 
+Expr
     Text : abc def");
         }
 
@@ -193,9 +203,9 @@ Expr :
         public void SimpleTextSubExprText()
         {
             Parse("abc{def}ghi", @"
-Expr : 
+Expr
     Text : abc
-    SubExpr : 
+    SubExpr
         Identifier : def
     Text : ghi");
         }
@@ -207,7 +217,6 @@ Expr :
             var actual = NodeToString(parser.Parse(text));
 
             Assert.That(actual, Is.EqualTo(expected));
-
         }
 
         private string NodeToString(Node<NodeType> root)
@@ -224,9 +233,11 @@ Expr :
             stringBuilder.AppendLine();
             stringBuilder.Append(new string(' ', indent * 4));
             stringBuilder.Append(parent.NodeType);
-            stringBuilder.Append(" : ");
-            stringBuilder.Append(parent.Text);
-
+            if (!String.IsNullOrWhiteSpace(parent.Text))
+            {
+                stringBuilder.Append(" : ");
+                stringBuilder.Append(parent.Text);
+            }
             foreach (Node<NodeType> child in parent.Nodes)
             {
                 NodeToString(child, stringBuilder, indent + 1);

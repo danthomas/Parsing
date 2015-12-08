@@ -14,6 +14,7 @@ namespace V3.Templates
                 new TokenPattern<NodeType>(NodeType.Equals, "="),
                 new TokenPattern<NodeType>(NodeType.Then, "?"),
                 new TokenPattern<NodeType>(NodeType.Else, ":"),
+                new TokenPattern<NodeType>(NodeType.Whitespace, @"^[\ \t]+$"),
                 new TokenPattern<NodeType>(NodeType.Dollar, "$"),
                 new TokenPattern<NodeType>(NodeType.Or, "|"),
                 new RegexPattern<NodeType>(NodeType.Text, "^[^{}]+$"),

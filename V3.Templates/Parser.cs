@@ -5,13 +5,15 @@ namespace V3.Templates
     /*
     Expr : TextOrSubExpr*
     TextOrSubExpr : text | SubExpr
-    SubExpr : openCurly identifier [equals Values] [Then] closeCurly
+    SubExpr : openCurly whitespace identifier whitespace [equals Values] [Then] closeCurly
+    
     Then : then SubExprOrValues [Else]
     Else : else SubExprOrValues
     SubExprOrValues : SubExpr | ValueOrDollar+
     ValueOrDollar : value | dollar
     Values : value [or value]*
 
+    whitespace : '^[\ ]+$'
     text : '^[^{}]+$'
     identifier : ''
     value : ''
@@ -45,7 +47,7 @@ namespace V3.Templates
         {
             if (AreNodeTypes(NodeType.Text))
             {
-                Consume(parent, NodeType.Text);
+                Consume(NodeType.Text, parent);
             }
             else if (AreNodeTypes(NodeType.OpenCurly))
             {
@@ -57,25 +59,41 @@ namespace V3.Templates
         {
             var child = Add(parent, NodeType.SubExpr);
 
-            Consume(child, NodeType.OpenCurly, false);
-            Consume(child, NodeType.Identifier);
+            Consume(NodeType.OpenCurly);
+            if (AreNodeTypes(NodeType.Whitespace))
+            {
+                Whitespace(child);
+            }
+            Consume(NodeType.Identifier, child);
+            if (AreNodeTypes(NodeType.Whitespace))
+            {
+                Whitespace(child);
+            }
             if (AreNodeTypes(NodeType.Equals))
             {
-                Consume(child, NodeType.Equals);
+                Consume(NodeType.Equals);
                 Values(child);
             }
             if (AreNodeTypes(NodeType.Then))
             {
                 Then(child);
             }
-            Consume(child, NodeType.CloseCurly, false);
+            Consume(NodeType.CloseCurly);
+        }
+
+        private void Whitespace(Node<NodeType> child)
+        {
+            if (AreNodeTypes(NodeType.Whitespace))
+            {
+                Consume(NodeType.Whitespace);
+            }
         }
 
         private void Then(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Then);
 
-            Consume(child, NodeType.Then, false);
+            Consume(NodeType.Then);
 
             SubExprOrValues(child);
 
@@ -89,7 +107,7 @@ namespace V3.Templates
         {
             var child = Add(parent, NodeType.Else);
 
-            Consume(child, NodeType.Else, false);
+            Consume(NodeType.Else);
 
             SubExprOrValues(child);
         }
@@ -115,11 +133,11 @@ namespace V3.Templates
         {
             var child = Add(parent, NodeType.Values);
 
-            Consume(child, NodeType.Value);
+            Consume(NodeType.Value, child);
             while (AreNodeTypes(NodeType.Or))
             {
-                Consume(child, NodeType.Or, false);
-                Consume(child, NodeType.Value);
+                Consume(NodeType.Or);
+                Consume(NodeType.Value, child);
             }
         }
 
@@ -127,11 +145,11 @@ namespace V3.Templates
         {
             if (AreNodeTypes(NodeType.Value))
             {
-                Consume(parent, NodeType.Value);
+                Consume(NodeType.Value, parent);
             }
             else if (AreNodeTypes(NodeType.Dollar))
             {
-                Consume(parent, NodeType.Dollar);
+                Consume(NodeType.Dollar, parent);
             }
         }
 
