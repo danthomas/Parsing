@@ -40,10 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockExpr.cs" />
+    <Compile Include="ConditionalExpr.cs" />
+    <Compile Include="ExprBase.cs" />
+    <Compile Include="ExprBuilder.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Lexer.cs" />
     <Compile Include="NodeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextExpr.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\V3.Parsing.Core\V3.Parsing.Core.csproj">

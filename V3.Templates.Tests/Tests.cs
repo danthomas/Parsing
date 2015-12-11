@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using V3.Parsing.Core;
 
@@ -10,21 +9,9 @@ namespace V3.Templates.Tests
     public class Tests
     {
         [Test]
-        public void XXX()
-        {
-
-            bool asfas = new Regex(@"^[\ \t]+$").IsMatch(" \t");
-
-            Parse("{  abc  }", @"
-Expr
-    SubExpr
-        Identifier : abc");
-        }
-
-        [Test]
         public void Complex()
         {
-            Parse("xxx {  abc  =def|ghi|jkl?{ab=cd?de$fg}:{hi=jk?lm$:no$pq}} yyy", @"
+          var root =  Parse("xxx {  abc  =def|ghi|jkl?{ab=cd?de$fg}:{hi=jk?lm$:no$pq}} yyy", @"
 Expr
     Text : xxx 
     SubExpr
@@ -55,8 +42,10 @@ Expr
                             Dollar : $
                             Value : pq
     Text :  yyy");
+
+            var expr = new ExprBuilder().Build(root);
         }
-        
+
         [Test]
         public void AttrThenSubExp()
         {
@@ -210,13 +199,17 @@ Expr
     Text : ghi");
         }
 
-        private void Parse(string text, string expected)
+        private Node<NodeType> Parse(string text, string expected)
         {
             Parser parser = new Parser();
 
-            var actual = NodeToString(parser.Parse(text));
+            var root = parser.Parse(text);
+
+            var actual = NodeToString(root);
 
             Assert.That(actual, Is.EqualTo(expected));
+
+            return root;
         }
 
         private string NodeToString(Node<NodeType> root)
