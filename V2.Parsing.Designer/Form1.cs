@@ -81,7 +81,7 @@ namespace V2.Parsing.Designer
         }
 
         private void parseToolStripMenuItem_Click(object sender, EventArgs e)
-        {d
+        {
             var parser = new Parser();
 
             Node<NodeType> node = parser.Parse(grammarDef.Text);
@@ -103,7 +103,7 @@ namespace V2.Parsing.Designer
 
             lexerDef.Text = _builder.BuildLexer(grammar);
             parserDef.Text = _builder.BuildParser2(grammar);
-            tokenTypeDef.Text = _builder.b
+            //tokenTypeDef.Text = _builder.b
         }
 
 

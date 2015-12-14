@@ -40,10 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttrExpr.cs" />
     <Compile Include="BlockExpr.cs" />
     <Compile Include="ConditionalExpr.cs" />
     <Compile Include="ExprBase.cs" />
     <Compile Include="ExprBuilder.cs" />
+    <Compile Include="FuncBuilder.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Lexer.cs" />
     <Compile Include="NodeType.cs" />

@@ -17,6 +17,10 @@
         Dollar,
         Or,
         Values,
-        Whitespace
+        Whitespace,
+        NotEquals,
+        OpenBrace,
+        CloseBrace,
+        Regex
     }
 }

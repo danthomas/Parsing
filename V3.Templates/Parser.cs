@@ -1,16 +1,18 @@
-﻿using V3.Parsing.Core;
+﻿using System;
+using V3.Parsing.Core;
 
 namespace V3.Templates
 {
     /*
     Expr : TextOrSubExpr*
     TextOrSubExpr : text | SubExpr
-    SubExpr : openCurly whitespace identifier whitespace [equals Values] [Then] closeCurly
-    
-    Then : then SubExprOrValues [Else]
-    Else : else SubExprOrValues
-    SubExprOrValues : SubExpr | ValueOrDollar+
-    ValueOrDollar : value | dollar
+    SubExpr : openCurly whitespace identifier [Regex] whitespace [EqualsOrNotEquals Values] [Then] closeCurly
+    Regex : openBrace text closeBrace
+    EqualsOrNotEquals : equals | notEquals
+    Then : then SubExprOrTexts* [Else]
+    Else : else SubExprOrTexts*
+    SubExprOrTexts : SubExpr | TextOrDollar+
+    TextOrDollar : text | dollar
     Values : value [or value]*
 
     whitespace : '^[\ ]+$'
@@ -19,7 +21,10 @@ namespace V3.Templates
     value : ''
     openCurly : '{'
     closeCurly : '}'
+    openBrace : '('
+    closeBrace : ')'
     equals : '='
+    notEquals : '!='
     or : '|'
     dollar : '$'
     */
@@ -65,13 +70,18 @@ namespace V3.Templates
                 Whitespace(child);
             }
             Consume(NodeType.Identifier, child);
+            if (AreNodeTypes(NodeType.OpenBrace))
+            {
+                Regex(child);
+            }
             if (AreNodeTypes(NodeType.Whitespace))
             {
                 Whitespace(child);
             }
-            if (AreNodeTypes(NodeType.Equals))
+            if (AreNodeTypes(NodeType.Equals) 
+                || AreNodeTypes(NodeType.NotEquals))
             {
-                Consume(NodeType.Equals);
+                EqualsOrNotEquals(child);
                 Values(child);
             }
             if (AreNodeTypes(NodeType.Then))
@@ -79,6 +89,27 @@ namespace V3.Templates
                 Then(child);
             }
             Consume(NodeType.CloseCurly);
+        }
+
+        private void Regex(Node<NodeType> parent)
+        {
+            var child = Add(parent, NodeType.Regex);
+
+            Consume(NodeType.OpenBrace);
+            Consume(NodeType.Text, child);
+            Consume(NodeType.CloseBrace);
+        }
+
+        private void EqualsOrNotEquals(Node<NodeType> parent)
+        {
+            if (AreNodeTypes(NodeType.Equals))
+            {
+                Consume(NodeType.Equals, parent);
+            }
+            else if (AreNodeTypes(NodeType.NotEquals))
+            {
+                Consume(NodeType.NotEquals, parent);
+            }
         }
 
         private void Whitespace(Node<NodeType> child)
@@ -95,7 +126,12 @@ namespace V3.Templates
 
             Consume(NodeType.Then);
 
-            SubExprOrValues(child);
+            while (AreNodeTypes(NodeType.OpenCurly)
+                || AreNodeTypes(NodeType.Text)
+                || AreNodeTypes(NodeType.Dollar))
+            {
+                SubExprOrTexts(child);
+            }
 
             if (AreNodeTypes(NodeType.Else))
             {
@@ -109,22 +145,22 @@ namespace V3.Templates
 
             Consume(NodeType.Else);
 
-            SubExprOrValues(child);
+            SubExprOrTexts(child);
         }
 
-        private void SubExprOrValues(Node<NodeType> parent)
+        private void SubExprOrTexts(Node<NodeType> parent)
         {
             if (AreNodeTypes(NodeType.OpenCurly))
             {
                 SubExpr(parent);
             }
-            else if (AreNodeTypes(NodeType.Value)
+            else if (AreNodeTypes(NodeType.Text)
                 || AreNodeTypes(NodeType.Dollar))
             {
                 do
                 {
-                    ValueOrDollar(parent);
-                } while (AreNodeTypes(NodeType.Value)
+                    TextOrDollar(parent);
+                } while (AreNodeTypes(NodeType.Text)
                          || AreNodeTypes(NodeType.Dollar));
             }
         }
@@ -141,11 +177,11 @@ namespace V3.Templates
             }
         }
 
-        private void ValueOrDollar(Node<NodeType> parent)
+        private void TextOrDollar(Node<NodeType> parent)
         {
-            if (AreNodeTypes(NodeType.Value))
+            if (AreNodeTypes(NodeType.Text))
             {
-                Consume(NodeType.Value, parent);
+                Consume(NodeType.Text, parent);
             }
             else if (AreNodeTypes(NodeType.Dollar))
             {
