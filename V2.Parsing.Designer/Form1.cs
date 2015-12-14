@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using V2.Parsing.Core;
 using V2.Parsing.Core.Domain;
@@ -12,15 +13,23 @@ namespace V2.Parsing.Designer
 {
     public partial class Form1 : Form
     {
-        private string _filePath;
         private readonly Utils _utils;
+        private readonly Settings _settings;
+        private Builder _builder;
+        private Parser _parser;
+        private object _parser2;
 
         public Form1()
         {
             _utils = new Utils();
+            _builder = new Builder();
+            _parser = new Parser();
+            _settings = new Settings();
+            _settings.Load();
+
             InitializeComponent();
-            _filePath = @"c:\temp\parsing\v2.parsing.core\grammardef\def.grm";
-            RefreshGrammarDef();
+
+            LoadGrammerDefFile();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -34,19 +43,45 @@ namespace V2.Parsing.Designer
 
             if (result == DialogResult.OK)
             {
-                _filePath = openFileDialog.FileName;
+                _settings.GrammarDefFilePath = openFileDialog.FileName;
 
-                RefreshGrammarDef();
+                LoadGrammerDefFile();
             }
         }
 
-        private void RefreshGrammarDef()
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            grammarDef.Text = File.ReadAllText(_filePath);
+            if (String.IsNullOrWhiteSpace(_settings.GrammarDefFilePath))
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Grammar Def Files|*.grm"
+                };
+
+                var result = saveFileDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    _settings.GrammarDefFilePath = saveFileDialog.FileName;
+                }
+            }
+
+            if (!String.IsNullOrWhiteSpace(_settings.GrammarDefFilePath))
+            {
+                File.WriteAllText(_settings.GrammarDefFilePath, grammarDef.Text);
+            }
+        }
+
+        private void LoadGrammerDefFile()
+        {
+            if (File.Exists(_settings.GrammarDefFilePath))
+            {
+                grammarDef.Text = File.ReadAllText(_settings.GrammarDefFilePath);
+            }
         }
 
         private void parseToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        {d
             var parser = new Parser();
 
             Node<NodeType> node = parser.Parse(grammarDef.Text);
@@ -56,21 +91,42 @@ namespace V2.Parsing.Designer
 
         private void generateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var builder = new Builder();
+            Node<NodeType> root = _parser.Parse(grammarDef.Text);
+
+            _builder.PreProcess(root);
+
+            nodes.Text = _utils.NodeToString(root);
+
+            var grammar = _builder.BuildGrammar(root);
+
+            RefreshGrammarTree(grammar);
+
+            lexerDef.Text = _builder.BuildLexer(grammar);
+            parserDef.Text = _builder.BuildParser2(grammar);
+            tokenTypeDef.Text = _builder.b
+        }
+
+
+        private void compileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             var parser = new Parser();
 
             Node<NodeType> root = parser.Parse(grammarDef.Text);
 
-            builder.PreProcess(root);
+            _builder.PreProcess(root);
 
-            nodes.Text = _utils.NodeToString(root);
+            Grammar grammar = _builder.BuildGrammar(root);
 
-            var grammar = builder.BuildGrammar(root);
+            var actual = _utils.GrammarToDefString(grammar);
+            
+            _parser2 = _builder.CreateParser(grammar);
+            //
+            //
+        }
 
-            RefreshGrammarTree(grammar);
-
-            lexerDef.Text = builder.BuildLexer(grammar);
-            parserDef.Text = builder.BuildParser2(grammar);
+        private void testToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //var root2 = _parser2.GetType().GetMethod("Parse").Invoke(_parser2, new object[] { text });
         }
 
         private void RefreshGrammarTree(Grammar grammar)
@@ -299,10 +355,5 @@ namespace V2.Parsing.Designer
             ZeroOrMore = zeroOrMore;
             Text = "Zero or More";
         }
-    }
-
-    class Settings
-    {
-        public string DirPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Parsing");
     }
 }
