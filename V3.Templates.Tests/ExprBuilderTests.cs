@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using V3.Parsing.Core;
@@ -7,7 +6,7 @@ using V3.Parsing.Core;
 namespace V3.Templates.Tests
 {
     [TestFixture]
-    public class Tests
+    public class ExprBuilderTests
     {
         [Test]
         public void SimpleRegex()
@@ -31,7 +30,7 @@ BlockExpr :
 Expr
     Text : abc", @"
 BlockExpr : 
-    TextExpr : abc", @"abc");
+    TextExpr : abc");
         }
 
         [Test]
@@ -107,7 +106,7 @@ BlockExpr :
          Then BlockExpr : 
             ConditionalExpr : def != 
                  Then BlockExpr : 
-                    AttrExpr : def", "DEF");
+                    AttrExpr : def");
         }
 
         [Test]
@@ -301,7 +300,7 @@ BlockExpr :
     TextExpr : ghi");
         }
 
-        private void Test(string text, string expectedNode, string expectedExpr, string expected = null)
+        private void Test(string text, string expectedNode, string expectedExpr)
         {
             Parser parser = new Parser();
 
@@ -317,21 +316,6 @@ BlockExpr :
             var actualExpr = ExprToString(expr);
 
             Assert.That(actualExpr, Is.EqualTo(expectedExpr));
-
-            Dictionary<string, string> attribs = new Dictionary<string, string>();
-
-            attribs.Add("abc", "ABC");
-            attribs.Add("def", "DEF");
-            attribs.Add("ghi", "GHI");
-            attribs.Add("jkl", "JKL");
-            attribs.Add("mno", "MNO");
-
-            string actual = new FuncBuilder().Build(text)(attribs);
-
-            if (expected!= null)
-            {
-                Assert.That(actual, Is.EqualTo(expected));
-            }
         }
 
         private string ExprToString(BlockExpr expr)

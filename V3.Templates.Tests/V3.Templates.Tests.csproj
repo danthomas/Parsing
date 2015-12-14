@@ -44,8 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExprBuilderTests2.cs" />
     <Compile Include="FuncBuilderTests.cs" />
-    <Compile Include="Tests.cs" />
+    <Compile Include="ExprBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
