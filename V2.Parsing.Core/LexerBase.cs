@@ -13,8 +13,7 @@ namespace V2.Parsing.Core
         private char _currentChar;
         private readonly char _endOfFile;
         private List<Token<T>> _buffer;
-        private char _nextChar;
-
+        
         public LexerBase()
         {
             _endOfFile = (char)0;
@@ -40,7 +39,6 @@ namespace V2.Parsing.Core
         {
             _currentChar = _index < _text.Length ? _text[_index] : _endOfFile;
             _index++;
-            _nextChar = _index < _text.Length ? _text[_index] : _endOfFile;
         }
 
         public Token<T> Token(int index)
