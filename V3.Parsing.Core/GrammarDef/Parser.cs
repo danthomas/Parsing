@@ -4,7 +4,7 @@
     {
         public Parser() : base(new Lexer())
         {
-            IgnoreChars = new[] { ' ', '\r' };
+            IgnoreChars = new[] { ' ', '\r', '\t' };
             CaseSensitive = true;
         }
 
@@ -225,7 +225,7 @@
             }
         }
 
-        public Node<NodeType> Ignores(Node<NodeType> parent)
+        public void Ignores(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.Ignores);
 
@@ -236,18 +236,12 @@
             {
                 Ignore(child);
             } while (AreNodeTypes(NodeType.NewLine, NodeType.Identifier));
-
-            return child;
         }
 
-        public Node<NodeType> Ignore(Node<NodeType> parent)
+        public void Ignore(Node<NodeType> parent)
         {
-            var child = Add(parent, NodeType.Ignore);
-
             Consume(NodeType.NewLine);
-            Consume(NodeType.Identifier, child);
-
-            return child;
+            Consume(NodeType.Identifier, parent);
         }
     }
 }

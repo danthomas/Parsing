@@ -86,7 +86,7 @@ namespace V3.Parsing.Core
         private List<Node<N>> NextNodes()
         {
             int length = 1;
-            List<Node<N>> nextNodes = new List<Node<N>>();
+            List<Match> nextNodes = new List<Match>();
 
             if (_ignore.Any())
             {
@@ -107,7 +107,7 @@ namespace V3.Parsing.Core
 
                 var matches = Patterns
                     .Where(x => x.IsMatch(text, _caseSensitive) == IsMatch.Yes)
-                    .Select(x => new Node<N>(x.NodeType, text))
+                    .Select(x => new Match(x.NodeType, text, x.GetType() == typeof(TokenPattern<N>)))
                     .ToList();
 
                 if (matches.Any())
@@ -130,21 +130,35 @@ namespace V3.Parsing.Core
                 {
                     break;
                 }
-                
 
-                if (_index + length  < _text.Length - 1
+                if (_index + length < _text.Length - 1
                     && !Char.IsLetterOrDigit(_text[_index + length + 1])
-                    && Patterns
-                        .OfType<TokenPattern<N>>()
-                        .Any(x => x.IsMatch(text, _caseSensitive) == IsMatch.Yes))
+                    && nextNodes.Any(x => x.IsToken))
                 {
+                    nextNodes = nextNodes.Where(x => x.IsToken).ToList();
                     break;
                 }
 
                 length++;
             }
 
-            return nextNodes;
+            return nextNodes
+                .Select(x => new Node<N>(x.NodeType, x.Text))
+                .ToList();
+        }
+
+        class Match
+        {
+            public N NodeType { get; set; }
+            public string Text { get; set; }
+            public bool IsToken { get; set; }
+
+            public Match(N nodeType, string text, bool isToken)
+            {
+                NodeType = nodeType;
+                Text = text;
+                IsToken = isToken;
+            }
         }
     }
 }
