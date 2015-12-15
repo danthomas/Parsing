@@ -11,9 +11,11 @@
 
         public Node<N> Parse(string text)
         {
-            _lexer.Init(text, CaseSensitive);
+            _lexer.Init(text, CaseSensitive, IgnoreChars);
             return Root();
         }
+
+        public abstract char[] IgnoreChars { get; }
 
         public abstract bool CaseSensitive { get; }
 

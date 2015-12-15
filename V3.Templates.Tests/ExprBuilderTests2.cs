@@ -266,8 +266,7 @@ Conditional-def=ghi?
             Assert.That(actual, Is.EqualTo(@"
 Text-xxx
 Conditional-abc=ABC?
-	Conditional-abc!=null?
-		Attr-abc
+	Attr-abc
 Text-yy"));
         }
 
@@ -315,7 +314,7 @@ Text-yy"));
                 }
                 else if (attrExpr != null)
                 {
-                    actual += Environment.NewLine + new string('\t', indent) + "Attr-" + attrExpr.Name + (attrExpr.Regex == null ? "" : "(" + attrExpr.Regex + ")");
+                    actual += Environment.NewLine + new string('\t', indent) + "Attr-" + attrExpr.Name + (String.IsNullOrWhiteSpace(attrExpr.Regex) ? "" : "(" + attrExpr.Regex + ")");
                 }
                 else if (blockExpr != null)
                 {

@@ -33,6 +33,8 @@ namespace V3.Templates
         public Parser()
             : base(new Lexer())
         {
+            IgnoreChars = new char[0];
+            CaseSensitive = false;
         }
 
         protected override Node<NodeType> Root()
@@ -189,6 +191,7 @@ namespace V3.Templates
             }
         }
 
-        public override bool CaseSensitive => false;
+        public override char[] IgnoreChars { get; }
+        public override bool CaseSensitive { get; }
     }
 }

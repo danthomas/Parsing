@@ -9,6 +9,22 @@ namespace V3.Templates.Tests
     public class ExprBuilderTests
     {
         [Test]
+        public void SimpleXxx()
+        {
+            Test("xxx{abc=ABC?$}yy", @"
+Expr
+    Text : xxx
+    SubExpr
+        Identifier : abc
+        Equals : =
+        Values
+            Value : ABC
+        Then
+            Dollar : $
+    Text : yy", @"");
+        }
+
+        [Test]
         public void SimpleRegex()
         {
             Test("{abc([+])}", @"

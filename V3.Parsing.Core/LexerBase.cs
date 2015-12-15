@@ -10,12 +10,14 @@ namespace V3.Parsing.Core
         private int _index;
         private List<Node<N>> _buffer;
         private bool _caseSensitive;
+        private char[] _ignore;
 
-        public void Init(string text, bool caseSensitive)
+        public void Init(string text, bool caseSensitive, char[] ignoreChars)
         {
             _buffer = new List<Node<N>>();
             _text = text.Replace("\n", "\r\n").Replace("\r\r\n", "\r\n");
             _caseSensitive = caseSensitive;
+            _ignore = ignoreChars;
             _index = 0;
         }
 
@@ -24,7 +26,7 @@ namespace V3.Parsing.Core
         public bool AreNodeTypes(params N[] nodeTypes)
         {
             var currentIndex = _index;
-            var currentBuffer = _buffer;
+            var currentBuffer = _buffer.ToList();
             int i = 0;
 
             foreach (N nodeType in nodeTypes)
@@ -86,9 +88,22 @@ namespace V3.Parsing.Core
             int length = 1;
             List<Node<N>> nextNodes = new List<Node<N>>();
 
+            if (_ignore.Any())
+            {
+                while (_index < _text.Length && _ignore.Contains(_text[_index]))
+                {
+                    _index++;
+                }
+            }
+
             while (_index + length <= _text.Length)
             {
                 string text = _text.Substring(_index, length);
+
+                if (text == "ignore")
+                {
+                    string thie = "sdfsad";
+                }
 
                 var matches = Patterns
                     .Where(x => x.IsMatch(text, _caseSensitive) == IsMatch.Yes)
@@ -112,6 +127,16 @@ namespace V3.Parsing.Core
                     }
                 }
                 else if (Patterns.All(x => x.IsMatch(text, _caseSensitive) != IsMatch.Possible))
+                {
+                    break;
+                }
+                
+
+                if (_index + length  < _text.Length - 1
+                    && !Char.IsLetterOrDigit(_text[_index + length + 1])
+                    && Patterns
+                        .OfType<TokenPattern<N>>()
+                        .Any(x => x.IsMatch(text, _caseSensitive) == IsMatch.Yes))
                 {
                     break;
                 }

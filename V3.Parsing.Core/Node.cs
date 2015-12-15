@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace V3.Parsing.Core
@@ -14,5 +15,10 @@ namespace V3.Parsing.Core
         public N NodeType { get; set; }
         public string Text { get; set; }
         public List<Node<N>> Nodes { get; set; }
+
+        public override string ToString()
+        {
+            return NodeType + (String.IsNullOrWhiteSpace(Text) && Text != " " ? "" : " - " + Text);
+        }
     }
 }

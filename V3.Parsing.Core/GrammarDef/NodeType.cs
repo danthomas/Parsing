@@ -1,0 +1,34 @@
+﻿namespace V3.Parsing.Core.GrammarDef
+{
+    public enum NodeType
+    {
+        Identifier,
+        Return,
+        NewLine,
+        Tab,
+        Space,
+        Plus,
+        Comma,
+        Star,
+        Colon,
+        OpenSquare,
+        CloseSquare,
+        Pipe,
+        Grammar,
+        Defs,
+        Patterns,
+        Ignore,
+        Discard,
+        CaseSensitive,
+        Def,
+        Part,
+        Optional,
+        Identifiers,
+        OptionalIdents,
+        RequiredIdents,
+        RequiredElements,
+        Element,
+        Pattern,
+        Ignores
+    }
+}

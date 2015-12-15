@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GrammarDef\Lexer.cs" />
+    <Compile Include="GrammarDef\NodeType.cs" />
+    <Compile Include="GrammarDef\Parser.cs" />
     <Compile Include="LexerBase.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="ParserBase.cs" />
@@ -48,6 +51,12 @@
     <Compile Include="RegexPattern.cs" />
     <Compile Include="StringPattern.cs" />
     <Compile Include="TokenPattern.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\V2.Parsing.Core\V2.Parsing.Core.csproj">
+      <Project>{D40C59D2-C78D-4244-BF73-3AE17E4F05D2}</Project>
+      <Name>V2.Parsing.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
