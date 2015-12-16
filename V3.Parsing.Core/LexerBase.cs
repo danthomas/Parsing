@@ -73,7 +73,7 @@ namespace V3.Parsing.Core
 
             nextNode = nextNodes.SingleOrDefault(x => x.NodeType.Equals(nodeType));
 
-            if (nextNode == null)
+            if (nextNode == null || !nextNode.NodeType.Equals(nodeType))
             {
                 throw new Exception($"Expected NodeType {nodeType} but was { String.Join(" or ", nextNodes.Select(x => x.ToString()))}.");
             }
@@ -100,7 +100,7 @@ namespace V3.Parsing.Core
             {
                 string text = _text.Substring(_index, length);
 
-                if (text == "int")
+                if (text == "t")
                 {
                     string thie = "sdfsad";
                 }

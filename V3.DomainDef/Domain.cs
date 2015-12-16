@@ -32,9 +32,16 @@ namespace V3.DomainDef
             stringBuilder.Append("domain ");
             stringBuilder.Append(Name);
 
+
+            bool firstEntity = true;
+
             foreach (var entity in Entities)
             {
                 stringBuilder.AppendLine();
+                if (!firstEntity)
+                {
+                    stringBuilder.AppendLine();
+                }
                 stringBuilder.Append("entity ");
                 if (!String.IsNullOrWhiteSpace(entity.Group))
                 {
@@ -69,6 +76,13 @@ namespace V3.DomainDef
                             }
                         }
                     }
+                    else if (prop.Type == "datetime")
+                    {
+                        if (!String.IsNullOrWhiteSpace(prop.DatetimePrecision))
+                        {
+                            stringBuilder.Append($"({prop.DatetimePrecision})");
+                        }
+                    }
 
                     if (prop.Null)
                     {
@@ -85,19 +99,73 @@ namespace V3.DomainDef
                         stringBuilder.Append(" readonly");
                     }
 
+                    if (prop.Auto)
+                    {
+                        stringBuilder.Append(" auto");
+                    }
+
                     first = false;
+                }
+
+                first = true;
+
+                if (entity.Procs.Any())
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("    procs");
+                    foreach (var proc in entity.Procs)
+                    {
+                        stringBuilder.AppendLine();
+                        stringBuilder.Append(first ? "      " : "    , ");
+                        stringBuilder.Append(proc.Name);
+
+                        if (proc.Props != null
+                            && proc.Props.Any())
+                        {
+                            stringBuilder.Append($" ({String.Join(", ", proc.Props)})");
+                        }
+
+                        first = false;
+                    }
+                }
+
+                first = true;
+
+                if (entity.Tasks.Any())
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("    tasks");
+                    foreach (var task in entity.Tasks)
+                    {
+                        stringBuilder.AppendLine();
+                        stringBuilder.Append(first ? "      " : "    , ");
+                        stringBuilder.Append(task.Name);
+
+                        if (!String.IsNullOrWhiteSpace(task.Text))
+                        {
+                            stringBuilder.Append($" {task.Text}");
+                        }
+
+                        if (task.SelectedIds != SelectedIds.Unspecified)
+                        {
+                            string selectedIds = task.SelectedIds.ToString();
+                            selectedIds= Char.ToLower(selectedIds[0]) + selectedIds.Substring(1);
+                            stringBuilder.Append($" {selectedIds}");
+                        }
+
+                        first = false;
+                    }
                 }
 
                 if (entity.DataRows != null)
                 {
-                    stringBuilder.AppendLine();
-                    stringBuilder.Append("data");
                     foreach (var dataRow in entity.DataRows)
                     {
                         stringBuilder.AppendLine();
                         stringBuilder.Append($"    [{String.Join(", ", dataRow.Values)}]");
                     }
                 }
+                firstEntity = false;
             }
 
             return stringBuilder.ToString();
@@ -132,7 +200,19 @@ namespace V3.DomainDef
                 .Select(x => new Prop(x))
                 .ToList();
 
-            var data = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.Data);
+            Procs = node
+                .Nodes
+                .Where(x => x.NodeType == NodeType.Proc)
+                .Select(x => new Proc(x))
+                .ToList();
+
+            Tasks = node
+                .Nodes
+                .Where(x => x.NodeType == NodeType.Task)
+                .Select(x => new Task(x))
+                .ToList();
+
+            var data = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.DataRows);
 
             if (data != null)
             {
@@ -144,6 +224,9 @@ namespace V3.DomainDef
             }
         }
 
+        public List<Task> Tasks { get; set; }
+
+        public List<Proc> Procs { get; set; }
 
         public bool Enum { get; set; }
 
@@ -156,6 +239,65 @@ namespace V3.DomainDef
         public List<DataRow> DataRows { get; set; }
     }
 
+    public class Proc
+    {
+        public Proc(Node<NodeType> node)
+        {
+            var identifierNodes = node.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
+            var procsNode = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.Procs);
+
+            Name = identifierNodes[0].Text;
+
+            if (procsNode != null)
+            {
+                Props = procsNode
+                    .Nodes
+                    .Where(x => x.NodeType == NodeType.Identifier)
+                    .Select(x => x.Text)
+                    .ToArray();
+            }
+        }
+
+        public string[] Props { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    public class Task
+    {
+        public Task(Node<NodeType> node)
+        {
+            Name = node.Nodes.Single(x => x.NodeType == NodeType.Identifier).Text;
+
+            Text = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.Literal) == null
+                ? ""
+                : node.Nodes.Single(x => x.NodeType == NodeType.Literal).Text;
+
+            if (node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.OneOrMore) != null)
+            {
+                SelectedIds = SelectedIds.OneOrMore;
+            }
+        }
+
+        public SelectedIds SelectedIds { get; set; }
+
+        public string Text { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    public enum SelectedIds
+    {
+        Unspecified = 0,
+        Zero = 1,
+        One = 2,
+        Two = 4,
+        More = 8,
+        OneOrMore = One | Two | More,
+        TwoOrMore = Two | More,
+        Any = Zero | One | Two | More
+    }
+
     public class Prop
     {
         public Prop(Node<NodeType> node)
@@ -166,9 +308,11 @@ namespace V3.DomainDef
 
             if (identifierNodes.Length == 1)
             {
-                Type = node.Nodes.Single(x => x.NodeType == NodeType.Type).Nodes[0].Text;
+                var typeNode = node.Nodes.Single(x => x.NodeType == NodeType.Type);
 
-                var numberNodes = node.Nodes.Single(x => x.NodeType == NodeType.Type).Nodes.Where(x => x.NodeType == NodeType.Number).ToArray();
+                Type = typeNode.Nodes[0].Text;
+
+                var numberNodes = typeNode.Nodes.Where(x => x.NodeType == NodeType.Number).ToArray();
                 if (numberNodes.Length == 1)
                 {
                     MaxLength = Int32.Parse(numberNodes[0].Text);
@@ -177,6 +321,19 @@ namespace V3.DomainDef
                 {
                     MinLength = Int32.Parse(numberNodes[0].Text);
                     MaxLength = Int32.Parse(numberNodes[1].Text);
+                }
+
+                if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Hour))
+                {
+                    DatetimePrecision = "h";
+                }
+                else if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Minute))
+                {
+                    DatetimePrecision = "m";
+                }
+                else if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Second))
+                {
+                    DatetimePrecision = "s";
                 }
             }
             else if (identifierNodes.Length == 2)
@@ -193,7 +350,13 @@ namespace V3.DomainDef
             Unique = node.Nodes.Any(x => x.NodeType == NodeType.Unique);
 
             Readonly = node.Nodes.Any(x => x.NodeType == NodeType.Readonly);
+
+            Auto = node.Nodes.Any(x => x.NodeType == NodeType.Auto);
         }
+
+        public bool Auto { get; set; }
+
+        public string DatetimePrecision { get; set; }
 
         public bool Readonly { get; set; }
 

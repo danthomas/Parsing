@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using V3.Parsing.Core;
 
 namespace V3.DomainDef
@@ -13,14 +14,17 @@ grammar Domain
 defs
     Domain : domain Identifier EntityOr*
     EntityOr : Entity |
-    Entity  : entity Identifer [dot Identifier] EntityModifiers Prop [comma Prop]* [DataRows]
+    Entity  : entity Identifer [dot Identifier] EntityModifiers Prop [comma Prop]* [procs Proc [comma Proc]*] [tasks Task [comma Task]*] DataRows
     EntityModifiers : [enum]*
     Prop : Identifier EntityOrType PropModifiers
     EntityOrType : Type | Identifier
-    Type : bool | byte | smallint | int | String
-    String : string openParen Number [comma Number] closeParen
-    PropModifiers : [null | unique]*
-    DataRows : data DataRow*
+    Type : bool | byte | short | int | String
+    String : string [openParen Number [comma Number] closeParen]
+    DateTime : datetime [openParen [hour | minute | second ]]
+    PropModifiers : [null | unique | auto]*
+    Proc : Identifier [openParen Identifier [comma Identifier] closeParen]
+    Task : Identifier [Literal] oneOrMore
+    DataRows : DataRow*
     DataRow : openSquare DataValue [comma DataValue] closeSquare
     DataValue : Number | Literal | null
 patterns
@@ -35,6 +39,10 @@ patterns
     int
     smallint
     string
+    datetime
+    hour
+    minute
+    second
     enum
     readonly
     Number : '^[0-9]+$'
@@ -49,16 +57,23 @@ patterns
             {
                 new TokenPattern<NodeType>(NodeType.Domain, "domain"),
                 new TokenPattern<NodeType>(NodeType.Entity, "entity"),
+                new TokenPattern<NodeType>(NodeType.Procs, "procs"),
+                new TokenPattern<NodeType>(NodeType.Tasks, "tasks"),
                 new TokenPattern<NodeType>(NodeType.Bool, "bool"),
                 new TokenPattern<NodeType>(NodeType.Byte, "byte"),
-                new TokenPattern<NodeType>(NodeType.Smallint, "smallint"),
+                new TokenPattern<NodeType>(NodeType.Short, "short"),
                 new TokenPattern<NodeType>(NodeType.Int, "int"),
                 new TokenPattern<NodeType>(NodeType.String, "string"),
                 new TokenPattern<NodeType>(NodeType.Null, "null"),
                 new TokenPattern<NodeType>(NodeType.Enum, "enum"),
+                new TokenPattern<NodeType>(NodeType.Auto, "auto"),
                 new TokenPattern<NodeType>(NodeType.Readonly, "readonly"),
                 new TokenPattern<NodeType>(NodeType.Unique, "unique"),
-                new TokenPattern<NodeType>(NodeType.Data, "data"),
+                new TokenPattern<NodeType>(NodeType.Datetime, "datetime"),
+                new TokenPattern<NodeType>(NodeType.OneOrMore, "oneOrMore"),
+                new TokenPattern<NodeType>(NodeType.Hour, "h"),
+                new TokenPattern<NodeType>(NodeType.Minute, "m"),
+                new TokenPattern<NodeType>(NodeType.Second, "s"),
 
                 new TokenPattern<NodeType>(NodeType.Dot, "."),
                 new TokenPattern<NodeType>(NodeType.Comma, ","),
@@ -87,7 +102,7 @@ patterns
     {
         public Parser() : base(new Lexer())
         {
-            IgnoreChars = new[] { ' ', 't', '\r', '\n' };
+            IgnoreChars = new[] { ' ', '\t', '\r', '\n' };
             CaseSensitive = true;
         }
 
@@ -144,17 +159,70 @@ patterns
                 Prop(child);
             }
 
-            if (AreNodeTypes(NodeType.Data))
+            if (AreNodeTypes(NodeType.Procs))
             {
-                DataRows(child);
+                Consume(NodeType.Procs);
+                Proc(child);
+
+                while (AreNodeTypes(NodeType.Comma))
+                {
+                    Consume(NodeType.Comma);
+                    Proc(child);
+                }
+            }
+
+            if (AreNodeTypes(NodeType.Tasks))
+            {
+                Consume(NodeType.Tasks);
+                Task(child);
+
+                while (AreNodeTypes(NodeType.Comma))
+                {
+                    Consume(NodeType.Comma);
+                    Task(child);
+                }
+            }
+            
+            DataRows(child);
+        }
+
+        private void Proc(Node<NodeType> parent)
+        {
+            var child = Add(parent, NodeType.Proc);
+            Consume(NodeType.Identifier, child);
+            if (AreNodeTypes(NodeType.OpenParen))
+            {
+                var child2 = Add(child, NodeType.Procs);
+                Consume(NodeType.OpenParen);
+                Consume(NodeType.Identifier, child2);
+                while(AreNodeTypes(NodeType.Identifier))
+                {
+                    Consume(NodeType.Identifier, child2);
+                }
+                Consume(NodeType.CloseParen);
+            }
+        }
+
+        private void Task(Node<NodeType> parent)
+        {
+            var child = Add(parent, NodeType.Task);
+            Consume(NodeType.Identifier, child);
+
+            if (AreNodeTypes(NodeType.Literal))
+            {
+                Consume(NodeType.Literal, child);
+            }
+
+            if (AreNodeTypes(NodeType.OneOrMore))
+            {
+                Consume(NodeType.OneOrMore, child);
             }
         }
 
         private void DataRows(Node<NodeType> parent)
         {
-            var child = Add(parent, NodeType.Data);
-            Consume(NodeType.Data);
-
+            var child = Add(parent, NodeType.DataRows);
+            
             while (AreNodeTypes(NodeType.OpenSquare))
             {
                 DataRow(child);
@@ -228,7 +296,8 @@ patterns
         {
             while (AreNodeTypes(NodeType.Null)
                 || AreNodeTypes(NodeType.Unique)
-                || AreNodeTypes(NodeType.Readonly))
+                || AreNodeTypes(NodeType.Readonly)
+                || AreNodeTypes(NodeType.Auto))
             {
                 if (AreNodeTypes(NodeType.Null))
                 {
@@ -241,6 +310,10 @@ patterns
                 else if (AreNodeTypes(NodeType.Readonly))
                 {
                     Consume(NodeType.Readonly, child);
+                }
+                else if (AreNodeTypes(NodeType.Auto))
+                {
+                    Consume(NodeType.Auto, child);
                 }
             }
         }
@@ -257,9 +330,9 @@ patterns
             {
                 Consume(NodeType.Byte, child);
             }
-            else if (AreNodeTypes(NodeType.Smallint))
+            else if (AreNodeTypes(NodeType.Short))
             {
-                Consume(NodeType.Smallint, child);
+                Consume(NodeType.Short, child);
             }
             else if (AreNodeTypes(NodeType.Int))
             {
@@ -269,19 +342,48 @@ patterns
             {
                 String(child);
             }
+            else if (AreNodeTypes(NodeType.Datetime))
+            {
+                Datetime(child);
+            }
         }
 
         private void String(Node<NodeType> parent)
         {
             Consume(NodeType.String, parent);
-            Consume(NodeType.OpenParen);
-            Consume(NodeType.Number, parent);
-            if (AreNodeTypes(NodeType.Comma))
+            if (AreNodeTypes(NodeType.OpenParen))
             {
-                Consume(NodeType.Comma);
+                Consume(NodeType.OpenParen);
                 Consume(NodeType.Number, parent);
+                if (AreNodeTypes(NodeType.Comma))
+                {
+                    Consume(NodeType.Comma);
+                    Consume(NodeType.Number, parent);
+                }
+                Consume(NodeType.CloseParen);
             }
-            Consume(NodeType.CloseParen);
+        }
+
+        private void Datetime(Node<NodeType> parent)
+        {
+            Consume(NodeType.Datetime, parent);
+            if (AreNodeTypes(NodeType.OpenParen))
+            {
+                Consume(NodeType.OpenParen);
+                if (AreNodeTypes(NodeType.Hour))
+                {
+                    Consume(NodeType.Hour, parent);
+                }
+                else if (AreNodeTypes(NodeType.Minute))
+                {
+                    Consume(NodeType.Minute, parent);
+                }
+                else if (AreNodeTypes(NodeType.Second))
+                {
+                    Consume(NodeType.Second, parent);
+                }
+                Consume(NodeType.CloseParen);
+            }
         }
     }
 
@@ -293,9 +395,7 @@ patterns
         Bool,
         Int,
         String,
-
         Comma,
-
         Identifier,
         Type,
         Number,
@@ -305,13 +405,23 @@ patterns
         Unique,
         Byte,
         Dot,
-        Smallint,
+        Short,
         Enum,
         Readonly,
         OpenSquare,
         CloseSquare,
-        Data,
         DataRow,
-        Literal
+        Literal,
+        DataRows,
+        Datetime,
+        Hour,
+        Minute,
+        Second,
+        Procs,
+        Proc,
+        Tasks,
+        Task,
+        Auto,
+        OneOrMore
     }
 }
