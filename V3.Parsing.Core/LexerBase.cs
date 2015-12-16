@@ -100,7 +100,7 @@ namespace V3.Parsing.Core
             {
                 string text = _text.Substring(_index, length);
 
-                if (text == "ignore")
+                if (text == "int")
                 {
                     string thie = "sdfsad";
                 }
@@ -132,7 +132,7 @@ namespace V3.Parsing.Core
                 }
 
                 if (_index + length < _text.Length - 1
-                    && !Char.IsLetterOrDigit(_text[_index + length + 1])
+                    && !Char.IsLetterOrDigit(_text[_index + length])
                     && nextNodes.Any(x => x.IsToken))
                 {
                     nextNodes = nextNodes.Where(x => x.IsToken).ToList();
@@ -146,6 +146,8 @@ namespace V3.Parsing.Core
                 .Select(x => new Node<N>(x.NodeType, x.Text))
                 .ToList();
         }
+
+        public bool IsComplete => _index == _text.Length;
 
         class Match
         {

@@ -1,4 +1,6 @@
-﻿namespace V3.Parsing.Core
+﻿using System;
+
+namespace V3.Parsing.Core
 {
     public abstract class ParserBase<N>
     {
@@ -12,7 +14,12 @@
         public Node<N> Parse(string text)
         {
             _lexer.Init(text, CaseSensitive, IgnoreChars);
-            return Root();
+            var root = Root();
+            if (!_lexer.IsComplete)
+            {
+                throw new Exception("Incomplete");
+            }
+            return root;
         }
 
         public abstract char[] IgnoreChars { get; }
