@@ -173,7 +173,7 @@ entity Security.Account
     , Deactivate
     , EmailPasswordReset 'Send Reset Password Email' oneOrMore
 
-entity AccountRole
+entity Security.AccountRole
       Id short auto
     , AccountId Account
     , RoleId Role
@@ -182,7 +182,36 @@ entity AccountRole
     procs
       SelectMany (AccountId)
     , Insert
-    , DeleteMany";
+    , DeleteMany
+
+entity Security.Session
+      Id int auto
+    , AccountId Account
+    , RoleId Role
+    indexes
+      unique (AccountId, RoleId)
+    procs
+      SelectMany (AccountId)
+    , Insert
+    , DeleteMany
+
+entity Security.Registration
+      Id int auto
+    , Forenames string(2, 50)
+    , Surname string(2, 30)
+    , Preferredname string(2, 100)
+    , Email string(2, 200) null
+    procs
+      GetIds
+    , Insert
+    , Update
+    , SelectMany
+    , Select (Id)
+    , Select (Email)
+    , DeleteMany
+    tasks
+      Delete
+    , CreateAccount 'Create Account' one";
 
             var node = parser.Parse(domainDef);
 

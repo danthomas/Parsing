@@ -100,10 +100,6 @@ namespace V3.Parsing.Core
             {
                 string text = _text.Substring(_index, length);
 
-                if (text == "t")
-                {
-                    string thie = "sdfsad";
-                }
 
                 var matches = Patterns
                     .Where(x => x.IsMatch(text, _caseSensitive) == IsMatch.Yes)
@@ -114,7 +110,9 @@ namespace V3.Parsing.Core
                 {
                     foreach (var match in matches)
                     {
-                        var index = nextNodes.FindIndex(x => x.NodeType.Equals(match.NodeType));
+                        var index = match.IsToken
+                            ? nextNodes.FindIndex(x => x.IsToken)
+                            : nextNodes.FindIndex(x => x.NodeType.Equals(match.NodeType));
 
                         if (index >= 0)
                         {
@@ -129,6 +127,11 @@ namespace V3.Parsing.Core
                 else if (Patterns.All(x => x.IsMatch(text, _caseSensitive) != IsMatch.Possible))
                 {
                     break;
+                }
+
+                if (text == "one")
+                {
+                    string thie = "sdfsad";
                 }
 
                 if (_index + length < _text.Length - 1

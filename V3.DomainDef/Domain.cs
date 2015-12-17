@@ -107,6 +107,26 @@ namespace V3.DomainDef
                     first = false;
                 }
 
+                if (entity.Indexes.Any())
+                {
+                    first = true;
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("    indexes");
+
+                    foreach (var index in entity.Indexes)
+                    {
+                        stringBuilder.AppendLine();
+                        stringBuilder.Append(first ? "      " : "    , ");
+                        if (index.Unique)
+                        {
+                            stringBuilder.Append("unique ");
+                        }
+                        stringBuilder.Append($"({String.Join(", ", index.Props)})");
+
+                        first = false;
+                    }
+                }
+
                 first = true;
 
                 if (entity.Procs.Any())
@@ -149,7 +169,7 @@ namespace V3.DomainDef
                         if (task.SelectedIds != SelectedIds.Unspecified)
                         {
                             string selectedIds = task.SelectedIds.ToString();
-                            selectedIds= Char.ToLower(selectedIds[0]) + selectedIds.Substring(1);
+                            selectedIds = Char.ToLower(selectedIds[0]) + selectedIds.Substring(1);
                             stringBuilder.Append($" {selectedIds}");
                         }
 
@@ -200,6 +220,12 @@ namespace V3.DomainDef
                 .Select(x => new Prop(x))
                 .ToList();
 
+            Indexes = node
+                .Nodes
+                .Where(x => x.NodeType == NodeType.Index)
+                .Select(x => new Index(x))
+                .ToList();
+
             Procs = node
                 .Nodes
                 .Where(x => x.NodeType == NodeType.Proc)
@@ -224,6 +250,8 @@ namespace V3.DomainDef
             }
         }
 
+        public List<Index> Indexes { get; set; }
+
         public List<Task> Tasks { get; set; }
 
         public List<Proc> Procs { get; set; }
@@ -237,6 +265,20 @@ namespace V3.DomainDef
         public string Name { get; set; }
 
         public List<DataRow> DataRows { get; set; }
+    }
+
+    public class Index
+    {
+        public Index(Node<NodeType> node)
+        {
+            Props = node.Nodes.Where(x => x.NodeType == NodeType.Identifier).Select(x => x.Text).ToArray();
+
+            Unique = node.Nodes.Any(x => x.NodeType == NodeType.Unique);
+        }
+
+        public bool Unique { get; set; }
+
+        public string[] Props { get; set; }
     }
 
     public class Proc
@@ -273,7 +315,11 @@ namespace V3.DomainDef
                 ? ""
                 : node.Nodes.Single(x => x.NodeType == NodeType.Literal).Text;
 
-            if (node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.OneOrMore) != null)
+            if (node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.One) != null)
+            {
+                SelectedIds = SelectedIds.One;
+            }
+            else if (node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.OneOrMore) != null)
             {
                 SelectedIds = SelectedIds.OneOrMore;
             }

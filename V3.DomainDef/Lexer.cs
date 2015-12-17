@@ -14,7 +14,7 @@ grammar Domain
 defs
     Domain : domain Identifier EntityOr*
     EntityOr : Entity |
-    Entity  : entity Identifer [dot Identifier] EntityModifiers Prop [comma Prop]* [procs Proc [comma Proc]*] [tasks Task [comma Task]*] DataRows
+    Entity  : entity Identifer [dot Identifier] EntityModifiers Prop [comma Prop]* [indexes Index [comma Index]*] [procs Proc [comma Proc]*] [tasks Task [comma Task]*] DataRows
     EntityModifiers : [enum]*
     Prop : Identifier EntityOrType PropModifiers
     EntityOrType : Type | Identifier
@@ -27,6 +27,7 @@ defs
     DataRows : DataRow*
     DataRow : openSquare DataValue [comma DataValue] closeSquare
     DataValue : Number | Literal | null
+    Index : [unique] openParen Identifier [comma Identifier] closeParen
 patterns
     comma : ','
     openParen : '('
@@ -45,6 +46,8 @@ patterns
     second
     enum
     readonly
+    oneOrMore
+    one
     Number : '^[0-9]+$'
     Identifier : '^[a-zA-Z_][a-zA-Z0-9_]*$'
     
@@ -70,7 +73,9 @@ patterns
                 new TokenPattern<NodeType>(NodeType.Readonly, "readonly"),
                 new TokenPattern<NodeType>(NodeType.Unique, "unique"),
                 new TokenPattern<NodeType>(NodeType.Datetime, "datetime"),
+                new TokenPattern<NodeType>(NodeType.One, "one"),
                 new TokenPattern<NodeType>(NodeType.OneOrMore, "oneOrMore"),
+                new TokenPattern<NodeType>(NodeType.Indexes, "indexes"),
                 new TokenPattern<NodeType>(NodeType.Hour, "h"),
                 new TokenPattern<NodeType>(NodeType.Minute, "m"),
                 new TokenPattern<NodeType>(NodeType.Second, "s"),
@@ -159,6 +164,18 @@ patterns
                 Prop(child);
             }
 
+            if (AreNodeTypes(NodeType.Indexes))
+            {
+                Consume(NodeType.Indexes);
+                Index(child);
+
+                while (AreNodeTypes(NodeType.Comma))
+                {
+                    Consume(NodeType.Comma);
+                    Index(child);
+                }
+            }
+
             if (AreNodeTypes(NodeType.Procs))
             {
                 Consume(NodeType.Procs);
@@ -182,8 +199,29 @@ patterns
                     Task(child);
                 }
             }
-            
+
             DataRows(child);
+        }
+
+        private void Index(Node<NodeType> parent)
+        {
+            var child = Add(parent, NodeType.Index);
+
+            if (AreNodeTypes(NodeType.Unique))
+            {
+                Consume(NodeType.Unique, child);
+            }
+
+            Consume(NodeType.OpenParen);
+            Consume(NodeType.Identifier, child);
+
+            while (AreNodeTypes(NodeType.Comma))
+            {
+                Consume(NodeType.Comma);
+                Consume(NodeType.Identifier, child);
+            }
+
+            Consume(NodeType.CloseParen);
         }
 
         private void Proc(Node<NodeType> parent)
@@ -195,7 +233,7 @@ patterns
                 var child2 = Add(child, NodeType.Procs);
                 Consume(NodeType.OpenParen);
                 Consume(NodeType.Identifier, child2);
-                while(AreNodeTypes(NodeType.Identifier))
+                while (AreNodeTypes(NodeType.Identifier))
                 {
                     Consume(NodeType.Identifier, child2);
                 }
@@ -213,7 +251,11 @@ patterns
                 Consume(NodeType.Literal, child);
             }
 
-            if (AreNodeTypes(NodeType.OneOrMore))
+            if (AreNodeTypes(NodeType.One))
+            {
+                Consume(NodeType.One, child);
+            }
+            else if (AreNodeTypes(NodeType.OneOrMore))
             {
                 Consume(NodeType.OneOrMore, child);
             }
@@ -222,7 +264,7 @@ patterns
         private void DataRows(Node<NodeType> parent)
         {
             var child = Add(parent, NodeType.DataRows);
-            
+
             while (AreNodeTypes(NodeType.OpenSquare))
             {
                 DataRow(child);
@@ -422,6 +464,9 @@ patterns
         Tasks,
         Task,
         Auto,
-        OneOrMore
+        OneOrMore,
+        Indexes,
+        Index,
+        One
     }
 }
