@@ -347,7 +347,23 @@ entity Result
     , AccountId Account
     , Detail string(1000)
     indexes
-      unique (WorkoutDateId AccountId)";
+      unique (WorkoutDateId AccountId)
+    procs
+      Insert
+    , Update
+    , DeleteMany
+    , Select (Id)
+    , Select (WorkoutDateId AccountId)
+
+entity AccountProgramme
+      Id int auto
+    , AccountId Account
+    , ProgrammeId Programme
+    procs
+      Insert
+    , DeleteMany
+    , SelectMany (AccountId)
+    , SelectMany (ProgrammeId)";
 
             var node = parser.Parse(domainDef);
 
