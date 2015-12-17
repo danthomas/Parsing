@@ -1,0 +1,468 @@
+﻿﻿<domain name='CrossfitJST'>
+
+  <page name='SettingEdit' text='Edit Setting'>
+    <form name='SettingEdit' entity='Setting' text='Edit Setting'>
+
+      <field propertyName='EmailHost' />
+      <field propertyName='EmailPort' />
+      <field propertyName='EmailAddress' />
+      <field propertyName='EmailPassword' />
+      <field propertyName='DisableEmail' />
+      <button buttonType='Save' name='Save' />
+    </form>
+  </page>
+
+  <page name='Login' text='Login'>
+    <form name='Login' entity='Account' text='Login'>
+      <field propertyName='Name' text='Username' />
+      <field propertyName='Password' />
+      <button buttonType='Save' name='Login' />
+      <button buttonType='Custom' name='Register' />
+    </form>
+  </page>
+
+  <page name='Register' text='Register Account'>
+    <form name='Register' entity='Registration' text='Register Account'>
+      <field propertyName='Forenames' />
+      <field propertyName='Surname' />
+      <field propertyName='PreferredName' text='Preferred Name' />
+      <field propertyName='Email' />
+      <button buttonType='Save' name='Register' />
+      <button buttonType='Cancel' />
+    </form>
+  </page>
+  <page name='Registrations' text='Registrations'>
+    <grid name='RegistrationGrid' entity='Registration' text='Registrations'>
+      <column name='Forenames' displayOrder='1' />
+      <column name='Surname' displayOrder='2' />
+      <column name='PreferredName' text='Preferred Name' displayOrder='3' />
+      <column name='Email' displayOrder='4' />AccountrRole
+    </grid>
+  </page>
+
+
+  <page name='Accounts' text='Accounts'>
+    <grid name='AccountGrid' entity='Account' text='Accounts'>
+      <column name='Name' displayOrder='1' sortOrder='1' text='Username' />
+      <column name='Forenames' displayOrder='2' />
+      <column name='Surname' displayOrder='3' />
+      <column name='PreferredName' text='Preferred Name' displayOrder='4' />
+      <column name='Email' displayOrder='5' />
+      <column name='IsActive' text='Is Active' displayOrder='6' />
+    </grid>
+  </page>
+  <page name='AccountEdit' text='Edit Account'>
+    <form name='AccountEdit' entity='Account' text='Edit Account'>
+      <field propertyName='Name' text='Username' />
+      <field propertyName='Forenames' />
+      <field propertyName='Surname' />
+      <field propertyName='PreferredName' text='Preferred Name' />
+      <field propertyName='Email' />
+      <field propertyName='IsActive' text='Is Active' />
+      <button buttonType='Save' name='Save' />
+    </form>
+  </page>
+
+  <page name='Programmes' text='Programmes'>
+    <grid name='ProgrammeGrid' entity='Programme' text='Programmes'>
+      <column name='Code' displayOrder='1' />
+      <column name='Name' displayOrder='2' />
+      <column name='SortOrder' text='Sort Order' displayOrder='3' />
+      <column name='IsActive' text='Is Active' displayOrder='4' />
+    </grid>
+  </page>
+  <page name='ProgrammeEdit' text='Edit Programme'>
+    <form name='ProgrammeEdit' entity='Programme' text='Edit Programme'>
+      <field propertyName='Name' />
+      <field propertyName='Code' />
+      <field propertyName='IsActive' text='Is Active' />
+      <button buttonType='Save' name='Save' />
+    </form>
+  </page>
+
+  <page name='LogItems' text='LogItems'>
+    <grid name='LogItemGrid' entity='LogItem' text='LogItems'>
+      <column name='Type' displayOrder='1' />
+      <column name='Message' displayOrder='2' />
+      <column name='DateTime' text='Date and Time' displayOrder='3' />
+    </grid>
+  </page>
+
+  <page name='Calendar' text='Calendar'>
+    <grid name='CalendarGrid' entity='WorkoutDate' text='Calendar'>
+    </grid>
+  </page>
+  <page name='WorkoutDates' text='WorkoutDates'>
+    <grid name='WorkoutDateGrid' entity='WorkoutDate' text='Workouts'>
+      <column name='StartDate' displayOrder='1' sortOrder='1' />
+    </grid>
+  </page>
+  <page name='WorkoutDateEdit' text='Edit WorkoutDate'>
+    <form name='WorkoutDateEdit' entity='WorkoutDate' text='Edit WorkoutDate'>
+      <field propertyName='Date' />
+      <field propertyName='Duration' />
+      <field propertyName='Detail' />
+      <button buttonType='Save' name='Save' />
+    </form>
+  </page>
+
+
+
+  <group name='App'>
+    <entity name='Entity' isDataOnly='true'>
+      <property name='Id' sqlServerType='TINYINT' isIdentifier='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' />
+      <property name='Plural' sqlServerType='VARCHAR' length='50' />
+    </entity>
+
+    <entity name='MenuItem'>
+      <property name='Id' sqlServerType='SMALLINT' isIdentifier='true' />
+      <property name='ParentId' referencedEntity='MenuItem' isNullable='true' />
+      <property name='Url' sqlServerType='VARCHAR' length='50' />
+      <property name='Text' sqlServerType='VARCHAR' length='30' />
+      <property name='DisplayIndex' sqlServerType='SMALLINT' />
+    </entity>
+
+    <entity name='TaskType' entityType='Enum' isDataOnly='true'>
+      <property name='Id' sqlServerType='TINYINT' isIdentifier='true' isReadOnly='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' isUnique='true' />
+      <property name='SelectedIds' sqlServerType='TINYINT' />
+      <row Id='1' Name='Add' SelectedIds='15' />
+      <row Id='2' Name='Edit' SelectedIds='2' />
+      <row Id='3' Name='Delete' SelectedIds='14' />
+      <row Id='4' Name='Activate' SelectedIds='14' />
+      <row Id='5' Name='Deactivate' SelectedIds='14' />
+      <row Id='6' Name='MoveUp' SelectedIds='2' />
+      <row Id='7' Name='MoveDown' SelectedIds='2' />
+      <row Id='255' Name='Custom' SelectedIds='14' />
+    </entity>
+
+    <entity name='Task' isDataOnly='true'>
+      <property name='Id' sqlServerType='TINYINT' isIdentifier='true' />
+      <property name='EntityId' referencedEntity='Entity' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' isNullable='true' />
+      <property name='TaskTypeId' referencedEntity='TaskType' />
+      <property name='Text' sqlServerType='VARCHAR' length='50' />
+      <property name='SelectedIds' sqlServerType='TINYINT' isNullable='true' />
+    </entity>
+
+    <entity name='Page' isDataOnly='true'>
+      <property name='Id' sqlServerType='SMALLINT' isIdentifier='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' />
+      <property name='Text' sqlServerType='VARCHAR' length='50' />
+    </entity>
+
+    <entity name='Form' isDataOnly='true'>
+      <property name='Id' sqlServerType='SMALLINT' isIdentifier='true' />
+      <property name='EntityId' referencedEntity='Entity' />
+      <property name='PageId' referencedEntity='Page' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' />
+      <property name='Text' sqlServerType='VARCHAR' length='50' />
+    </entity>
+
+    <entity name='Field' isDataOnly='true'>
+      <property name='Id' sqlServerType='SMALLINT' isIdentifier='true' />
+      <property name='FormId' referencedEntity='Form' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' />
+      <property name='Text' sqlServerType='VARCHAR' length='50' />
+      <property name='DisplayOrder' sqlServerType='SMALLINT' />
+    </entity>
+
+    <entity name='Grid'>
+      <property name='Id' sqlServerType='SMALLINT' isIdentifier='true' />
+      <property name='EntityId' referencedEntity='Entity' />
+      <property name='PageId' referencedEntity='Page' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' />
+      <property name='Text' sqlServerType='VARCHAR' length='50' />
+    </entity>
+
+    <entity name='Column' isDataOnly='true'>
+      <property name='Id' sqlServerType='SMALLINT' isIdentifier='true' />
+      <property name='GridId' referencedEntity='Grid' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' />
+      <property name='Text' sqlServerType='VARCHAR' length='50' />
+      <property name='SortOrder' sqlServerType='SMALLINT' />
+      <property name='DisplayOrder' sqlServerType='SMALLINT' />
+    </entity>
+
+  </group>
+
+  <group name='Logging'>
+    <entity name='LogItemType' isDataOnly='true' entityType='Enum'>
+      <property name='Id' sqlServerType='TINYINT' isIdentifier='true' isReadOnly='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' isUnique='true' />
+      <row Id='1' Name='Debug' />
+      <row Id='2' Name='Info' />
+      <row Id='3' Name='Warning' />
+      <row Id='4' Name='Error' />
+      <row Id='5' Name='Exception' />
+    </entity>
+    <entity name='LogItem' search='true'>
+      <property name='Id' sqlServerType='INT' isAuto='true' isIdentifier='true' />
+      <property name='LogItemTypeId' referencedEntity='LogItemType' />
+      <property name='Message' sqlServerType='VARCHAR' length='-1' />
+      <property name='StackTrace' sqlServerType='VARCHAR' length='-1' isNullable='true' />
+      <property name='DateTime' sqlServerType='DATETIME' />
+      <property name='AccountId' referencedEntity='Account' isNullable='true' />
+      <procedure procedureType='GetIds' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='DeleteMany' />
+      <task taskType='Delete' />
+    </entity>
+  </group>
+
+  <group name='Security'>
+    <entity name='Role'>
+      <property name='Id' sqlServerType='TINYINT' isAuto='true' isIdentifier='true' />
+      <property name='Code' sqlServerType='VARCHAR' length='20' minLength='4' isUnique='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' minLength='4' isUnique='true' />
+      <procedure procedureType='SelectMany'/>
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='Select' properties='Code'/>
+    </entity>
+    <entity name='RoleMenuItem'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />
+      <property name='RoleId' referencedEntity='Role' />
+      <property name='MenuItemId' referencedEntity='MenuItem' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='DeleteMany' />
+    </entity>
+    <entity name='RoleTask' isDataOnly='true'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />
+      <property name='RoleId' referencedEntity='Role' />
+      <property name='TaskId' referencedEntity='Task' />
+      <index properties='RoleId, TaskId' isUnique='true' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='DeleteMany' />
+    </entity>
+    <entity name='Account' search='true'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />f
+      <property name='Name' sqlServerType='VARCHAR' length='30' minLength='4' isUnique='true' displayText='Username' />
+      <property name='Forenames' sqlServerType='VARCHAR' length='50' minLength='2' />
+      <property name='Surname' sqlServerType='VARCHAR' length='30' minLength='2' />
+      <property name='PreferredName' sqlServerType='VARCHAR' length='100' minLength='2' />
+      <!-- Email not null where Email is not null -->
+      <property name='Email' sqlServerType='VARCHAR' length='200' isNullable='true' />
+      <property name='Salt' sqlServerType='VARCHAR' length='100' />
+      <property name='Password' sqlServerType='VARCHAR' length='1000' minLength='8' />
+      <property name='ResetKey' sqlServerType='VARCHAR' length='100' isNullable='true' />
+      <property name='ChangePassword' sqlServerType='BIT' />
+      <property name='IsActive' sqlServerType='BIT' />
+      <property name='ResultsPublic' sqlServerType='BIT' isNullable='true' />
+      <property name='SelectedProgrammeIds' sqlServerType='VARCHAR' length='100' isNullable='true' />
+
+      <procedure procedureType='GetIds' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='Select' properties='Name'/>
+      <procedure procedureType='Select' properties='Email'/>
+      <procedure procedureType='SelectMany'/>
+      <procedure procedureType='DeleteMany' />
+      <procedure procedureType='Activate' />
+      <procedure procedureType='Deactivate' />
+
+      <task taskType='Add' />
+      <task taskType='Edit' />
+      <task taskType='Delete' />
+      <task taskType='Activate' />
+      <task taskType='Deactivate' />
+      <task taskType='Custom' name='EmailPasswordReset' text='Email Password Reset' selectedIds='14' />
+
+    </entity>
+    <entity name='AccountRole'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />
+      <property name='AccountId' referencedEntity='Account' />
+      <property name='RoleId' referencedEntity='Role' />
+      <procedure procedureType='SelectMany' properties='AccountId'/>
+      <procedure procedureType='Insert' />
+      <procedure procedureType='DeleteMany' />
+      <index properties='AccountId, RoleId' isUnique='true' />
+    </entity>
+    <entity name='Session'>
+      <property name='Id' sqlServerType='INT' isAuto='true' isIdentifier='true' />
+      <property name='AccountId' referencedEntity='Account' />
+      <property name='StartDateTime' sqlServerType='DATETIME' />
+      <property name='UserAgent' sqlServerType='VARCHAR' length='1000' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Select' properties='Id'/>
+    </entity>
+    <entity name='Registration' search='true'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />
+      <property name='Forenames' sqlServerType='VARCHAR' length='50' minLength='2' />
+      <property name='Surname' sqlServerType='VARCHAR' length='30' minLength='2' />
+      <property name='PreferredName' sqlServerType='VARCHAR' length='100' minLength='2' />
+      <property name='Email' sqlServerType='VARCHAR' length='200' isNullable='true' />
+      <procedure procedureType='GetIds' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='SelectMany'/>
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='Select' properties='Email'/>
+      <procedure procedureType='DeleteMany' />
+      <task taskType='Delete' />
+      <task taskType='Custom' name='CreateAccount' text='Create Account' selectedIds='2' />
+    </entity>
+
+    <entity name='RegistrationProgramme' search='true'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />
+      <property name='RegistrationId' referencedEntity='Registration' />
+      <property name='ProgrammeId' referencedEntity='Programme' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='SelectMany' properties='RegistrationId' />
+    </entity>
+  </group>
+
+  <group name='Main'>
+    <entity name='Setting' >
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true'/>
+      <property name='EmailHost' sqlServerType='VARCHAR' length='50' />
+      <property name='EmailPort' sqlServerType='INT' />
+      <property name='EmailAddress' sqlServerType='VARCHAR' length='100' />
+      <property name='EmailPassword' sqlServerType='VARCHAR' length='100' />
+      <property name='DisableEmail' sqlServerType='BIT' isNullable='true' />
+      <property name='RegistrationEmail' sqlServerType='VARCHAR' length='2000' isNullable='true' />
+      <property name='RegistrationMessage' sqlServerType='VARCHAR' length='2000' isNullable='true' />
+
+      <procedure procedureType='Select' properties='Id' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='Insert' />
+
+      <task taskType='Edit' />
+    </entity>
+
+    <entity name='ProgrammeSessionType' isDataOnly='true' entityType='Enum'>
+      <property name='Id' sqlServerType='TINYINT' isIdentifier='true' isReadOnly='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' isUnique='true' />
+      <row Id='1' Name='None' />
+      <row Id='2' Name='Single' />
+      <row Id='3' Name='Multiple' />
+
+      <procedure procedureType='SelectMany' />
+    </entity>
+
+    <entity name='ProgrammeScheduleType' isDataOnly='true' entityType='Enum'>
+      <property name='Id' sqlServerType='TINYINT' isIdentifier='true' isReadOnly='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' isUnique='true' />
+      <row Id='1' Name='None' />
+      <row Id='2' Name='Assign' />
+      <row Id='3' Name='Book' />
+
+      <procedure procedureType='SelectMany' />
+    </entity>
+
+    <entity name='ProgrammeType'>
+      <property name='Id' sqlServerType='TINYINT' isAuto='true' isIdentifier='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' isUnique='true' />
+      <property name='ProgrammeSessionTypeId' referencedEntity='ProgrammeSessionType' />
+      <property name='ProgrammeScheduleTypeId' referencedEntity='ProgrammeScheduleType' />
+
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='SelectMany' />
+      <procedure procedureType='Select' properties='Id'/>
+    </entity>
+
+
+    <entity name='Programme' search='true'>
+      <property name='Id' sqlServerType='TINYINT' isAuto='true' isIdentifier='true' />
+      <property name='ProgrammeTypeId' referencedEntity='ProgrammeType' />
+      <property name='Code' sqlServerType='VARCHAR' length='10' minLength='4' isUnique='true' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' minLength='4' isUnique='true' />
+      <property name='SortOrder' sqlServerType='TINYINT'/>
+      <property name='IsActive' sqlServerType='BIT' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='SelectMany' />
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='Select' properties='Code'/>
+      <procedure procedureType='Select' properties='Name'/>
+      <procedure procedureType='DeleteMany' />
+      <procedure procedureType='Activate' />
+      <procedure procedureType='Deactivate' />
+      <procedure procedureType='GetIds' />
+
+      <task taskType='Add' />
+      <task taskType='Edit' />
+      <task taskType='Delete' />
+      <task taskType='Activate' />
+      <task taskType='Deactivate' />
+      <task taskType='MoveUp' />
+      <task taskType='MoveDown' />
+    </entity>
+    <entity name='WorkoutType' isDataOnly='true'>
+      <property name='Id' sqlServerType='SMALLINT' isAuto='true' isIdentifier='true' />
+      <property name='ProgrammeId' referencedEntity='Programme' />
+      <property name='Code' sqlServerType='VARCHAR' length='10' minLength='4' />
+      <property name='Name' sqlServerType='VARCHAR' length='50' minLength='4' />
+      <property name='Multiple' sqlServerType='BIT'/>
+      <property name='SortOrder' sqlServerType='TINYINT'/>
+      <index properties='ProgrammeId, Code' isUnique='true' />
+      <index properties='ProgrammeId, Name' isUnique='true' />
+
+      <procedure procedureType='SelectMany' />
+      <procedure procedureType='SelectMany' properties='ProgrammeId'/>
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='DeleteMany' />
+    </entity>
+    <entity name='WorkoutDate'>
+      <property name='Id' sqlServerType='INT' isAuto='true' isIdentifier='true' />
+      <property name='ProgrammeId' referencedEntity='Programme' />
+      <property name='TrainerId' referencedEntity='Account' isNullable='true' />
+      <property name='AccountId' referencedEntity='Account' isNullable='true' />
+      <property name='Date' sqlServerType='DATETIME' />
+      <property name='Duration' sqlServerType='SMALLINT' />
+      <property name='Detail' sqlServerType='VARCHAR' length='2000' />
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='Select' properties='ProgrammeId,Date'/>
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='DeleteMany' />
+      <procedure procedureType='GetIds' />
+
+      <task taskType='Add' />
+      <task taskType='Edit' />
+      <task taskType='Delete' />
+      <task taskType='Custom' name='EditResult' text='Edit Result' selectedIds='2' />
+      <task taskType='Custom' name='Copy' text='Copy' selectedIds='2' />
+
+    </entity>
+    <entity name='Workout'>
+      <property name='Id' sqlServerType='INT' isAuto='true' isIdentifier='true' />
+      <property name='WorkoutDateId' referencedEntity='WorkoutDate' />
+      <property name='WorkoutTypeId' referencedEntity='WorkoutType' />
+      <property name='Detail' sqlServerType='VARCHAR' length='1000' />
+      <index properties='WorkoutTypeId, WorkoutDateId' isUnique='true' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='DeleteMany' />
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='SelectMany' properties='WorkoutDateId'/>
+      <procedure procedureType='Select' properties='WorkoutDateId, WorkoutTypeId'/>
+    </entity>
+
+    <entity name='Result'>
+      <property name='Id' sqlServerType='INT' isAuto='true' isIdentifier='true' />
+      <property name='WorkoutDateId' referencedEntity='WorkoutDate' />
+      <property name='AccountId' referencedEntity='Account' isNullable='true' />
+      <property name='Detail' sqlServerType='VARCHAR' length='1000' />
+      <index properties='WorkoutDateId, AccountId' isUnique='true' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='Update' />
+      <procedure procedureType='DeleteMany' />
+      <procedure procedureType='Select' properties='Id'/>
+      <procedure procedureType='Select' properties='WorkoutDateId, AccountId'/>
+    </entity>
+
+    <entity name='AccountProgramme'>
+      <property name='Id' sqlServerType='INT' isAuto='true' isIdentifier='true' />
+      <property name='AccountId' referencedEntity='Account' />
+      <property name='ProgrammeId' referencedEntity='Programme' />
+      <procedure procedureType='Insert' />
+      <procedure procedureType='DeleteMany' />
+      <procedure procedureType='SelectMany' properties='AccountId' />
+      <procedure procedureType='SelectMany' properties='ProgrammeId' />
+    </entity>
+  </group>
+</domain>

@@ -121,7 +121,7 @@ namespace V3.DomainDef
                         {
                             stringBuilder.Append("unique ");
                         }
-                        stringBuilder.Append($"({String.Join(", ", index.Props)})");
+                        stringBuilder.Append($"({String.Join(" ", index.Props)})");
 
                         first = false;
                     }
@@ -142,7 +142,7 @@ namespace V3.DomainDef
                         if (proc.Props != null
                             && proc.Props.Any())
                         {
-                            stringBuilder.Append($" ({String.Join(", ", proc.Props)})");
+                            stringBuilder.Append($" ({String.Join(" ", proc.Props)})");
                         }
 
                         first = false;

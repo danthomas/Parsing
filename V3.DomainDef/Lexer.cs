@@ -73,6 +73,7 @@ patterns
                 new TokenPattern<NodeType>(NodeType.Readonly, "readonly"),
                 new TokenPattern<NodeType>(NodeType.Unique, "unique"),
                 new TokenPattern<NodeType>(NodeType.Datetime, "datetime"),
+                new TokenPattern<NodeType>(NodeType.Date, "date"),
                 new TokenPattern<NodeType>(NodeType.One, "one"),
                 new TokenPattern<NodeType>(NodeType.OneOrMore, "oneOrMore"),
                 new TokenPattern<NodeType>(NodeType.Indexes, "indexes"),
@@ -215,9 +216,8 @@ patterns
             Consume(NodeType.OpenParen);
             Consume(NodeType.Identifier, child);
 
-            while (AreNodeTypes(NodeType.Comma))
+            while (AreNodeTypes(NodeType.Identifier))
             {
-                Consume(NodeType.Comma);
                 Consume(NodeType.Identifier, child);
             }
 
@@ -388,6 +388,10 @@ patterns
             {
                 Datetime(child);
             }
+            else if (AreNodeTypes(NodeType.Date))
+            {
+                Date(child);
+            }
         }
 
         private void String(Node<NodeType> parent)
@@ -426,6 +430,28 @@ patterns
                 }
                 Consume(NodeType.CloseParen);
             }
+        }
+
+        private void Date(Node<NodeType> parent)
+        {
+            Consume(NodeType.Date, parent);
+            //if (AreNodeTypes(NodeType.OpenParen))
+            //{
+            //    Consume(NodeType.OpenParen);
+            //    if (AreNodeTypes(NodeType.Hour))
+            //    {
+            //        Consume(NodeType.Hour, parent);
+            //    }
+            //    else if (AreNodeTypes(NodeType.Minute))
+            //    {
+            //        Consume(NodeType.Minute, parent);
+            //    }
+            //    else if (AreNodeTypes(NodeType.Second))
+            //    {
+            //        Consume(NodeType.Second, parent);
+            //    }
+            //    Consume(NodeType.CloseParen);
+            //}
         }
     }
 
@@ -467,6 +493,7 @@ patterns
         OneOrMore,
         Indexes,
         Index,
-        One
+        One,
+        Date
     }
 }
