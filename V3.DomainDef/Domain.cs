@@ -8,17 +8,115 @@ namespace V3.DomainDef
 {
     public class Domain
     {
-        public Domain(Node<NodeType> node)
+        public Domain(Node<NodeType> domainNode)
         {
-            Name = node
+            Name = domainNode
                 .Nodes
                 .Single(x => x.NodeType == NodeType.Identifier).Text;
 
-            Entities = node
+            var entityNodes = domainNode
                 .Nodes
-                .Where(x => x.NodeType == NodeType.Entity)
-                .Select(x => new Entity(x))
-                .ToList();
+                .Where(x => x.NodeType == NodeType.Entity);
+
+            Entities = new List<Entity>();
+
+            foreach (var entityNode in entityNodes)
+            {
+                string group;
+                string name;
+                var identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
+
+                if (identifierNodes.Length == 1)
+                {
+                    group = "";
+                    name = identifierNodes[0].Text;
+                }
+                else if (identifierNodes.Length == 2)
+                {
+                    group = identifierNodes[0].Text;
+                    name = identifierNodes[1].Text;
+                }
+                else
+                {
+                    throw new Exception("Failed to set name of Entity");
+                }
+
+                bool @enum = entityNode.Nodes.Any(x => x.NodeType == NodeType.Enum);
+
+                Entities.Add(new Entity(entityNode, group, name, @enum));
+            }
+
+            foreach (var entityNode in entityNodes)
+            {
+                string group = null;
+                string name = null;
+                var identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
+
+                if (identifierNodes.Length == 1)
+                {
+                    group = "";
+                    name = identifierNodes[0].Text;
+                }
+
+                else if (identifierNodes.Length == 2)
+                {
+                    group = identifierNodes[0].Text;
+                    name = identifierNodes[1].Text;
+                }
+
+                var entity = Entities.Single(x => x.Group == group && x.Name == name);
+
+                entity.Props = entityNode
+                   .Nodes
+                   .Where(x => x.NodeType == NodeType.Prop)
+                   .Select(x => new Prop(x))
+                   .ToList();
+            }
+
+            foreach (var entityNode in entityNodes)
+            {
+                string group = null;
+                string name = null;
+                var identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
+
+                if (identifierNodes.Length == 1)
+                {
+                    group = "";
+                    name = identifierNodes[0].Text;
+                }
+                else if (identifierNodes.Length == 2)
+                {
+                    group = identifierNodes[0].Text;
+                    name = identifierNodes[1].Text;
+                }
+
+                var entity = Entities.Single(x => x.Group == group && x.Name == name);
+
+                entity.Indexes = entityNode
+                    .Nodes
+                    .Where(x => x.NodeType == NodeType.Index)
+                    .Select(x => new Index(x))
+                    .ToList();
+
+                entity.Procs = entityNode
+                    .Nodes
+                    .Where(x => x.NodeType == NodeType.Proc)
+                    .Select(x => new Proc(x))
+                    .ToList();
+
+                entity.Tasks = entityNode
+                    .Nodes
+                    .Where(x => x.NodeType == NodeType.Task)
+                    .Select(x => new Task(x))
+                    .ToList();
+
+                entity.DataRows = entityNode
+                    .Nodes.Single(x => x.NodeType == NodeType.DataRows)
+                    .Nodes
+                    .Where(x => x.NodeType == NodeType.DataRow)
+                    .Select(x => new DataRow(x))
+                    .ToList();
+            }
         }
 
         public string Name { get; set; }
@@ -194,60 +292,12 @@ namespace V3.DomainDef
 
     public class Entity
     {
-        public Entity(Node<NodeType> node)
+        public Entity(Node<NodeType> node, string group, string name, bool @enum)
         {
-            var identifierNodes = node.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
+            Group = @group;
+            Name = name;
+            Enum = @enum;
 
-            if (identifierNodes.Length == 1)
-            {
-                Name = identifierNodes[0].Text;
-            }
-            else if (identifierNodes.Length == 2)
-            {
-                Group = identifierNodes[0].Text;
-                Name = identifierNodes[1].Text;
-            }
-            else
-            {
-                throw new Exception("Failed to set name of Entity");
-            }
-
-            Enum = node.Nodes.Any(x => x.NodeType == NodeType.Enum);
-
-            Props = node
-                .Nodes
-                .Where(x => x.NodeType == NodeType.Prop)
-                .Select(x => new Prop(x))
-                .ToList();
-
-            Indexes = node
-                .Nodes
-                .Where(x => x.NodeType == NodeType.Index)
-                .Select(x => new Index(x))
-                .ToList();
-
-            Procs = node
-                .Nodes
-                .Where(x => x.NodeType == NodeType.Proc)
-                .Select(x => new Proc(x))
-                .ToList();
-
-            Tasks = node
-                .Nodes
-                .Where(x => x.NodeType == NodeType.Task)
-                .Select(x => new Task(x))
-                .ToList();
-
-            var data = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.DataRows);
-
-            if (data != null)
-            {
-                DataRows = data
-                    .Nodes
-                    .Where(x => x.NodeType == NodeType.DataRow)
-                    .Select(x => new DataRow(x))
-                    .ToList();
-            }
         }
 
         public List<Index> Indexes { get; set; }
