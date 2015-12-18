@@ -8,6 +8,9 @@ namespace V3.DomainDef
 {
     public class Domain
     {
+        private readonly string[] _types = { "bool", "byte", "short", "int", "long", "datetime", "date", "decimal", "string" };
+        private readonly string[] _idTypes = { "byte", "short", "int", "long" };
+
         public Domain(Node<NodeType> domainNode)
         {
             Name = domainNode
@@ -16,107 +19,196 @@ namespace V3.DomainDef
 
             var entityNodes = domainNode
                 .Nodes
-                .Where(x => x.NodeType == NodeType.Entity);
+                .Where(x => x.NodeType == NodeType.Entity)
+                .ToArray();
 
             Entities = new List<Entity>();
 
             foreach (var entityNode in entityNodes)
             {
-                string group;
-                string name;
-                var identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
-
-                if (identifierNodes.Length == 1)
+                GroupAndName(entityNode, (group, name) =>
                 {
-                    group = "";
-                    name = identifierNodes[0].Text;
-                }
-                else if (identifierNodes.Length == 2)
-                {
-                    group = identifierNodes[0].Text;
-                    name = identifierNodes[1].Text;
-                }
-                else
-                {
-                    throw new Exception("Failed to set name of Entity");
-                }
+                    bool @enum = entityNode.Nodes.Any(x => x.NodeType == NodeType.Enum);
 
-                bool @enum = entityNode.Nodes.Any(x => x.NodeType == NodeType.Enum);
-
-                Entities.Add(new Entity(entityNode, group, name, @enum));
+                    Entities.Add(new Entity(group, name, @enum));
+                });
             }
 
             foreach (var entityNode in entityNodes)
             {
-                string group = null;
-                string name = null;
-                var identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
-
-                if (identifierNodes.Length == 1)
+                GroupAndName(entityNode, (group, entityName) =>
                 {
-                    group = "";
-                    name = identifierNodes[0].Text;
-                }
+                    var entity = Entities.Single(x => x.Group == group && x.Name == entityName);
 
-                else if (identifierNodes.Length == 2)
-                {
-                    group = identifierNodes[0].Text;
-                    name = identifierNodes[1].Text;
-                }
+                    var propNode = entityNode
+                        .Nodes
+                        .First(x => x.NodeType == NodeType.Prop);
 
-                var entity = Entities.Single(x => x.Group == group && x.Name == name);
+                    var identifierNodes = propNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
 
-                entity.Props = entityNode
-                   .Nodes
-                   .Where(x => x.NodeType == NodeType.Prop)
-                   .Select(x => new Prop(x))
-                   .ToList();
+                    string name = identifierNodes[0].Text;
+
+                    var typeNode = propNode.Nodes.Single(x => x.NodeType == NodeType.Type);
+
+                    var type = typeNode.Nodes[0].Text;
+
+                    var auto = propNode.Nodes.Any(x => x.NodeType == NodeType.Auto);
+
+                    var @readonly = propNode.Nodes.Any(x => x.NodeType == NodeType.Readonly);
+
+                    if (_idTypes.Contains(type))
+                    {
+                        entity.Props.Add(new ValueProp(name, type, auto, @readonly));
+                    }
+                    else
+                    {
+                        throw new Exception($"Failed to find Entity {type}");
+                    }
+                });
             }
 
             foreach (var entityNode in entityNodes)
             {
-                string group = null;
-                string name = null;
-                var identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
-
-                if (identifierNodes.Length == 1)
+                GroupAndName(entityNode, (group, entityName) =>
                 {
-                    group = "";
-                    name = identifierNodes[0].Text;
-                }
-                else if (identifierNodes.Length == 2)
-                {
-                    group = identifierNodes[0].Text;
-                    name = identifierNodes[1].Text;
-                }
+                    var entity = Entities.Single(x => x.Group == group && x.Name == entityName);
 
-                var entity = Entities.Single(x => x.Group == group && x.Name == name);
+                    foreach (var propNode in entityNode
+                        .Nodes
+                        .Where(x => x.NodeType == NodeType.Prop)
+                        .Skip(1))
+                    {
+                        var identifierNodes = propNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
 
-                entity.Indexes = entityNode
-                    .Nodes
-                    .Where(x => x.NodeType == NodeType.Index)
-                    .Select(x => new Index(x))
-                    .ToList();
+                        string name = identifierNodes[0].Text;
+                        string type;
+                        int minLength = 0;
+                        int maxLength = 0;
+                        string dateTimePrecision = "";
 
-                entity.Procs = entityNode
-                    .Nodes
-                    .Where(x => x.NodeType == NodeType.Proc)
-                    .Select(x => new Proc(x))
-                    .ToList();
+                        if (identifierNodes.Length == 1)
+                        {
+                            var typeNode = propNode.Nodes.Single(x => x.NodeType == NodeType.Type);
 
-                entity.Tasks = entityNode
-                    .Nodes
-                    .Where(x => x.NodeType == NodeType.Task)
-                    .Select(x => new Task(x))
-                    .ToList();
+                            type = typeNode.Nodes[0].Text;
 
-                entity.DataRows = entityNode
-                    .Nodes.Single(x => x.NodeType == NodeType.DataRows)
-                    .Nodes
-                    .Where(x => x.NodeType == NodeType.DataRow)
-                    .Select(x => new DataRow(x))
-                    .ToList();
+                            var numberNodes = typeNode.Nodes.Where(x => x.NodeType == NodeType.Number).ToArray();
+                            if (numberNodes.Length == 1)
+                            {
+                                maxLength = Int32.Parse(numberNodes[0].Text);
+                            }
+                            else if (numberNodes.Length == 2)
+                            {
+                                minLength = Int32.Parse(numberNodes[0].Text);
+                                maxLength = Int32.Parse(numberNodes[1].Text);
+                            }
+
+                            if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Hour))
+                            {
+                                dateTimePrecision = "h";
+                            }
+                            else if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Minute))
+                            {
+                                dateTimePrecision = "m";
+                            }
+                            else if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Second))
+                            {
+                                dateTimePrecision = "s";
+                            }
+                        }
+                        else if (identifierNodes.Length == 2)
+                        {
+                            type = identifierNodes[1].Text;
+                        }
+                        else
+                        {
+                            throw new Exception("Failed to set Type of Entity");
+                        }
+
+                        var @null = propNode.Nodes.Any(x => x.NodeType == NodeType.Null);
+
+                        var unique = propNode.Nodes.Any(x => x.NodeType == NodeType.Unique);
+
+                        var @readonly = propNode.Nodes.Any(x => x.NodeType == NodeType.Readonly);
+
+                        var auto = propNode.Nodes.Any(x => x.NodeType == NodeType.Auto);
+
+                        if (_types.Contains(type))
+                        {
+                            entity.Props.Add(new ValueProp(name, type, dateTimePrecision, @null, unique, @readonly, auto, minLength, maxLength));
+                        }
+                        else
+                        {
+                            var refEntity = Entities.SingleOrDefault(x => x.Name == type);
+
+                            if (refEntity == null)
+                            {
+                                throw new Exception($"Failed to find Entity {type}");
+                            }
+
+                            entity.Props.Add(new RefProp(name, refEntity, @null, unique, @readonly));
+                        }
+                    }
+                });
             }
+
+            foreach (var entityNode in entityNodes)
+            {
+                GroupAndName(entityNode, (group, name) =>
+                {
+                    var entity = Entities.Single(x => x.Group == group && x.Name == name);
+
+                    entity.Indexes = entityNode
+                        .Nodes
+                        .Where(x => x.NodeType == NodeType.Index)
+                        .Select(x => new Index(x))
+                        .ToList();
+
+                    entity.Procs = entityNode
+                        .Nodes
+                        .Where(x => x.NodeType == NodeType.Proc)
+                        .Select(x => new Proc(x))
+                        .ToList();
+
+                    entity.Tasks = entityNode
+                        .Nodes
+                        .Where(x => x.NodeType == NodeType.Task)
+                        .Select(x => new Task(x))
+                        .ToList();
+
+                    entity.DataRows = entityNode
+                        .Nodes.Single(x => x.NodeType == NodeType.DataRows)
+                        .Nodes
+                        .Where(x => x.NodeType == NodeType.DataRow)
+                        .Select(x => new DataRow(x))
+                        .ToList();
+                });
+            }
+        }
+
+        private void GroupAndName(Node<NodeType> entityNode, Action<string, string> action)
+        {
+            string group;
+            string name;
+
+            Node<NodeType>[] identifierNodes = entityNode.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
+
+            if (identifierNodes.Length == 1)
+            {
+                group = "";
+                name = identifierNodes[0].Text;
+            }
+            else if (identifierNodes.Length == 2)
+            {
+                group = identifierNodes[0].Text;
+                name = identifierNodes[1].Text;
+            }
+            else
+            {
+                throw new Exception("Failed to set name of Entity");
+            }
+
+            action(group, name);
         }
 
         public string Name { get; set; }
@@ -153,32 +245,43 @@ namespace V3.DomainDef
                 }
 
                 bool first = true;
+
                 foreach (var prop in entity.Props)
                 {
+                    var valueProp = prop as ValueProp;
+                    var refProp = prop as RefProp;
+
                     stringBuilder.AppendLine();
                     stringBuilder.Append(first ? "      " : "    , ");
                     stringBuilder.Append(prop.Name);
-                    stringBuilder.Append($" {prop.Type}");
+                    if (valueProp != null)
+                    {
+                        stringBuilder.Append($" {prop.Type}");
+                    }
+                    else if (refProp != null)
+                    {
+                        stringBuilder.Append($" {refProp.Entity.Name}");
+                    }
 
                     if (prop.Type == "string")
                     {
-                        if (prop.MaxLength > 0)
+                        if (valueProp != null && valueProp.MaxLength > 0)
                         {
-                            if (prop.MinLength > 0)
+                            if (valueProp.MinLength > 0)
                             {
-                                stringBuilder.Append($"({prop.MinLength}, {prop.MaxLength})");
+                                stringBuilder.Append($"({valueProp.MinLength}, {valueProp.MaxLength})");
                             }
                             else
                             {
-                                stringBuilder.Append($"({prop.MaxLength})");
+                                stringBuilder.Append($"({valueProp.MaxLength})");
                             }
                         }
                     }
-                    else if (prop.Type == "datetime")
+                    else if (valueProp != null && prop.Type == "datetime")
                     {
-                        if (!String.IsNullOrWhiteSpace(prop.DatetimePrecision))
+                        if (!String.IsNullOrWhiteSpace(valueProp.DatetimePrecision))
                         {
-                            stringBuilder.Append($"({prop.DatetimePrecision})");
+                            stringBuilder.Append($"({valueProp.DatetimePrecision})");
                         }
                     }
 
@@ -197,7 +300,7 @@ namespace V3.DomainDef
                         stringBuilder.Append(" readonly");
                     }
 
-                    if (prop.Auto)
+                    if (valueProp != null && valueProp.Auto)
                     {
                         stringBuilder.Append(" auto");
                     }
@@ -288,194 +391,5 @@ namespace V3.DomainDef
 
             return stringBuilder.ToString();
         }
-    }
-
-    public class Entity
-    {
-        public Entity(Node<NodeType> node, string group, string name, bool @enum)
-        {
-            Group = @group;
-            Name = name;
-            Enum = @enum;
-
-        }
-
-        public List<Index> Indexes { get; set; }
-
-        public List<Task> Tasks { get; set; }
-
-        public List<Proc> Procs { get; set; }
-
-        public bool Enum { get; set; }
-
-        public string Group { get; set; }
-
-        public List<Prop> Props { get; set; }
-
-        public string Name { get; set; }
-
-        public List<DataRow> DataRows { get; set; }
-    }
-
-    public class Index
-    {
-        public Index(Node<NodeType> node)
-        {
-            Props = node.Nodes.Where(x => x.NodeType == NodeType.Identifier).Select(x => x.Text).ToArray();
-
-            Unique = node.Nodes.Any(x => x.NodeType == NodeType.Unique);
-        }
-
-        public bool Unique { get; set; }
-
-        public string[] Props { get; set; }
-    }
-
-    public class Proc
-    {
-        public Proc(Node<NodeType> node)
-        {
-            var identifierNodes = node.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
-            var procsNode = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.Procs);
-
-            Name = identifierNodes[0].Text;
-
-            if (procsNode != null)
-            {
-                Props = procsNode
-                    .Nodes
-                    .Where(x => x.NodeType == NodeType.Identifier)
-                    .Select(x => x.Text)
-                    .ToArray();
-            }
-        }
-
-        public string[] Props { get; set; }
-
-        public string Name { get; set; }
-    }
-
-    public class Task
-    {
-        public Task(Node<NodeType> node)
-        {
-            Name = node.Nodes.Single(x => x.NodeType == NodeType.Identifier).Text;
-
-            Text = node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.Literal) == null
-                ? ""
-                : node.Nodes.Single(x => x.NodeType == NodeType.Literal).Text;
-
-            if (node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.One) != null)
-            {
-                SelectedIds = SelectedIds.One;
-            }
-            else if (node.Nodes.SingleOrDefault(x => x.NodeType == NodeType.OneOrMore) != null)
-            {
-                SelectedIds = SelectedIds.OneOrMore;
-            }
-        }
-
-        public SelectedIds SelectedIds { get; set; }
-
-        public string Text { get; set; }
-
-        public string Name { get; set; }
-    }
-
-    public enum SelectedIds
-    {
-        Unspecified = 0,
-        Zero = 1,
-        One = 2,
-        Two = 4,
-        More = 8,
-        OneOrMore = One | Two | More,
-        TwoOrMore = Two | More,
-        Any = Zero | One | Two | More
-    }
-
-    public class Prop
-    {
-        public Prop(Node<NodeType> node)
-        {
-            var identifierNodes = node.Nodes.Where(x => x.NodeType == NodeType.Identifier).ToArray();
-
-            Name = identifierNodes[0].Text;
-
-            if (identifierNodes.Length == 1)
-            {
-                var typeNode = node.Nodes.Single(x => x.NodeType == NodeType.Type);
-
-                Type = typeNode.Nodes[0].Text;
-
-                var numberNodes = typeNode.Nodes.Where(x => x.NodeType == NodeType.Number).ToArray();
-                if (numberNodes.Length == 1)
-                {
-                    MaxLength = Int32.Parse(numberNodes[0].Text);
-                }
-                else if (numberNodes.Length == 2)
-                {
-                    MinLength = Int32.Parse(numberNodes[0].Text);
-                    MaxLength = Int32.Parse(numberNodes[1].Text);
-                }
-
-                if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Hour))
-                {
-                    DatetimePrecision = "h";
-                }
-                else if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Minute))
-                {
-                    DatetimePrecision = "m";
-                }
-                else if (typeNode.Nodes.Any(x => x.NodeType == NodeType.Second))
-                {
-                    DatetimePrecision = "s";
-                }
-            }
-            else if (identifierNodes.Length == 2)
-            {
-                Type = identifierNodes[1].Text;
-            }
-            else
-            {
-                throw new Exception("Failed to set Type of Entity");
-            }
-
-            Null = node.Nodes.Any(x => x.NodeType == NodeType.Null);
-
-            Unique = node.Nodes.Any(x => x.NodeType == NodeType.Unique);
-
-            Readonly = node.Nodes.Any(x => x.NodeType == NodeType.Readonly);
-
-            Auto = node.Nodes.Any(x => x.NodeType == NodeType.Auto);
-        }
-
-        public bool Auto { get; set; }
-
-        public string DatetimePrecision { get; set; }
-
-        public bool Readonly { get; set; }
-
-        public bool Unique { get; set; }
-
-        public bool Null { get; set; }
-
-        public int MinLength { get; set; }
-
-        public int MaxLength { get; set; }
-
-        public string Type { get; set; }
-
-        public string Name { get; set; }
-    }
-
-    public class DataRow
-    {
-        public DataRow(Node<NodeType> node)
-        {
-            Values = node.Nodes.Select(x => x.Text).ToArray();
-        }
-
-        public string[] Values { get; set; }
     }
 }
