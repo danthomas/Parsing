@@ -26,7 +26,7 @@ namespace V3.DomainDef
 
             foreach (var entityNode in entityNodes)
             {
-                GroupAndName(entityNode, (group, name) =>
+                ForGroupAndName(entityNode, (group, name) =>
                 {
                     bool @enum = entityNode.Nodes.Any(x => x.NodeType == NodeType.Enum);
 
@@ -36,10 +36,8 @@ namespace V3.DomainDef
 
             foreach (var entityNode in entityNodes)
             {
-                GroupAndName(entityNode, (group, entityName) =>
+                ForEntity(entityNode, (entity) =>
                 {
-                    var entity = Entities.Single(x => x.Group == group && x.Name == entityName);
-
                     var propNode = entityNode
                         .Nodes
                         .First(x => x.NodeType == NodeType.Prop);
@@ -69,10 +67,8 @@ namespace V3.DomainDef
 
             foreach (var entityNode in entityNodes)
             {
-                GroupAndName(entityNode, (group, entityName) =>
+                ForEntity(entityNode, (entity) =>
                 {
-                    var entity = Entities.Single(x => x.Group == group && x.Name == entityName);
-
                     foreach (var propNode in entityNode
                         .Nodes
                         .Where(x => x.NodeType == NodeType.Prop)
@@ -154,10 +150,8 @@ namespace V3.DomainDef
 
             foreach (var entityNode in entityNodes)
             {
-                GroupAndName(entityNode, (group, name) =>
+                ForEntity(entityNode, (entity) =>
                 {
-                    var entity = Entities.Single(x => x.Group == group && x.Name == name);
-
                     entity.Indexes = entityNode
                         .Nodes
                         .Where(x => x.NodeType == NodeType.Index)
@@ -186,7 +180,17 @@ namespace V3.DomainDef
             }
         }
 
-        private void GroupAndName(Node<NodeType> entityNode, Action<string, string> action)
+        private void ForEntity(Node<NodeType> entityNode, Action<Entity> action)
+        {
+            ForGroupAndName(entityNode, (group, name) =>
+            {
+                var entity = Entities.Single(x => x.Group == group && x.Name == name);
+
+                action(entity);
+            });
+        }
+
+        private void ForGroupAndName(Node<NodeType> entityNode, Action<string, string> action)
         {
             string group;
             string name;
@@ -207,7 +211,7 @@ namespace V3.DomainDef
             {
                 throw new Exception("Failed to set name of Entity");
             }
-
+            
             action(group, name);
         }
 
